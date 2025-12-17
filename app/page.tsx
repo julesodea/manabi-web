@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useCollections } from '@/lib/hooks/useCollections';
-import { CollectionCard } from '@/components/CollectionCard';
-import { LoadingSkeleton } from '@/components/LoadingSkeleton';
-import { Button } from '@/components/ui/Button';
+import Link from "next/link";
+import { useCollections } from "@/lib/hooks/useCollections";
+import { CollectionCard } from "@/components/CollectionCard";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { Button } from "@/components/ui/Button";
 
 export default function Home() {
   const { data: collections = [], isLoading: loading } = useCollections();
 
   // Separate system and user collections
-  const systemCollections = collections.filter(c => c.type === 'system');
-  const userCollections = collections.filter(c => c.type === 'user');
+  const systemCollections = collections.filter((c) => c.type === "system");
+  const userCollections = collections.filter((c) => c.type === "user");
 
   // TODO: Implement learning progress tracking
   const reviewsToday = 0;
@@ -24,8 +24,9 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">学び Manabi</h1>
-              <p className="text-gray-600 mt-1">Learn Japanese Kanji with Spaced Repetition</p>
+              <h1 className="sm:text-3xl text-2xl font-bold text-gray-900">
+                学び Manabi
+              </h1>
             </div>
             <div className="flex gap-4">
               <Link href="/kanji-grid">
@@ -44,15 +45,21 @@ export default function Home() {
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-blue-700 rounded-lg p-6">
-              <div className="text-blue-200 text-sm font-medium mb-1">Study Streak</div>
+              <div className="text-blue-200 text-sm font-medium mb-1">
+                Study Streak
+              </div>
               <div className="text-4xl font-bold">{studyStreak} days</div>
             </div>
             <div className="bg-blue-700 rounded-lg p-6">
-              <div className="text-blue-200 text-sm font-medium mb-1">Reviews Today</div>
+              <div className="text-blue-200 text-sm font-medium mb-1">
+                Reviews Today
+              </div>
               <div className="text-4xl font-bold">{reviewsToday}</div>
             </div>
             <div className="bg-blue-700 rounded-lg p-6">
-              <div className="text-blue-200 text-sm font-medium mb-1">Total Collections</div>
+              <div className="text-blue-200 text-sm font-medium mb-1">
+                Total Collections
+              </div>
               <div className="text-4xl font-bold">{collections.length}</div>
             </div>
           </div>
@@ -64,24 +71,27 @@ export default function Home() {
         {/* System Collections */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">System Collections</h2>
-            <span className="text-sm text-gray-500">{systemCollections.length} collections</span>
+            <h2 className="text-2xl font-bold text-gray-900">
+              System Collections
+            </h2>
+            <span className="text-sm text-gray-500">
+              {systemCollections.length} collections
+            </span>
           </div>
 
           {loading ? (
             <LoadingSkeleton count={6} />
           ) : systemCollections.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg border">
-              <p className="text-gray-600 mb-4">No collections found. Make sure data is loaded.</p>
+              <p className="text-gray-600 mb-4">
+                No collections found. Make sure data is loaded.
+              </p>
               <p className="text-sm text-gray-500">Run: npm run load-data</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {systemCollections.map(collection => (
-                <CollectionCard
-                  key={collection.id}
-                  collection={collection}
-                />
+              {systemCollections.map((collection) => (
+                <CollectionCard key={collection.id} collection={collection} />
               ))}
             </div>
           )}
@@ -91,18 +101,19 @@ export default function Home() {
         {userCollections.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">My Collections</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                My Collections
+              </h2>
               <Link href="/collections/manage">
-                <Button variant="ghost" size="sm">Manage</Button>
+                <Button variant="ghost" size="sm">
+                  Manage
+                </Button>
               </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userCollections.map(collection => (
-                <CollectionCard
-                  key={collection.id}
-                  collection={collection}
-                />
+              {userCollections.map((collection) => (
+                <CollectionCard key={collection.id} collection={collection} />
               ))}
             </div>
           </section>
