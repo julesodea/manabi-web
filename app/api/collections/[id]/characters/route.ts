@@ -3,10 +3,11 @@ import { DatabaseService } from '@/lib/services/database';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const result = await DatabaseService.getCharactersByCollection(params.id);
+    const { id } = await params;
+    const result = await DatabaseService.getCharactersByCollection(id);
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching characters:', error);

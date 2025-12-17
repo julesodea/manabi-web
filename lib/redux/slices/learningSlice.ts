@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { LearningProgress, ReviewItem, StudySession } from '@/types';
+import { LearningProgress, ReviewItem, StudySession, StudyMode } from '@/types';
 
 interface LearningState {
   progress: { [characterId: string]: LearningProgress };
@@ -67,7 +67,7 @@ const learningSlice = createSlice({
   name: 'learning',
   initialState,
   reducers: {
-    startStudySession: (state, action: PayloadAction<{ collectionId: string; mode: 'flashcard' | 'multiple-choice' }>) => {
+    startStudySession: (state, action: PayloadAction<{ collectionId: string; mode: StudyMode }>) => {
       const session: StudySession = {
         id: `session_${Date.now()}`,
         collectionId: action.payload.collectionId,
@@ -90,7 +90,7 @@ const learningSlice = createSlice({
     recordAnswer: (state, action: PayloadAction<{
       characterId: string;
       isCorrect: boolean;
-      studyMode: 'flashcard' | 'multiple-choice';
+      studyMode: StudyMode;
       timeSpent: number;
     }>) => {
       if (state.currentSession) {

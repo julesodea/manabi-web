@@ -22,7 +22,9 @@ export default function StudyPage() {
   const currentKanjiData = useAppSelector(selectCurrentKanjiData);
   const currentIndex = useAppSelector(state => state.characters.currentIndex);
   const characters = useAppSelector(state => {
-    const currentCollection = state.characters.currentCollection;
+    const currentCollectionId = state.characters.currentCollection;
+    if (!currentCollectionId) return [];
+    const currentCollection = state.characters.collections[currentCollectionId];
     if (!currentCollection) return [];
     return currentCollection.characterIds
       .map(id => state.characters.entities[id])
