@@ -187,7 +187,7 @@ export class DatabaseService {
     return data.map(this.mapToCollection);
   }
 
-  static async createCollection(collection: Collection, userId?: string): Promise<Collection> {
+  static async createCollection(collection: Collection, userId?: string | null): Promise<Collection> {
     const { data, error } = await supabaseAdmin
       .from('collections')
       .insert({
@@ -201,7 +201,7 @@ export class DatabaseService {
         grade: collection.metadata.grade,
         jlpt_level: collection.metadata.jlptLevel,
         category: collection.metadata.category,
-        user_id: userId,
+        user_id: userId || null,
       })
       .select()
       .single();

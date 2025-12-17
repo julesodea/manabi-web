@@ -11,12 +11,12 @@
     "load-data:clear": "tsx scripts/loadData.ts --clear"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.11.2",
     "@supabase/supabase-js": "^2.88.0",
+    "@tanstack/react-query": "^5.90.12",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "react-redux": "^9.2.0"
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

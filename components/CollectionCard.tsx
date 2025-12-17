@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { Collection } from '@/types';
+import Link from "next/link";
+import { Collection } from "@/types";
 
 interface CollectionCardProps {
   collection: Collection;
@@ -55,8 +55,11 @@ export function CollectionCard({ collection, progress }: CollectionCardProps) {
       </div>
 
       <div className="mt-4 pt-4 border-t">
-        <span className="text-xs text-gray-500">
-          Study mode: {collection.studyMode === 'flashcard' ? 'Flashcard' : 'Multiple Choice'}
+        <span className="text-xs text-gray-700">
+          Study mode:{" "}
+          {collection.studyMode === "flashcard"
+            ? "Flashcard"
+            : "Multiple Choice"}
         </span>
       </div>
     </Link>

@@ -1,29 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
-import { useAppDispatch, useAppSelector } from '@/lib/redux/store';
-import { loadCollections } from '@/lib/redux/slices/charactersSlice';
+import { useCollections } from '@/lib/hooks/useCollections';
 import { CollectionCard } from '@/components/CollectionCard';
 import { LoadingSkeleton } from '@/components/LoadingSkeleton';
 import { Button } from '@/components/ui/Button';
 
 export default function Home() {
-  const dispatch = useAppDispatch();
-  const collections = useAppSelector(state =>
-    Object.values(state.characters.collections)
-  );
-  const loading = useAppSelector(state => state.characters.loading);
-  const reviewsToday = useAppSelector(state => state.learning.reviewsToday);
-  const studyStreak = useAppSelector(state => state.learning.studyStreak);
-
-  useEffect(() => {
-    dispatch(loadCollections());
-  }, [dispatch]);
+  const { data: collections = [], isLoading: loading } = useCollections();
 
   // Separate system and user collections
   const systemCollections = collections.filter(c => c.type === 'system');
   const userCollections = collections.filter(c => c.type === 'user');
+
+  // TODO: Implement learning progress tracking
+  const reviewsToday = 0;
+  const studyStreak = 0;
 
   return (
     <div className="min-h-screen bg-gray-50">

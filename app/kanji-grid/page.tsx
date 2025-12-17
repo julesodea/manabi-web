@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { LoadingSkeleton } from '@/components/LoadingSkeleton';
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 
 interface KanjiWithData {
   id: string;
@@ -14,17 +15,42 @@ interface KanjiWithData {
   };
 }
 
-const JLPT_LEVELS = ['All', 'N5', 'N4', 'N3', 'N2', 'N1'];
-const PAGE_SIZE = 50; // Load 50 kanji at a time
+const JLPT_LEVELS = ["All", "N5", "N4", "N3", "N2", "N1"];
+const PAGE_SIZE = 50;
 
-export default function KanjiGridPage() {
+function KanjiGridContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectionModeParam = searchParams.get("select") === "true";
+
   const [displayedKanji, setDisplayedKanji] = useState<KanjiWithData[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [selectedLevel, setSelectedLevel] = useState('All');
+  const [selectedLevel, setSelectedLevel] = useState("All");
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
+  const [selectionMode, setSelectionMode] = useState(selectionModeParam);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  // Toggle kanji selection
+  const toggleKanji = (id: string) => {
+    setSelectedKanji((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Create collection with selected kanji
+  const createCollection = () => {
+    const ids = Array.from(selectedKanji).join(",");
+    router.push(`/collections/create?characterIds=${encodeURIComponent(ids)}`);
+  };
 
   // Fetch initial kanji for the selected level
   useEffect(() => {
@@ -33,12 +59,17 @@ export default function KanjiGridPage() {
       setDisplayedKanji([]);
       setHasMore(true);
       try {
-        const levelParam = selectedLevel !== 'All' ? `jlptLevel=${selectedLevel}` : '';
+        const levelParam =
+          selectedLevel !== "All" ? `jlptLevel=${selectedLevel}` : "";
 
         // Fetch count and initial data in parallel
         const [countResponse, dataResponse] = await Promise.all([
-          fetch(`/api/kanji/count${levelParam ? `?${levelParam}` : ''}`),
-          fetch(`/api/kanji?${levelParam}${levelParam ? '&' : ''}limit=${PAGE_SIZE}&offset=0`)
+          fetch(`/api/kanji/count${levelParam ? `?${levelParam}` : ""}`),
+          fetch(
+            `/api/kanji?${levelParam}${
+              levelParam ? "&" : ""
+            }limit=${PAGE_SIZE}&offset=0`
+          ),
         ]);
 
         if (countResponse.ok) {
@@ -52,7 +83,7 @@ export default function KanjiGridPage() {
           setHasMore(data.length === PAGE_SIZE);
         }
       } catch (error) {
-        console.error('Failed to fetch kanji:', error);
+        console.error("Failed to fetch kanji:", error);
       } finally {
         setLoading(false);
       }
@@ -67,17 +98,20 @@ export default function KanjiGridPage() {
 
     setLoadingMore(true);
     try {
-      const levelParam = selectedLevel !== 'All' ? `jlptLevel=${selectedLevel}&` : '';
+      const levelParam =
+        selectedLevel !== "All" ? `jlptLevel=${selectedLevel}&` : "";
       const offset = displayedKanji.length;
-      const response = await fetch(`/api/kanji?${levelParam}limit=${PAGE_SIZE}&offset=${offset}`);
+      const response = await fetch(
+        `/api/kanji?${levelParam}limit=${PAGE_SIZE}&offset=${offset}`
+      );
 
       if (response.ok) {
         const newKanji = await response.json();
-        setDisplayedKanji(prev => [...prev, ...newKanji]);
+        setDisplayedKanji((prev) => [...prev, ...newKanji]);
         setHasMore(newKanji.length === PAGE_SIZE);
       }
     } catch (error) {
-      console.error('Failed to load more kanji:', error);
+      console.error("Failed to load more kanji:", error);
     } finally {
       setLoadingMore(false);
     }
@@ -86,7 +120,7 @@ export default function KanjiGridPage() {
   // Intersection Observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && !loading) {
           loadMore();
         }
@@ -113,13 +147,37 @@ export default function KanjiGridPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <Link href="/" className="text-blue-600 hover:text-blue-700 text-sm mb-2 inline-block">
-                ← Back to Home
+              <Link
+                href="/"
+                className="text-blue-600 hover:text-blue-700 text-sm mb-2 inline-block"
+              >
+                Back to Home
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">Browse Kanji</h1>
               <p className="text-gray-600 mt-1">
-                {loading ? 'Loading...' : totalCount > 0 ? `${totalCount} kanji` : `${displayedKanji.length} kanji`}
+                {selectionMode ? (
+                  <span>{selectedKanji.size} selected</span>
+                ) : loading ? (
+                  "Loading..."
+                ) : totalCount > 0 ? (
+                  `${totalCount} kanji`
+                ) : (
+                  `${displayedKanji.length} kanji`
+                )}
               </p>
+            </div>
+            <div className="flex gap-2">
+              {selectionMode && selectedKanji.size > 0 && (
+                <Button variant="primary" onClick={createCollection}>
+                  Create Collection ({selectedKanji.size})
+                </Button>
+              )}
+              <Button
+                variant={selectionMode ? "secondary" : "ghost"}
+                onClick={() => setSelectionMode(!selectionMode)}
+              >
+                {selectionMode ? "Cancel Selection" : "Select Kanji"}
+              </Button>
             </div>
           </div>
         </div>
@@ -129,10 +187,10 @@ export default function KanjiGridPage() {
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex gap-2 overflow-x-auto">
-            {JLPT_LEVELS.map(level => (
+            {JLPT_LEVELS.map((level) => (
               <Button
                 key={level}
-                variant={selectedLevel === level ? 'primary' : 'ghost'}
+                variant={selectedLevel === level ? "primary" : "ghost"}
                 size="sm"
                 onClick={() => setSelectedLevel(level)}
               >
@@ -150,30 +208,65 @@ export default function KanjiGridPage() {
         ) : displayedKanji.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border">
             <p className="text-gray-600 mb-4">No kanji found for this level.</p>
-            <p className="text-sm text-gray-500">Make sure data is loaded with: npm run load-data</p>
+            <p className="text-sm text-gray-500">
+              Make sure data is loaded with: npm run load-data
+            </p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {displayedKanji.map(k => (
-                <Link
-                  key={k.id}
-                  href={`/kanji/${k.id}`}
-                  className="aspect-square bg-white border rounded-lg hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center p-4 group"
-                >
-                  <div className="text-6xl mb-2 group-hover:scale-110 transition-transform">
-                    {k.character}
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-gray-600 line-clamp-2">
-                      {k.kanjiData.meanings.slice(0, 2).join(', ')}
-                    </p>
-                    <span className="text-xs text-blue-600 font-medium mt-1 inline-block">
-                      {k.kanjiData.jlptLevel}
-                    </span>
-                  </div>
-                </Link>
-              ))}
+              {displayedKanji.map((k) => {
+                const isSelected = selectedKanji.has(k.id);
+                const cardClassName = `aspect-square bg-white border-2 rounded-lg hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center p-4 group relative ${
+                  isSelected
+                    ? "border-blue-600 bg-blue-50 ring-2 ring-blue-600"
+                    : "border-gray-200"
+                }`;
+
+                const cardContent = (
+                  <>
+                    {selectionMode && isSelected && (
+                      <div className="absolute top-2 right-2 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                        ✓
+                      </div>
+                    )}
+                    <div
+                      className={`text-6xl mb-2 group-hover:scale-110 transition-transform ${
+                        isSelected ? "text-blue-900" : "text-gray-700"
+                      }`}
+                    >
+                      {k.character}
+                    </div>
+                    <div className="text-center">
+                      <p className="capitalize text-xs text-gray-600 line-clamp-2">
+                        {k.kanjiData.meanings.slice(0, 2).join(", ")}
+                      </p>
+                      <span className="text-xs text-blue-600 font-medium mt-1 inline-block">
+                        {k.kanjiData.jlptLevel}
+                      </span>
+                    </div>
+                  </>
+                );
+
+                return selectionMode ? (
+                  <button
+                    key={k.id}
+                    type="button"
+                    onClick={() => toggleKanji(k.id)}
+                    className={cardClassName}
+                  >
+                    {cardContent}
+                  </button>
+                ) : (
+                  <Link
+                    key={k.id}
+                    href={`/kanji/${k.id}`}
+                    className={cardClassName}
+                  >
+                    {cardContent}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Loading indicator and scroll trigger */}
@@ -190,6 +283,34 @@ export default function KanjiGridPage() {
           </>
         )}
       </main>
+
+      {/* Floating action button for selection mode */}
+      {selectionMode && selectedKanji.size > 0 && (
+        <div className="fixed bottom-8 right-8">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={createCollection}
+            className="shadow-2xl"
+          >
+            Create Collection ({selectedKanji.size})
+          </Button>
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function KanjiGridPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-6xl animate-pulse">学</div>
+        </div>
+      }
+    >
+      <KanjiGridContent />
+    </Suspense>
   );
 }

@@ -4,58 +4,45 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
-import { loadCharactersByCollection, selectCurrentCharacter, selectCurrentKanjiData, nextCharacter, setCurrentCollection } from '@/lib/redux/slices/charactersSlice';
-import { startStudySession, recordAnswer, endStudySession } from '@/lib/redux/slices/learningSlice';
-import { Character, KanjiData } from '@/types';
+import { useCollection, useCollectionCharacters } from '@/lib/hooks/useCollections';
+import { useStudyStore } from '@/lib/stores/studyStore';
 
 type AnswerResult = 'correct' | 'incorrect' | null;
 
 export default function StudyPage() {
   const params = useParams();
   const router = useRouter();
-  const dispatch = useAppDispatch();
-
   const collectionId = params.collectionId as string;
-  const collection = useAppSelector(state => state.characters.collections[collectionId]);
-  const currentCharacter = useAppSelector(selectCurrentCharacter);
-  const currentKanjiData = useAppSelector(selectCurrentKanjiData);
-  const currentIndex = useAppSelector(state => state.characters.currentIndex);
-  const characters = useAppSelector(state => {
-    const currentCollectionId = state.characters.currentCollection;
-    if (!currentCollectionId) return [];
-    const currentCollection = state.characters.collections[currentCollectionId];
-    if (!currentCollection) return [];
-    return currentCollection.characterIds
-      .map(id => state.characters.entities[id])
-      .filter((char): char is Character => char !== undefined);
-  });
 
-  const [loading, setLoading] = useState(true);
+  // React Query
+  const { data: collection } = useCollection(collectionId);
+  const { data: characterData, isLoading: loading } = useCollectionCharacters(collectionId);
+
+  // Zustand
+  const {
+    currentIndex,
+    characters,
+    kanjiData,
+    sessionStats,
+    startSession,
+    nextCharacter,
+    recordAnswer: recordAnswerInStore,
+    resetSession,
+  } = useStudyStore();
+
+  const currentCharacter = characters[currentIndex];
+  const currentKanjiData = currentCharacter ? kanjiData[currentCharacter.id] : null;
+
   const [flipped, setFlipped] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResult>(null);
   const [sessionComplete, setSessionComplete] = useState(false);
-  const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0, total: 0 });
 
-  // Load collection data
+  // Load collection data and start session
   useEffect(() => {
-    async function loadCollection() {
-      setLoading(true);
-      try {
-        await dispatch(loadCharactersByCollection(collectionId)).unwrap();
-        dispatch(setCurrentCollection(collectionId));
-        dispatch(startStudySession({ collectionId, mode: collection?.studyMode || 'flashcard' }));
-      } catch (error) {
-        console.error('Failed to load collection:', error);
-      } finally {
-        setLoading(false);
-      }
+    if (characterData && !loading) {
+      startSession(collectionId, characterData.characters, characterData.kanjiData);
     }
-
-    if (collectionId) {
-      loadCollection();
-    }
-  }, [collectionId, dispatch, collection?.studyMode]);
+  }, [characterData, loading, collectionId, startSession]);
 
   // Handle card flip
   const handleFlip = useCallback(() => {
@@ -70,20 +57,8 @@ export default function StudyPage() {
 
     setAnswerResult(isCorrect ? 'correct' : 'incorrect');
 
-    // Update stats
-    setSessionStats(prev => ({
-      correct: prev.correct + (isCorrect ? 1 : 0),
-      incorrect: prev.incorrect + (isCorrect ? 0 : 1),
-      total: prev.total + 1,
-    }));
-
-    // Record answer in Redux
-    dispatch(recordAnswer({
-      characterId: currentCharacter.id,
-      isCorrect,
-      studyMode: 'flashcard',
-      timeSpent: 0, // Could track this with timer
-    }));
+    // Record answer in store
+    recordAnswerInStore(isCorrect);
 
     // Wait a moment before moving to next card
     setTimeout(() => {
@@ -92,15 +67,14 @@ export default function StudyPage() {
       if (nextIndex >= characters.length) {
         // Session complete
         setSessionComplete(true);
-        dispatch(endStudySession());
       } else {
         // Move to next card
-        dispatch(nextCharacter());
+        nextCharacter();
         setFlipped(false);
         setAnswerResult(null);
       }
     }, 1000);
-  }, [currentCharacter, currentIndex, characters.length, answerResult, dispatch]);
+  }, [currentCharacter, currentIndex, characters.length, answerResult, nextCharacter, recordAnswerInStore]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -200,8 +174,9 @@ export default function StudyPage() {
                 variant="primary"
                 onClick={() => {
                   setSessionComplete(false);
-                  setSessionStats({ correct: 0, incorrect: 0, total: 0 });
-                  dispatch(startStudySession({ collectionId, mode: collection.studyMode }));
+                  if (characterData) {
+                    startSession(collectionId, characterData.characters, characterData.kanjiData);
+                  }
                 }}
               >
                 Study Again

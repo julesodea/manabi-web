@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
-import { ReduxProvider } from "@/lib/redux/ReduxProvider";
+import { QueryProvider } from "@/lib/providers/QueryProvider";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -24,7 +24,7 @@ export default function RootLayout({
       <body
         className={`${notoSansJP.variable} antialiased font-sans`}
       >
-        <ReduxProvider>{children}</ReduxProvider>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
