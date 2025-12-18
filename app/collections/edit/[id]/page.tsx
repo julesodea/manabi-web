@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { useCreateCollection } from "@/lib/hooks/useCollections";
+import { useCollection, useUpdateCollection } from "@/lib/hooks/useCollections";
 import { StudyMode } from "@/types";
 
 interface KanjiWithData {
@@ -19,10 +19,14 @@ interface KanjiWithData {
 const JLPT_LEVELS = ["All", "N5", "N4", "N3", "N2", "N1"];
 const PAGE_SIZE = 50;
 
-function CreateCollectionForm() {
+function EditCollectionForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const createCollection = useCreateCollection();
+  const params = useParams();
+  const collectionId = params.id as string;
+
+  const { data: collection, isLoading: loadingCollection } =
+    useCollection(collectionId);
+  const updateCollection = useUpdateCollection();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -40,14 +44,15 @@ function CreateCollectionForm() {
   const [searchQuery, setSearchQuery] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Pre-fill from URL params
+  // Pre-fill form with existing collection data
   useEffect(() => {
-    const ids = searchParams.get("characterIds");
-    if (ids) {
-      const idArray = ids.split(",").map((id) => id.trim());
-      setSelectedKanji(new Set(idArray));
+    if (collection) {
+      setName(collection.name);
+      setDescription(collection.description);
+      setStudyMode(collection.studyMode);
+      setSelectedKanji(new Set(collection.characterIds));
     }
-  }, [searchParams]);
+  }, [collection]);
 
   // Toggle kanji selection
   const toggleKanji = (id: string) => {
@@ -174,19 +179,44 @@ function CreateCollectionForm() {
     }
 
     try {
-      await createCollection.mutateAsync({
+      await updateCollection.mutateAsync({
+        id: collectionId,
         name: name.trim(),
         description: description.trim(),
         studyMode,
         characterIds: Array.from(selectedKanji),
       });
 
-      router.push("/");
+      router.push("/collections/manage");
     } catch (err) {
-      setError("Failed to create collection. Please try again.");
-      console.error("Create collection error:", err);
+      setError("Failed to update collection. Please try again.");
+      console.error("Update collection error:", err);
     }
   };
+
+  if (loadingCollection) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4 animate-pulse">学</div>
+          <p className="text-gray-600">Loading collection...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!collection) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Collection not found</p>
+          <Link href="/collections/manage">
+            <Button>Back to Manage</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -195,13 +225,13 @@ function CreateCollectionForm() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <Link
-                href="/"
+                href="/collections/manage"
                 className="text-blue-600 hover:text-blue-700 text-sm mb-1 inline-block"
               >
-                Back to Home
+                Back to Manage
               </Link>
               <h1 className="text-2xl font-bold text-gray-900">
-                Create Collection
+                Edit Collection
               </h1>
             </div>
             <div className="text-right">
@@ -267,7 +297,7 @@ function CreateCollectionForm() {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/collections/manage")}
                 size="sm"
                 className="flex-1"
               >
@@ -277,14 +307,14 @@ function CreateCollectionForm() {
                 type="submit"
                 variant="primary"
                 disabled={
-                  createCollection.isPending || selectedKanji.size === 0
+                  updateCollection.isPending || selectedKanji.size === 0
                 }
                 size="sm"
                 className="flex-1"
               >
-                {createCollection.isPending
-                  ? "Creating..."
-                  : `Create (${selectedKanji.size})`}
+                {updateCollection.isPending
+                  ? "Updating..."
+                  : `Update (${selectedKanji.size})`}
               </Button>
             </div>
           </form>
@@ -400,7 +430,7 @@ function CreateCollectionForm() {
   );
 }
 
-export default function CreateCollectionPage() {
+export default function EditCollectionPage() {
   return (
     <Suspense
       fallback={
@@ -409,7 +439,7 @@ export default function CreateCollectionPage() {
         </div>
       }
     >
-      <CreateCollectionForm />
+      <EditCollectionForm />
     </Suspense>
   );
 }

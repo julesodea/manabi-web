@@ -12,6 +12,11 @@ interface KanjiWithData {
   kanjiData: {
     meanings: string[];
     jlptLevel: string;
+    readings: {
+      onyomi: string[];
+      kunyomi: string[];
+      nanori: string[];
+    };
   };
 }
 
@@ -31,7 +36,18 @@ function KanjiGridContent() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Toggle kanji selection
   const toggleKanji = (id: string) => {
@@ -52,7 +68,7 @@ function KanjiGridContent() {
     router.push(`/collections/create?characterIds=${encodeURIComponent(ids)}`);
   };
 
-  // Fetch initial kanji for the selected level
+  // Fetch initial kanji for the selected level or search query
   useEffect(() => {
     async function fetchInitialKanji() {
       setLoading(true);
@@ -62,14 +78,15 @@ function KanjiGridContent() {
         const levelParam =
           selectedLevel !== "All" ? `jlptLevel=${selectedLevel}` : "";
 
+        // Use search API if there's a query, otherwise use regular API
+        const apiUrl = debouncedSearchQuery
+          ? `/api/kanji/search?q=${encodeURIComponent(debouncedSearchQuery)}${levelParam ? `&${levelParam}` : ""}&limit=${PAGE_SIZE}&offset=0`
+          : `/api/kanji?${levelParam}${levelParam ? "&" : ""}limit=${PAGE_SIZE}&offset=0`;
+
         // Fetch count and initial data in parallel
         const [countResponse, dataResponse] = await Promise.all([
           fetch(`/api/kanji/count${levelParam ? `?${levelParam}` : ""}`),
-          fetch(
-            `/api/kanji?${levelParam}${
-              levelParam ? "&" : ""
-            }limit=${PAGE_SIZE}&offset=0`
-          ),
+          fetch(apiUrl),
         ]);
 
         if (countResponse.ok) {
@@ -90,7 +107,7 @@ function KanjiGridContent() {
     }
 
     fetchInitialKanji();
-  }, [selectedLevel]);
+  }, [selectedLevel, debouncedSearchQuery]);
 
   // Load more kanji when scrolling
   const loadMore = useCallback(async () => {
@@ -101,9 +118,13 @@ function KanjiGridContent() {
       const levelParam =
         selectedLevel !== "All" ? `jlptLevel=${selectedLevel}&` : "";
       const offset = displayedKanji.length;
-      const response = await fetch(
-        `/api/kanji?${levelParam}limit=${PAGE_SIZE}&offset=${offset}`
-      );
+
+      // Use search API if there's a query, otherwise use regular API
+      const apiUrl = debouncedSearchQuery
+        ? `/api/kanji/search?q=${encodeURIComponent(debouncedSearchQuery)}&${levelParam}limit=${PAGE_SIZE}&offset=${offset}`
+        : `/api/kanji?${levelParam}limit=${PAGE_SIZE}&offset=${offset}`;
+
+      const response = await fetch(apiUrl);
 
       if (response.ok) {
         const newKanji = await response.json();
@@ -115,7 +136,7 @@ function KanjiGridContent() {
     } finally {
       setLoadingMore(false);
     }
-  }, [selectedLevel, displayedKanji.length, loadingMore, hasMore]);
+  }, [selectedLevel, debouncedSearchQuery, displayedKanji.length, loadingMore, hasMore]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -159,6 +180,8 @@ function KanjiGridContent() {
                   <span>{selectedKanji.size} selected</span>
                 ) : loading ? (
                   "Loading..."
+                ) : searchQuery ? (
+                  `${displayedKanji.length} kanji found`
                 ) : totalCount > 0 ? (
                   `${totalCount} kanji`
                 ) : (
@@ -186,17 +209,26 @@ function KanjiGridContent() {
       {/* Filters */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex gap-2 overflow-x-auto">
-            {JLPT_LEVELS.map((level) => (
-              <Button
-                key={level}
-                variant={selectedLevel === level ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedLevel(level)}
-              >
-                {level}
-              </Button>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by character, meaning, or reading..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-500"
+            />
+            <div className="flex gap-2 overflow-x-auto">
+              {JLPT_LEVELS.map((level) => (
+                <Button
+                  key={level}
+                  variant={selectedLevel === level ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => setSelectedLevel(level)}
+                >
+                  {level}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -207,9 +239,15 @@ function KanjiGridContent() {
           <LoadingSkeleton count={15} />
         ) : displayedKanji.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border">
-            <p className="text-gray-600 mb-4">No kanji found for this level.</p>
+            <p className="text-gray-600 mb-4">
+              {searchQuery
+                ? "No kanji found matching your search."
+                : "No kanji found for this level."}
+            </p>
             <p className="text-sm text-gray-500">
-              Make sure data is loaded with: npm run load-data
+              {searchQuery
+                ? "Try a different search term"
+                : "Make sure data is loaded with: npm run load-data"}
             </p>
           </div>
         ) : (
@@ -217,7 +255,7 @@ function KanjiGridContent() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {displayedKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
-                const cardClassName = `aspect-square bg-white border-2 rounded-lg hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center p-4 group relative ${
+                const cardClassName = `aspect-square bg-white border-2 rounded-lg transition-all duration-200 flex flex-col items-center justify-center p-4 group relative ${
                   isSelected
                     ? "border-blue-600 bg-blue-50 ring-2 ring-blue-600"
                     : "border-gray-200"
@@ -226,12 +264,24 @@ function KanjiGridContent() {
                 const cardContent = (
                   <>
                     {selectionMode && isSelected && (
-                      <div className="absolute top-2 right-2 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                        ✓
+                      <div className="absolute top-2 right-2 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
                       </div>
                     )}
                     <div
-                      className={`text-6xl mb-2 group-hover:scale-110 transition-transform ${
+                      className={`text-6xl mb-2 transition-transform ${
                         isSelected ? "text-blue-900" : "text-gray-700"
                       }`}
                     >

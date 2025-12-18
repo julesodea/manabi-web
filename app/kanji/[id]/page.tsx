@@ -125,7 +125,7 @@ export default function KanjiDetailPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">None</p>
+                  <p className="text-gray-700">None</p>
                 )}
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function KanjiDetailPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">None</p>
+                  <p className="text-gray-700">None</p>
                 )}
               </div>
             </div>

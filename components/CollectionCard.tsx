@@ -17,7 +17,7 @@ export function CollectionCard({ collection, progress }: CollectionCardProps) {
   return (
     <Link
       href={`/study/${collection.id}`}
-      className="block border rounded-lg p-6 hover:shadow-lg transition-shadow duration-200 bg-white"
+      className="block border rounded-lg p-6 transition-shadow duration-200 bg-white"
     >
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-xl font-semibold text-gray-900">

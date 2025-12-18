@@ -103,6 +103,75 @@ export class DatabaseService {
     return result;
   }
 
+  static async searchKanji(query: string, jlptLevel?: string, limit?: number, offset?: number): Promise<Array<Character & { kanjiData: KanjiData }>> {
+    // First get all kanji_data with JLPT filter if specified
+    let kanjiQuery = supabase
+      .from('kanji_data')
+      .select('*');
+
+    if (jlptLevel && jlptLevel !== 'All') {
+      kanjiQuery = kanjiQuery.eq('jlpt_level', jlptLevel);
+    }
+
+    const { data: allKanjiData, error: kanjiError } = await kanjiQuery;
+
+    if (kanjiError || !allKanjiData) {
+      console.error('Error fetching kanji data:', kanjiError);
+      return [];
+    }
+
+    // Get character IDs
+    const characterIds = allKanjiData.map(kd => kd.character_id);
+
+    // Fetch all characters
+    const { data: allCharacters, error: charactersError } = await supabase
+      .from('characters')
+      .select('*')
+      .in('id', characterIds);
+
+    if (charactersError || !allCharacters) {
+      console.error('Error fetching characters:', charactersError);
+      return [];
+    }
+
+    // Create maps for quick lookup
+    const characterMap = new Map(allCharacters.map(char => [char.id, char]));
+
+    // Combine and filter by search query
+    const searchLower = query.toLowerCase();
+    const filtered = allKanjiData
+      .filter(kd => characterMap.has(kd.character_id))
+      .map(kd => ({
+        ...this.mapToCharacter(characterMap.get(kd.character_id)),
+        kanjiData: this.mapToKanjiData(kd)
+      }))
+      .filter(item => {
+        // Search in character
+        if (item.character.includes(searchLower)) return true;
+
+        // Search in meanings
+        if (item.kanjiData.meanings.some(m => m.toLowerCase().includes(searchLower))) return true;
+
+        // Search in readings
+        const allReadings = [
+          ...item.kanjiData.readings.onyomi,
+          ...item.kanjiData.readings.kunyomi,
+          ...item.kanjiData.readings.nanori,
+        ];
+        if (allReadings.some(r => r.toLowerCase().includes(searchLower))) return true;
+
+        // Search in ID
+        if (item.id.toLowerCase().includes(searchLower)) return true;
+
+        return false;
+      });
+
+    // Apply pagination
+    const start = offset || 0;
+    const end = limit ? start + limit : filtered.length;
+    return filtered.slice(start, end);
+  }
+
   // Collection operations
   static async getAllCollections(): Promise<Collection[]> {
     const { data, error } = await supabase
@@ -143,30 +212,35 @@ export class DatabaseService {
       return { characters: [], kanjiData: {}, collectionId };
     }
 
-    const { data, error } = await supabase
+    // Fetch characters
+    const { data: charactersData, error: charactersError } = await supabase
       .from('characters')
-      .select(`
-        *,
-        kanji_data (*)
-      `)
+      .select('*')
       .in('id', collection.characterIds);
 
-    if (error) {
-      console.error('Error fetching characters:', error);
+    if (charactersError) {
+      console.error('Error fetching characters:', charactersError);
       return { characters: [], kanjiData: {}, collectionId };
     }
 
-    const characters: Character[] = [];
+    // Fetch kanji data for these characters
+    const { data: kanjiDataList, error: kanjiError } = await supabase
+      .from('kanji_data')
+      .select('*')
+      .in('character_id', collection.characterIds);
+
+    if (kanjiError) {
+      console.error('Error fetching kanji data:', kanjiError);
+    }
+
+    const characters: Character[] = charactersData.map(this.mapToCharacter);
     const kanjiData: { [id: string]: KanjiData } = {};
 
-    data.forEach((item: any) => {
-      const character = this.mapToCharacter(item);
-      characters.push(character);
-
-      if (item.kanji_data && item.kanji_data.length > 0) {
-        kanjiData[character.id] = this.mapToKanjiData(item.kanji_data[0]);
-      }
-    });
+    if (kanjiDataList) {
+      kanjiDataList.forEach((item: any) => {
+        kanjiData[item.character_id] = this.mapToKanjiData(item);
+      });
+    }
 
     return { characters, kanjiData, collectionId };
   }

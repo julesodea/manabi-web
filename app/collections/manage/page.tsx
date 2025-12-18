@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import {
   useCollections,
   useDeleteCollection,
@@ -14,23 +15,43 @@ export default function ManageCollectionsPage() {
   const { data: collections = [], isLoading } = useCollections();
   const deleteCollection = useDeleteCollection();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    collectionId: string | null;
+    collectionName: string | null;
+  }>({
+    isOpen: false,
+    collectionId: null,
+    collectionName: null,
+  });
 
   const userCollections = collections.filter((c) => c.type === "user");
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
-      return;
-    }
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteModal({
+      isOpen: true,
+      collectionId: id,
+      collectionName: name,
+    });
+  };
 
-    setDeletingId(id);
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.collectionId) return;
+
+    setDeletingId(deleteModal.collectionId);
     try {
-      await deleteCollection.mutateAsync(id);
+      await deleteCollection.mutateAsync(deleteModal.collectionId);
+      setDeleteModal({ isOpen: false, collectionId: null, collectionName: null });
     } catch (error) {
       console.error("Failed to delete collection:", error);
       alert("Failed to delete collection. Please try again.");
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, collectionId: null, collectionName: null });
   };
 
   return (
@@ -105,10 +126,15 @@ export default function ManageCollectionsPage() {
                       Study
                     </Button>
                   </Link>
+                  <Link href={`/collections/edit/${collection.id}`}>
+                    <Button variant="secondary" size="sm">
+                      Edit
+                    </Button>
+                  </Link>
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => handleDelete(collection.id, collection.name)}
+                    onClick={() => handleDeleteClick(collection.id, collection.name)}
                     disabled={deletingId === collection.id}
                   >
                     {deletingId === collection.id ? "Deleting..." : "Delete"}
@@ -119,6 +145,34 @@ export default function ManageCollectionsPage() {
           </div>
         )}
       </main>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        title="Delete Collection"
+        footer={
+          <>
+            <Button variant="secondary" onClick={handleDeleteCancel}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleDeleteConfirm}
+              disabled={!!deletingId}
+            >
+              {deletingId ? "Deleting..." : "Delete"}
+            </Button>
+          </>
+        }
+      >
+        <p>
+          Are you sure you want to delete <strong>"{deleteModal.collectionName}"</strong>?
+        </p>
+        <p className="mt-2 text-sm">
+          This action cannot be undone.
+        </p>
+      </Modal>
     </div>
   );
 }
