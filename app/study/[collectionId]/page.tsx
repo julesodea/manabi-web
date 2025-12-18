@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -9,8 +9,14 @@ import {
   useCollectionCharacters,
 } from "@/lib/hooks/useCollections";
 import { useStudyStore } from "@/lib/stores/studyStore";
+import { KanjiData } from "@/types";
 
 type AnswerResult = "correct" | "incorrect" | null;
+
+interface MultipleChoiceOption {
+  meaning: string;
+  isCorrect: boolean;
+}
 
 export default function StudyPage() {
   const params = useParams();
@@ -42,6 +48,46 @@ export default function StudyPage() {
   const [flipped, setFlipped] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResult>(null);
   const [sessionComplete, setSessionComplete] = useState(false);
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
+    null
+  );
+
+  // Determine study mode from collection
+  const studyMode = collection?.studyMode || "flashcard";
+
+  // Generate multiple choice options
+  const multipleChoiceOptions = useMemo(() => {
+    if (studyMode !== "multiple_choice" || !currentKanjiData || !kanjiData) {
+      return [];
+    }
+
+    const correctMeaning = currentKanjiData.meanings[0] || "";
+
+    // Get other meanings from other kanji in the collection
+    const otherMeanings: string[] = [];
+    const kanjiDataValues = Object.values(kanjiData) as KanjiData[];
+
+    for (const kd of kanjiDataValues) {
+      if (kd.characterId !== currentCharacter?.id && kd.meanings.length > 0) {
+        otherMeanings.push(kd.meanings[0]);
+      }
+      if (otherMeanings.length >= 10) break; // Get enough options to choose from
+    }
+
+    // Shuffle and pick 3 wrong answers
+    const shuffledWrong = otherMeanings
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+
+    // Create options array with correct answer
+    const options: MultipleChoiceOption[] = [
+      { meaning: correctMeaning, isCorrect: true },
+      ...shuffledWrong.map((m) => ({ meaning: m, isCorrect: false })),
+    ];
+
+    // Shuffle all options
+    return options.sort(() => Math.random() - 0.5);
+  }, [studyMode, currentKanjiData, kanjiData, currentCharacter?.id]);
 
   // Load collection data and start session
   useEffect(() => {
@@ -61,7 +107,7 @@ export default function StudyPage() {
     }
   }, [flipped, answerResult]);
 
-  // Handle answer
+  // Handle answer (for flashcard mode)
   const handleAnswer = useCallback(
     async (isCorrect: boolean) => {
       if (!currentCharacter || answerResult) return;
@@ -96,26 +142,90 @@ export default function StudyPage() {
     ]
   );
 
+  // Handle multiple choice selection
+  const handleMultipleChoiceSelect = useCallback(
+    (optionIndex: number) => {
+      if (!currentCharacter || answerResult || selectedOptionIndex !== null)
+        return;
+
+      const selectedOption = multipleChoiceOptions[optionIndex];
+      if (!selectedOption) return;
+
+      setSelectedOptionIndex(optionIndex);
+      const isCorrect = selectedOption.isCorrect;
+      setAnswerResult(isCorrect ? "correct" : "incorrect");
+
+      // Record answer in store
+      recordAnswerInStore(isCorrect);
+
+      // Wait a moment before moving to next card
+      setTimeout(() => {
+        const nextIndex = currentIndex + 1;
+
+        if (nextIndex >= characters.length) {
+          // Session complete
+          setSessionComplete(true);
+        } else {
+          // Move to next card
+          nextCharacter();
+          setAnswerResult(null);
+          setSelectedOptionIndex(null);
+        }
+      }, 1500);
+    },
+    [
+      currentCharacter,
+      currentIndex,
+      characters.length,
+      answerResult,
+      selectedOptionIndex,
+      multipleChoiceOptions,
+      nextCharacter,
+      recordAnswerInStore,
+    ]
+  );
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (sessionComplete) return;
 
-      if (e.key === " " && !flipped) {
-        e.preventDefault();
-        handleFlip();
-      } else if (flipped && !answerResult) {
-        if (e.key === "1") {
-          handleAnswer(false);
-        } else if (e.key === "2") {
-          handleAnswer(true);
+      if (studyMode === "multiple_choice") {
+        // Multiple choice: 1-4 to select options
+        if (!answerResult && selectedOptionIndex === null) {
+          const keyNum = parseInt(e.key);
+          if (keyNum >= 1 && keyNum <= 4) {
+            e.preventDefault();
+            handleMultipleChoiceSelect(keyNum - 1);
+          }
+        }
+      } else {
+        // Flashcard mode
+        if (e.key === " " && !flipped) {
+          e.preventDefault();
+          handleFlip();
+        } else if (flipped && !answerResult) {
+          if (e.key === "1") {
+            handleAnswer(false);
+          } else if (e.key === "2") {
+            handleAnswer(true);
+          }
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [flipped, answerResult, sessionComplete, handleFlip, handleAnswer]);
+  }, [
+    flipped,
+    answerResult,
+    sessionComplete,
+    studyMode,
+    selectedOptionIndex,
+    handleFlip,
+    handleAnswer,
+    handleMultipleChoiceSelect,
+  ]);
 
   if (loading) {
     return (
@@ -258,111 +368,191 @@ export default function StudyPage() {
         </div>
       </header>
 
-      {/* Flashcard */}
+      {/* Study Content */}
       <main className="container mx-auto px-4 py-4 md:py-8">
         <div className="max-w-2xl mx-auto h-[calc(100vh-220px)] flex flex-col">
-          {/* Card */}
-          <div
-            className={`
-              relative bg-white rounded-2xl shadow-2xl cursor-pointer flex-1 max-h-[600px]
-              transition-all duration-500
-              ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
-              ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
-            `}
-            onClick={handleFlip}
-          >
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
-              {!flipped ? (
-                // Front: Kanji character
-                <div className="text-center">
-                  <div className="text-gray-700 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-4 md:mb-8 font-bold">
+          {studyMode === "multiple_choice" ? (
+            // Multiple Choice Mode
+            <>
+              {/* Kanji Card */}
+              <div
+                className={`
+                  relative bg-white rounded-2xl flex-1 max-h-[300px]
+                  transition-all duration-500
+                  ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
+                  ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
+                `}
+              >
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
+                  <div className="text-gray-700 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold">
                     {currentCharacter?.character}
                   </div>
-                  <p className="text-gray-500 text-sm">
-                    Tap or press Space to reveal
+                  <p className="text-gray-500 text-sm mt-4">
+                    What does this kanji mean?
                   </p>
                 </div>
-              ) : (
-                // Back: Meanings and readings
-                <div className="text-center w-full overflow-y-auto">
-                  <div className="text-gray-700 text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 font-bold text-gray-400">
-                    {currentCharacter?.character}
-                  </div>
+              </div>
 
-                  {/* Meanings */}
-                  <div className="mb-4 md:mb-6">
-                    <h3 className="text-sm capitalize font-semibold text-gray-600 mb-2">
-                      Meanings
-                    </h3>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {currentKanjiData?.meanings.map((meaning, i) => (
-                        <span
-                          key={i}
-                          className="capitalize px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-lg text-base md:text-lg"
-                        >
-                          {meaning}
+              {/* Multiple Choice Options */}
+              <div className="mt-4 md:mt-6 grid grid-cols-2 gap-3">
+                {multipleChoiceOptions.map((option, index) => {
+                  const isSelected = selectedOptionIndex === index;
+                  const showCorrect = answerResult && option.isCorrect;
+                  const showIncorrect =
+                    isSelected && answerResult === "incorrect";
+
+                  let buttonClass =
+                    "bg-white border-2 border-gray-200 text-gray-900 hover:bg-gray-50";
+                  if (showCorrect) {
+                    buttonClass =
+                      "bg-green-100 border-2 border-green-500 text-green-900";
+                  } else if (showIncorrect) {
+                    buttonClass =
+                      "bg-red-100 border-2 border-red-500 text-red-900";
+                  } else if (isSelected) {
+                    buttonClass =
+                      "bg-blue-100 border-2 border-blue-500 text-blue-900";
+                  }
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleMultipleChoiceSelect(index)}
+                      disabled={answerResult !== null}
+                      className={`
+                        p-4 md:p-6 rounded-xl transition-all duration-200 text-left
+                        disabled:cursor-default
+                        ${buttonClass}
+                      `}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-500 w-6">
+                          {index + 1}.
                         </span>
-                      ))}
-                    </div>
-                  </div>
+                        <span className="capitalize text-base md:text-lg font-medium">
+                          {option.meaning}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-                  {/* Readings */}
-                  <div className="grid grid-cols-2 gap-4 mb-4 md:mb-6">
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-600 mb-1">
-                        On'yomi
-                      </h4>
-                      <div className="text-sm text-gray-700">
-                        {currentKanjiData?.readings.onyomi.join(", ") || "None"}
+              {/* Hint for keyboard shortcuts */}
+              {!answerResult && (
+                <p className="text-center text-sm text-gray-500 mt-4">
+                  Press 1-4 to select an answer
+                </p>
+              )}
+            </>
+          ) : (
+            // Flashcard Mode
+            <>
+              {/* Card */}
+              <div
+                className={`
+                  relative bg-white rounded-2xl cursor-pointer flex-1 max-h-[600px]
+                  transition-all duration-500
+                  ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
+                  ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
+                `}
+                onClick={handleFlip}
+              >
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
+                  {!flipped ? (
+                    // Front: Kanji character
+                    <div className="text-center">
+                      <div className="text-gray-700 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-4 md:mb-8 font-bold">
+                        {currentCharacter?.character}
+                      </div>
+                      <p className="text-gray-500 text-sm">
+                        Tap or press Space to reveal
+                      </p>
+                    </div>
+                  ) : (
+                    // Back: Meanings and readings
+                    <div className="text-center w-full overflow-y-auto">
+                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 font-bold text-gray-400">
+                        {currentCharacter?.character}
+                      </div>
+
+                      {/* Meanings */}
+                      <div className="mb-4 md:mb-6">
+                        <h3 className="text-sm capitalize font-semibold text-gray-600 mb-2">
+                          Meanings
+                        </h3>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          {currentKanjiData?.meanings.map((meaning, i) => (
+                            <span
+                              key={i}
+                              className="capitalize px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-lg text-base md:text-lg"
+                            >
+                              {meaning}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Readings */}
+                      <div className="grid grid-cols-2 gap-4 mb-4 md:mb-6">
+                        <div>
+                          <h4 className="text-xs font-semibold text-gray-600 mb-1">
+                            On'yomi
+                          </h4>
+                          <div className="text-sm text-gray-700">
+                            {currentKanjiData?.readings.onyomi.join(", ") ||
+                              "None"}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-semibold text-gray-600 mb-1">
+                            Kun'yomi
+                          </h4>
+                          <div className="text-sm text-gray-700">
+                            {currentKanjiData?.readings.kunyomi.join(", ") ||
+                              "None"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* JLPT Level */}
+                      <div className="text-xs text-gray-500">
+                        {currentKanjiData?.jlptLevel} • Grade{" "}
+                        {currentKanjiData?.grade}
                       </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-600 mb-1">
-                        Kun'yomi
-                      </h4>
-                      <div className="text-sm text-gray-700">
-                        {currentKanjiData?.readings.kunyomi.join(", ") ||
-                          "None"}
-                      </div>
-                    </div>
-                  </div>
+                  )}
+                </div>
+              </div>
 
-                  {/* JLPT Level */}
-                  <div className="text-xs text-gray-500">
-                    {currentKanjiData?.jlptLevel} • Grade{" "}
-                    {currentKanjiData?.grade}
-                  </div>
+              {/* Answer buttons */}
+              {flipped && !answerResult && (
+                <div className="mt-4 md:mt-6 grid grid-cols-2 gap-3 md:gap-4">
+                  <Button
+                    variant="danger"
+                    size="lg"
+                    onClick={() => handleAnswer(false)}
+                    className="py-4 md:py-6"
+                  >
+                    <div className="text-center">
+                      <div className="text-sm md:text-base">Incorrect</div>
+                      <div className="text-xs opacity-75">Press 1</div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => handleAnswer(true)}
+                    className="py-4 md:py-6"
+                  >
+                    <div className="text-center">
+                      <div className="text-sm md:text-base">Correct</div>
+                      <div className="text-xs opacity-75">Press 2</div>
+                    </div>
+                  </Button>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Answer buttons */}
-          {flipped && !answerResult && (
-            <div className="mt-4 md:mt-6 grid grid-cols-2 gap-3 md:gap-4">
-              <Button
-                variant="danger"
-                size="lg"
-                onClick={() => handleAnswer(false)}
-                className="py-4 md:py-6"
-              >
-                <div className="text-center">
-                  <div className="text-sm md:text-base">Incorrect</div>
-                  <div className="text-xs opacity-75">Press 1</div>
-                </div>
-              </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => handleAnswer(true)}
-                className="py-4 md:py-6"
-              >
-                <div className="text-center">
-                  <div className="text-sm md:text-base">Correct</div>
-                  <div className="text-xs opacity-75">Press 2</div>
-                </div>
-              </Button>
-            </div>
+            </>
           )}
 
           {/* Session stats */}
