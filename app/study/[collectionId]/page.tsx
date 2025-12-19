@@ -51,6 +51,7 @@ export default function StudyPage() {
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
     null
   );
+  const [shuffleMode, setShuffleMode] = useState(false);
 
   // Determine study mode from collection
   const studyMode = collection?.studyMode || "flashcard";
@@ -92,13 +93,17 @@ export default function StudyPage() {
   // Load collection data and start session
   useEffect(() => {
     if (characterData && !loading) {
+      const chars = shuffleMode
+        ? [...characterData.characters].sort(() => Math.random() - 0.5)
+        : characterData.characters;
+
       startSession(
         collectionId,
-        characterData.characters,
+        chars,
         characterData.kanjiData
       );
     }
-  }, [characterData, loading, collectionId, startSession]);
+  }, [characterData, loading, collectionId, startSession, shuffleMode]);
 
   // Handle card flip
   const handleFlip = useCallback(() => {
@@ -314,9 +319,13 @@ export default function StudyPage() {
                 onClick={() => {
                   setSessionComplete(false);
                   if (characterData) {
+                    const chars = shuffleMode
+                      ? [...characterData.characters].sort(() => Math.random() - 0.5)
+                      : characterData.characters;
+
                     startSession(
                       collectionId,
-                      characterData.characters,
+                      chars,
                       characterData.kanjiData
                     );
                   }
@@ -348,10 +357,27 @@ export default function StudyPage() {
                 {collection.name}
               </h1>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-600">Progress</div>
-              <div className="text-lg font-semibold">
-                {currentIndex + 1} / {characters.length}
+            <div className="flex items-center gap-4">
+              {studyMode === "multiple_choice" && (
+                <button
+                  onClick={() => setShuffleMode(!shuffleMode)}
+                  className={`
+                    px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
+                    ${shuffleMode
+                      ? "bg-blue-100 text-blue-700 border border-blue-300"
+                      : "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200"
+                    }
+                  `}
+                  title="Toggle random order"
+                >
+                  {shuffleMode ? "🔀 Random" : "📋 In Order"}
+                </button>
+              )}
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Progress</div>
+                <div className="text-lg font-semibold">
+                  {currentIndex + 1} / {characters.length}
+                </div>
               </div>
             </div>
           </div>

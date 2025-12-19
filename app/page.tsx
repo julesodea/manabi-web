@@ -6,11 +6,13 @@ import { useCollections } from "@/lib/hooks/useCollections";
 import { CollectionCard } from "@/components/CollectionCard";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/lib/providers/AuthProvider";
 
 export default function Home() {
   const { data: collections = [], isLoading: loading } = useCollections();
   const [systemCollectionsExpanded, setSystemCollectionsExpanded] =
     useState(false);
+  const { user, loading: authLoading, signOut } = useAuth();
 
   // Separate system and user collections
   const systemCollections = collections.filter((c) => c.type === "system");
@@ -31,7 +33,7 @@ export default function Home() {
                 学び Manabi
               </h1>
             </div>
-            <div className="flex gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Link href="/kanji-grid">
                 <Button variant="secondary" size="sm" className="text-xs sm:text-sm">
                   Browse Kanji
@@ -42,6 +44,33 @@ export default function Home() {
                   Create
                 </Button>
               </Link>
+              {!authLoading && (
+                <>
+                  {user ? (
+                    <div className="flex items-center gap-2">
+                      {user.user_metadata?.avatar_url && (
+                        <img
+                          src={user.user_metadata.avatar_url}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full"
+                        />
+                      )}
+                      <button
+                        onClick={() => signOut()}
+                        className="text-xs sm:text-sm text-gray-600 hover:text-gray-900"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  ) : (
+                    <Link href="/login">
+                      <Button variant="ghost" size="sm" className="text-xs sm:text-sm">
+                        Sign in
+                      </Button>
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -76,26 +105,65 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* User Collections */}
-        {userCollections.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                My Collections
-              </h2>
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">My Collections</h2>
+            {userCollections.length > 0 && (
               <Link href="/collections/manage">
                 <Button variant="ghost" size="sm">
                   Manage
                 </Button>
               </Link>
-            </div>
+            )}
+          </div>
 
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-lg border p-6 animate-pulse"
+                >
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : userCollections.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userCollections.map((collection) => (
                 <CollectionCard key={collection.id} collection={collection} />
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <Link href="/collections/create">
+              <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-6 hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div className="text-center">
+                  <svg
+                    className="w-12 h-12 mx-auto text-gray-400 mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">
+                    Create a collection
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Start learning by creating your first collection
+                  </p>
+                </div>
+              </div>
+            </Link>
+          )}
+        </section>
 
         {/* System Collections */}
         <section className="mb-12">

@@ -173,22 +173,56 @@ export class DatabaseService {
   }
 
   // Collection operations
-  static async getAllCollections(): Promise<Collection[]> {
-    const { data, error } = await supabase
+  static async getAllCollections(userId?: string): Promise<Collection[]> {
+    // Use supabaseAdmin to bypass RLS since we're filtering manually by user_id
+    // Get system collections
+    const { data: systemCollections, error: systemError } = await supabaseAdmin
       .from('collections')
       .select('*')
+      .eq('type', 'system')
       .order('order_index', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching collections:', error);
+    if (systemError) {
+      console.error('Error fetching system collections:', systemError);
       return [];
     }
 
-    return data.map(this.mapToCollection);
+    // Get user collections if userId is provided
+    let userCollections: any[] = [];
+    if (userId) {
+      const { data, error } = await supabaseAdmin
+        .from('collections')
+        .select('*')
+        .eq('type', 'user')
+        .eq('user_id', userId)
+        .order('order_index', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching user collections:', error);
+      } else {
+        userCollections = data || [];
+      }
+    } else {
+      // For unauthenticated users, get user collections without user_id (legacy/anonymous)
+      const { data, error } = await supabaseAdmin
+        .from('collections')
+        .select('*')
+        .eq('type', 'user')
+        .is('user_id', null)
+        .order('order_index', { ascending: true });
+
+      if (!error && data) {
+        userCollections = data;
+      }
+    }
+
+    const allCollections = [...userCollections, ...systemCollections];
+    return allCollections.map(this.mapToCollection);
   }
 
   static async getCollectionById(id: string): Promise<Collection | null> {
-    const { data, error } = await supabase
+    // Use supabaseAdmin to bypass RLS
+    const { data, error } = await supabaseAdmin
       .from('collections')
       .select('*')
       .eq('id', id)

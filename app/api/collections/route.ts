@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DatabaseService } from '@/lib/services/database';
 import { Collection } from '@/types';
+import { getServerUser } from '@/lib/supabase/server-client';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const type = searchParams.get('type');
-    const userId = searchParams.get('userId');
+    const user = await getServerUser();
+    console.log('GET collections - user:', user?.id, user?.email);
 
-    if (type === 'user' && userId) {
-      const collections = await DatabaseService.getUserCollections(userId);
-      return NextResponse.json(collections);
-    }
-
-    const collections = await DatabaseService.getAllCollections();
+    // Get all collections (system + user's own if authenticated)
+    const collections = await DatabaseService.getAllCollections(user?.id);
+    console.log('GET collections - found:', collections.length, 'user collections:', collections.filter(c => c.type === 'user').length);
     return NextResponse.json(collections);
   } catch (error) {
     console.error('Error fetching collections:', error);
@@ -23,8 +20,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getServerUser();
     const body = await request.json();
-    const { name, description, studyMode, characterIds, userId } = body;
+    const { name, description, studyMode, characterIds } = body;
 
     if (!name || !characterIds || characterIds.length === 0) {
       return NextResponse.json({ error: 'Name and characterIds are required' }, { status: 400 });
@@ -47,12 +45,11 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // TODO: Add authentication - passing null for userId until auth is implemented
-    const created = await DatabaseService.createCollection(collection, null);
+    // Pass user ID if authenticated
+    const created = await DatabaseService.createCollection(collection, user?.id || null);
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error('Error creating collection:', error);
-    // Log the full error details
     if (error instanceof Error) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
