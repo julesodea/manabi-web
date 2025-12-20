@@ -12,7 +12,7 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: "Manabi - Learn Japanese Kanji",
-  description: "Master Japanese kanji with spaced repetition learning",
+  description: "Master Japanese kanji with Manabi",
 };
 
 export default function RootLayout({
@@ -22,9 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${notoSansJP.variable} antialiased font-sans`}
-      >
+      <body className={`${notoSansJP.variable} antialiased font-sans`}>
         <AuthProvider>
           <QueryProvider>{children}</QueryProvider>
         </AuthProvider>
