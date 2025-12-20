@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "(sleep 2 && open http://localhost:3000 &) && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -17,6 +17,7 @@
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "wanakana": "^5.3.1",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "@types/node": "^20.19.27",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/wanakana": "^4.0.6",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",

@@ -8,6 +8,7 @@ import {
   ReviewItem,
   StudySession
 } from '@/types';
+import { toHiragana, toKatakana, isRomaji } from 'wanakana';
 
 export class DatabaseService {
   // Character operations
@@ -139,6 +140,11 @@ export class DatabaseService {
 
     // Combine and filter by search query
     const searchLower = query.toLowerCase();
+
+    // Convert romaji to hiragana and katakana for reading search
+    const searchHiragana = isRomaji(query) ? toHiragana(query) : null;
+    const searchKatakana = isRomaji(query) ? toKatakana(query) : null;
+
     const filtered = allKanjiData
       .filter(kd => characterMap.has(kd.character_id))
       .map(kd => ({
@@ -152,13 +158,19 @@ export class DatabaseService {
         // Search in meanings
         if (item.kanjiData.meanings.some(m => m.toLowerCase().includes(searchLower))) return true;
 
-        // Search in readings
+        // Search in readings (original query for direct kana input)
         const allReadings = [
           ...item.kanjiData.readings.onyomi,
           ...item.kanjiData.readings.kunyomi,
           ...item.kanjiData.readings.nanori,
         ];
         if (allReadings.some(r => r.toLowerCase().includes(searchLower))) return true;
+
+        // Search in readings using converted romaji (hiragana)
+        if (searchHiragana && allReadings.some(r => r.includes(searchHiragana))) return true;
+
+        // Search in readings using converted romaji (katakana)
+        if (searchKatakana && allReadings.some(r => r.includes(searchKatakana))) return true;
 
         // Search in ID
         if (item.id.toLowerCase().includes(searchLower)) return true;
