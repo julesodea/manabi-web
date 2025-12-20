@@ -97,11 +97,7 @@ export default function StudyPage() {
         ? [...characterData.characters].sort(() => Math.random() - 0.5)
         : characterData.characters;
 
-      startSession(
-        collectionId,
-        chars,
-        characterData.kanjiData
-      );
+      startSession(collectionId, chars, characterData.kanjiData);
     }
   }, [characterData, loading, collectionId, startSession, shuffleMode]);
 
@@ -320,14 +316,12 @@ export default function StudyPage() {
                   setSessionComplete(false);
                   if (characterData) {
                     const chars = shuffleMode
-                      ? [...characterData.characters].sort(() => Math.random() - 0.5)
+                      ? [...characterData.characters].sort(
+                          () => Math.random() - 0.5
+                        )
                       : characterData.characters;
 
-                    startSession(
-                      collectionId,
-                      chars,
-                      characterData.kanjiData
-                    );
+                    startSession(collectionId, chars, characterData.kanjiData);
                   }
                 }}
               >
@@ -357,20 +351,14 @@ export default function StudyPage() {
                 {collection.name}
               </h1>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-start gap-4">
               {studyMode === "multiple_choice" && (
                 <button
                   onClick={() => setShuffleMode(!shuffleMode)}
-                  className={`
-                    px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
-                    ${shuffleMode
-                      ? "bg-blue-100 text-blue-700 border border-blue-300"
-                      : "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200"
-                    }
-                  `}
                   title="Toggle random order"
+                  className="text-sm text-gray-600"
                 >
-                  {shuffleMode ? "🔀 Random" : "📋 In Order"}
+                  {shuffleMode ? "Shuffle" : "In Order"}
                 </button>
               )}
               <div className="text-right">
