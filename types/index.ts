@@ -77,6 +77,7 @@ export interface Collection {
   characterIds: string[];
   orderIndex: number;
   studyMode: StudyMode;
+  userId?: string | null;
   metadata: {
     grade?: number;
     jlptLevel?: string;

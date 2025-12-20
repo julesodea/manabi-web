@@ -322,8 +322,10 @@ export class DatabaseService {
     return this.mapToCollection(data);
   }
 
+  // NOTE: This method uses supabaseAdmin and bypasses RLS
+  // For user collections, use the authenticated client in API routes instead
   static async updateCollection(collection: Collection): Promise<Collection> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('collections')
       .update({
         name: collection.name,
@@ -343,6 +345,8 @@ export class DatabaseService {
     return this.mapToCollection(data);
   }
 
+  // NOTE: This method uses the browser supabase client which may not work correctly in server context
+  // For user collections, use the authenticated client in API routes instead
   static async deleteCollection(collectionId: string): Promise<void> {
     const { error } = await supabase
       .from('collections')
@@ -502,6 +506,7 @@ export class DatabaseService {
       characterIds: data.character_ids || [],
       orderIndex: data.order_index,
       studyMode: data.study_mode,
+      userId: data.user_id,
       metadata: {
         grade: data.grade,
         jlptLevel: data.jlpt_level,
