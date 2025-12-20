@@ -1,5 +1,17 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 
+interface ExampleWord {
+  word: string;
+  reading: string;
+  meaning: string;
+}
+
+interface ExampleSentence {
+  japanese: string;
+  reading: string;
+  translation: string;
+}
+
 interface KanjiWithData {
   id: string;
   character: string;
@@ -13,6 +25,10 @@ interface KanjiWithData {
       kunyomi: string[];
       nanori: string[];
     };
+    radicals?: string[];
+    components?: string[];
+    exampleWords?: ExampleWord[];
+    exampleSentences?: ExampleSentence[];
   };
 }
 

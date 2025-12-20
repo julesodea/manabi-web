@@ -90,6 +90,13 @@ function KanjiGridContent() {
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  // Let browser handle scroll restoration
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.history.scrollRestoration = "auto";
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
