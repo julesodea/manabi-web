@@ -16,7 +16,11 @@ export async function GET(request: NextRequest) {
         limit ? parseInt(limit) : undefined,
         offset ? parseInt(offset) : undefined
       );
-      return NextResponse.json(kanji);
+      return NextResponse.json(kanji, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      });
     }
 
     const results = await DatabaseService.searchKanji(
@@ -26,7 +30,12 @@ export async function GET(request: NextRequest) {
       offset ? parseInt(offset) : undefined
     );
 
-    return NextResponse.json(results);
+    // Cache search results for 2 minutes
+    return NextResponse.json(results, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300',
+      },
+    });
   } catch (error) {
     console.error('Error searching kanji:', error);
     return NextResponse.json({ error: 'Failed to search kanji' }, { status: 500 });

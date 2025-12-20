@@ -43,145 +43,114 @@ export class DatabaseService {
   }
 
   static async getAllKanji(jlptLevel?: string, limit?: number, offset?: number): Promise<Array<Character & { kanjiData: KanjiData }>> {
-    // First get all kanji_data (start here to respect JLPT filter)
-    let kanjiQuery = supabase
+    // Use a single query with embedded join via foreign key relationship
+    // This fetches kanji_data with its related character in one request
+    let query = supabase
       .from('kanji_data')
-      .select('*');
+      .select(`
+        *,
+        characters!kanji_data_character_id_fkey (*)
+      `);
 
     if (jlptLevel && jlptLevel !== 'All') {
-      kanjiQuery = kanjiQuery.eq('jlpt_level', jlptLevel);
+      query = query.eq('jlpt_level', jlptLevel);
     }
 
-    // Add pagination if limit is provided
+    // Add pagination
     if (limit !== undefined) {
-      kanjiQuery = kanjiQuery.range(offset || 0, (offset || 0) + limit - 1);
+      query = query.range(offset || 0, (offset || 0) + limit - 1);
     }
 
-    const { data: kanjiDataList, error: kanjiError } = await kanjiQuery;
+    const { data, error } = await query;
 
-    if (kanjiError || !kanjiDataList) {
-      console.error('Error fetching kanji data:', kanjiError);
+    if (error || !data) {
+      console.error('Error fetching kanji:', error);
       return [];
     }
 
-    // Get character IDs from kanji data
-    const characterIds = kanjiDataList.map(kd => kd.character_id);
-
-    // Fetch characters in batches (Supabase has a 1000 row default limit per query)
-    const batchSize = 1000;
-    const allCharacters: any[] = [];
-
-    for (let i = 0; i < characterIds.length; i += batchSize) {
-      const batch = characterIds.slice(i, i + batchSize);
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .in('id', batch);
-
-      if (error) {
-        console.error('Error fetching character batch:', error);
-        continue;
-      }
-
-      if (data) {
-        allCharacters.push(...data);
-      }
-    }
-
-    // Create maps for quick lookup
-    const characterMap = new Map(
-      allCharacters.map(char => [char.id, char])
-    );
-
-    // Combine them - iterate over kanji_data to maintain filtering
-    const result = kanjiDataList
-      .filter(kd => characterMap.has(kd.character_id))
-      .map(kd => ({
-        ...this.mapToCharacter(characterMap.get(kd.character_id)),
-        kanjiData: this.mapToKanjiData(kd)
+    // Map the joined data
+    return data
+      .filter((item: any) => item.characters) // Ensure character exists
+      .map((item: any) => ({
+        ...this.mapToCharacter(item.characters),
+        kanjiData: this.mapToKanjiData(item)
       }));
-
-    return result;
   }
 
   static async searchKanji(query: string, jlptLevel?: string, limit?: number, offset?: number): Promise<Array<Character & { kanjiData: KanjiData }>> {
-    // First get all kanji_data with JLPT filter if specified
-    let kanjiQuery = supabase
-      .from('kanji_data')
-      .select('*');
-
-    if (jlptLevel && jlptLevel !== 'All') {
-      kanjiQuery = kanjiQuery.eq('jlpt_level', jlptLevel);
-    }
-
-    const { data: allKanjiData, error: kanjiError } = await kanjiQuery;
-
-    if (kanjiError || !allKanjiData) {
-      console.error('Error fetching kanji data:', kanjiError);
-      return [];
-    }
-
-    // Get character IDs
-    const characterIds = allKanjiData.map(kd => kd.character_id);
-
-    // Fetch all characters
-    const { data: allCharacters, error: charactersError } = await supabase
-      .from('characters')
-      .select('*')
-      .in('id', characterIds);
-
-    if (charactersError || !allCharacters) {
-      console.error('Error fetching characters:', charactersError);
-      return [];
-    }
-
-    // Create maps for quick lookup
-    const characterMap = new Map(allCharacters.map(char => [char.id, char]));
-
-    // Combine and filter by search query
-    const searchLower = query.toLowerCase();
+    const queryLower = query.toLowerCase();
 
     // Convert romaji to hiragana and katakana for reading search
     const searchHiragana = isRomaji(query) ? toHiragana(query) : null;
     const searchKatakana = isRomaji(query) ? toKatakana(query) : null;
 
-    const filtered = allKanjiData
-      .filter(kd => characterMap.has(kd.character_id))
-      .map(kd => ({
-        ...this.mapToCharacter(characterMap.get(kd.character_id)),
-        kanjiData: this.mapToKanjiData(kd)
-      }))
-      .filter(item => {
-        // Search in character
-        if (item.character.includes(searchLower)) return true;
+    // For meaning/reading search on arrays, PostgREST array operators require exact matches
+    // We'll fetch data and filter client-side for flexible matching
+    // This is still efficient because we limit the initial fetch
 
-        // Search in meanings
-        if (item.kanjiData.meanings.some(m => m.toLowerCase().includes(searchLower))) return true;
+    let baseQuery = supabase
+      .from('kanji_data')
+      .select(`
+        *,
+        characters!kanji_data_character_id_fkey (*)
+      `);
 
-        // Search in readings (original query for direct kana input)
-        const allReadings = [
-          ...item.kanjiData.readings.onyomi,
-          ...item.kanjiData.readings.kunyomi,
-          ...item.kanjiData.readings.nanori,
-        ];
-        if (allReadings.some(r => r.toLowerCase().includes(searchLower))) return true;
+    if (jlptLevel && jlptLevel !== 'All') {
+      baseQuery = baseQuery.eq('jlpt_level', jlptLevel);
+    }
 
-        // Search in readings using converted romaji (hiragana)
-        if (searchHiragana && allReadings.some(r => r.includes(searchHiragana))) return true;
+    // Limit to reasonable amount for client-side filtering
+    const { data: allKanji, error } = await baseQuery.limit(2136);
 
-        // Search in readings using converted romaji (katakana)
-        if (searchKatakana && allReadings.some(r => r.includes(searchKatakana))) return true;
+    if (error || !allKanji) {
+      console.error('Error fetching kanji for search:', error);
+      return [];
+    }
 
-        // Search in ID
-        if (item.id.toLowerCase().includes(searchLower)) return true;
+    // Filter results client-side for flexible matching
+    const filteredResults = allKanji.filter((item: any) => {
+      // Check if query matches the character directly
+      if (item.characters?.character === query) {
+        return true;
+      }
 
-        return false;
-      });
+      // Check meanings (case-insensitive partial match)
+      if (item.meanings?.some((m: string) => m.toLowerCase().includes(queryLower))) {
+        return true;
+      }
+
+      // Check readings - original query
+      if (item.onyomi?.some((r: string) => r.includes(query))) return true;
+      if (item.kunyomi?.some((r: string) => r.includes(query))) return true;
+      if (item.nanori?.some((r: string) => r.includes(query))) return true;
+
+      // Check readings - converted romaji to hiragana/katakana
+      if (searchHiragana) {
+        if (item.onyomi?.some((r: string) => r.includes(searchHiragana))) return true;
+        if (item.kunyomi?.some((r: string) => r.includes(searchHiragana))) return true;
+        if (item.nanori?.some((r: string) => r.includes(searchHiragana))) return true;
+      }
+      if (searchKatakana) {
+        if (item.onyomi?.some((r: string) => r.includes(searchKatakana))) return true;
+        if (item.kunyomi?.some((r: string) => r.includes(searchKatakana))) return true;
+        if (item.nanori?.some((r: string) => r.includes(searchKatakana))) return true;
+      }
+
+      return false;
+    });
 
     // Apply pagination
     const start = offset || 0;
-    const end = limit ? start + limit : filtered.length;
-    return filtered.slice(start, end);
+    const end = limit ? start + limit : filteredResults.length;
+    const paginatedResults = filteredResults.slice(start, end);
+
+    // Map the joined data
+    return paginatedResults
+      .filter((item: any) => item.characters)
+      .map((item: any) => ({
+        ...this.mapToCharacter(item.characters),
+        kanjiData: this.mapToKanjiData(item)
+      }));
   }
 
   // Collection operations

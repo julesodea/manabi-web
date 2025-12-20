@@ -21,7 +21,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch count' }, { status: 500 });
     }
 
-    return NextResponse.json({ count: count || 0 });
+    // Cache for 10 minutes (count rarely changes)
+    return NextResponse.json({ count: count || 0 }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
+      },
+    });
   } catch (error) {
     console.error('Error fetching kanji count:', error);
     return NextResponse.json({ error: 'Failed to fetch count' }, { status: 500 });

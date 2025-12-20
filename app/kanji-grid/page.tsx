@@ -1,39 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-
-interface KanjiWithData {
-  id: string;
-  character: string;
-  kanjiData: {
-    meanings: string[];
-    jlptLevel: string;
-    readings: {
-      onyomi: string[];
-      kunyomi: string[];
-      nanori: string[];
-    };
-  };
-}
+import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
 
 const JLPT_LEVELS = ["All", "N5", "N4", "N3", "N2", "N1"];
-const PAGE_SIZE = 50;
 
 function KanjiGridContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectionModeParam = searchParams.get("select") === "true";
 
-  const [displayedKanji, setDisplayedKanji] = useState<KanjiWithData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("All");
-  const [hasMore, setHasMore] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,6 +29,24 @@ function KanjiGridContent() {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // TanStack Query hooks
+  const { data: totalCount } = useKanjiCount(selectedLevel);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useKanjiInfinite({
+    query: debouncedSearchQuery || undefined,
+    jlptLevel: selectedLevel,
+  });
+
+  // Flatten paginated data
+  const displayedKanji = useMemo(() => {
+    return data?.pages.flatMap((page) => page.items) ?? [];
+  }, [data]);
 
   // Toggle kanji selection
   const toggleKanji = (id: string) => {
@@ -68,82 +67,12 @@ function KanjiGridContent() {
     router.push(`/collections/create?characterIds=${encodeURIComponent(ids)}`);
   };
 
-  // Fetch initial kanji for the selected level or search query
-  useEffect(() => {
-    async function fetchInitialKanji() {
-      setLoading(true);
-      setDisplayedKanji([]);
-      setHasMore(true);
-      try {
-        const levelParam =
-          selectedLevel !== "All" ? `jlptLevel=${selectedLevel}` : "";
-
-        // Use search API if there's a query, otherwise use regular API
-        const apiUrl = debouncedSearchQuery
-          ? `/api/kanji/search?q=${encodeURIComponent(debouncedSearchQuery)}${levelParam ? `&${levelParam}` : ""}&limit=${PAGE_SIZE}&offset=0`
-          : `/api/kanji?${levelParam}${levelParam ? "&" : ""}limit=${PAGE_SIZE}&offset=0`;
-
-        // Fetch count and initial data in parallel
-        const [countResponse, dataResponse] = await Promise.all([
-          fetch(`/api/kanji/count${levelParam ? `?${levelParam}` : ""}`),
-          fetch(apiUrl),
-        ]);
-
-        if (countResponse.ok) {
-          const { count } = await countResponse.json();
-          setTotalCount(count);
-        }
-
-        if (dataResponse.ok) {
-          const data = await dataResponse.json();
-          setDisplayedKanji(data);
-          setHasMore(data.length === PAGE_SIZE);
-        }
-      } catch (error) {
-        console.error("Failed to fetch kanji:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchInitialKanji();
-  }, [selectedLevel, debouncedSearchQuery]);
-
-  // Load more kanji when scrolling
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-
-    setLoadingMore(true);
-    try {
-      const levelParam =
-        selectedLevel !== "All" ? `jlptLevel=${selectedLevel}&` : "";
-      const offset = displayedKanji.length;
-
-      // Use search API if there's a query, otherwise use regular API
-      const apiUrl = debouncedSearchQuery
-        ? `/api/kanji/search?q=${encodeURIComponent(debouncedSearchQuery)}&${levelParam}limit=${PAGE_SIZE}&offset=${offset}`
-        : `/api/kanji?${levelParam}limit=${PAGE_SIZE}&offset=${offset}`;
-
-      const response = await fetch(apiUrl);
-
-      if (response.ok) {
-        const newKanji = await response.json();
-        setDisplayedKanji((prev) => [...prev, ...newKanji]);
-        setHasMore(newKanji.length === PAGE_SIZE);
-      }
-    } catch (error) {
-      console.error("Failed to load more kanji:", error);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [selectedLevel, debouncedSearchQuery, displayedKanji.length, loadingMore, hasMore]);
-
   // Intersection Observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          loadMore();
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { threshold: 0.1 }
@@ -159,7 +88,7 @@ function KanjiGridContent() {
         observer.unobserve(currentTarget);
       }
     };
-  }, [loadMore, loading]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -178,11 +107,11 @@ function KanjiGridContent() {
               <p className="text-gray-600 mt-1">
                 {selectionMode ? (
                   <span>{selectedKanji.size} selected</span>
-                ) : loading ? (
+                ) : isLoading ? (
                   "Loading..."
                 ) : searchQuery ? (
                   `${displayedKanji.length} kanji found`
-                ) : totalCount > 0 ? (
+                ) : totalCount ? (
                   `${totalCount} kanji`
                 ) : (
                   `${displayedKanji.length} kanji`
@@ -235,7 +164,7 @@ function KanjiGridContent() {
 
       {/* Kanji Grid */}
       <main className="container mx-auto px-4 py-8">
-        {loading ? (
+        {isLoading ? (
           <LoadingSkeleton count={15} />
         ) : displayedKanji.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border">
@@ -321,10 +250,10 @@ function KanjiGridContent() {
 
             {/* Loading indicator and scroll trigger */}
             <div ref={observerTarget} className="py-8 text-center">
-              {loadingMore && (
+              {isFetchingNextPage && (
                 <div className="text-gray-600">Loading more kanji...</div>
               )}
-              {!hasMore && totalCount > 0 && (
+              {!hasNextPage && totalCount && totalCount > 0 && (
                 <div className="text-gray-500 text-sm">
                   All {totalCount} kanji loaded!
                 </div>
