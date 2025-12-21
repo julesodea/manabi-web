@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Red circle background -->
+  <circle cx="32" cy="32" r="30" fill="#ef4444"/>
+  <!-- Kanji character 学 -->
+  <text 
+    x="32" 
+    y="34" 
+    font-family="Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif" 
+    font-size="38" 
+    font-weight="bold" 
+    fill="white" 
+    text-anchor="middle" 
+    dominant-baseline="central"
+  >学</text>
+</svg>
+
