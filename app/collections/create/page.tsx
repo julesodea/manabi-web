@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import { useCreateCollection } from "@/lib/hooks/useCollections";
 import { StudyMode } from "@/types";
 
@@ -28,6 +27,7 @@ function CreateCollectionForm() {
   const [description, setDescription] = useState("");
   const [studyMode, setStudyMode] = useState<StudyMode>("flashcard");
   const [error, setError] = useState("");
+  const [scrolled, setScrolled] = useState(false);
 
   // Kanji grid state
   const [displayedKanji, setDisplayedKanji] = useState<KanjiWithData[]>([]);
@@ -39,6 +39,15 @@ function CreateCollectionForm() {
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  // Handle scroll for sticky header shadow
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Pre-fill from URL params
   useEffect(() => {
@@ -189,43 +198,58 @@ function CreateCollectionForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <Link
-                href="/"
-                className="text-blue-600 hover:text-blue-700 text-sm mb-1 inline-block"
-              >
-                Back to Home
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
+          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                  学
+                </div>
+                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                  Manabi
+                </span>
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <div className="hidden sm:block h-6 w-px bg-gray-200" />
+              <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">
                 Create Collection
               </h1>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-600">Selected</div>
-              <div className="text-2xl font-bold text-blue-600">
-                {selectedKanji.size}
+
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-sm text-gray-500">Selected</div>
+                <div className="text-xl font-bold text-rose-500">
+                  {selectedKanji.size}
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* Collection Info Form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Form Section */}
+      <div className="pt-20 border-b border-gray-100 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-500"
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                 placeholder="Collection Name *"
                 required
               />
@@ -233,85 +257,104 @@ function CreateCollectionForm() {
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-500"
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                 placeholder="Description (optional)"
               />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setStudyMode("flashcard")}
-                className={`flex-1 px-4 py-2 border-2 rounded-lg transition-colors text-sm ${
+                className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "flashcard"
-                    ? "border-blue-600 bg-blue-50 text-blue-900"
-                    : "border-gray-800 text-gray-900 hover:bg-gray-50"
+                    ? "border-rose-500 bg-rose-50 text-rose-900"
+                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                📇 Flashcard
+                Flashcard
               </button>
               <button
                 type="button"
                 onClick={() => setStudyMode("multiple_choice")}
-                className={`flex-1 px-4 py-2 border-2 rounded-lg transition-colors text-sm ${
+                className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "multiple_choice"
-                    ? "border-blue-600 bg-blue-50 text-blue-900"
-                    : "border-gray-800 text-gray-900 hover:bg-gray-50"
+                    ? "border-rose-500 bg-rose-50 text-rose-900"
+                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                ✅ Multiple Choice
+                Multiple Choice
               </button>
             </div>
 
-            <div className="flex gap-2">
-              <Button
+            <div className="flex gap-3">
+              <button
                 type="button"
-                variant="secondary"
                 onClick={() => router.push("/")}
-                size="sm"
-                className="flex-1"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-100 transition"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 type="submit"
-                variant="primary"
                 disabled={
                   createCollection.isPending || selectedKanji.size === 0
                 }
-                size="sm"
-                className="flex-1"
+                className="flex-1 px-4 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createCollection.isPending
                   ? "Creating..."
                   : `Create (${selectedKanji.size})`}
-              </Button>
+              </button>
             </div>
           </form>
         </div>
-      </header>
+      </div>
 
       {/* Filters & Search */}
-      <div className="bg-white border-b sticky top-[220px] z-10">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search kanji by character, meaning, or ID..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 placeholder:text-gray-500"
-            />
-            <div className="flex gap-2 overflow-x-auto">
+      <div className="sticky top-[72px] z-40 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-center bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 flex-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search kanji by character, meaning..."
+                className="grow bg-transparent border-none outline-none px-4 py-2.5 text-sm placeholder-gray-400 rounded-l-full"
+              />
+              <div className="pr-2 py-1">
+                <div className="p-2 bg-rose-500 rounded-full text-white">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar">
               {JLPT_LEVELS.map((level) => (
-                <Button
+                <button
                   key={level}
-                  variant={selectedLevel === level ? "primary" : "ghost"}
-                  size="sm"
+                  type="button"
                   onClick={() => setSelectedLevel(level)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+                    selectedLevel === level
+                      ? "bg-gray-900 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
                 >
                   {level}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -319,14 +362,14 @@ function CreateCollectionForm() {
       </div>
 
       {/* Kanji Grid */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 animate-pulse">学</div>
             <p className="text-gray-600">Loading kanji...</p>
           </div>
         ) : filteredKanji.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg border">
+          <div className="text-center py-12 bg-gray-50 rounded-2xl">
             <p className="text-gray-600 mb-2">No kanji found</p>
             <p className="text-sm text-gray-500">
               Try a different search or filter
@@ -334,7 +377,7 @@ function CreateCollectionForm() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-4 text-sm text-gray-500">
               Showing {filteredKanji.length} of {totalCount} kanji
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
@@ -345,14 +388,14 @@ function CreateCollectionForm() {
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className={`aspect-square bg-white border-2 rounded-lg transition-all duration-200 flex flex-col items-center justify-center p-2 group relative ${
+                    className={`aspect-square bg-gray-50 border rounded-xl transition-all duration-200 flex flex-col items-center justify-center p-2 group relative hover:shadow-md ${
                       isSelected
-                        ? "border-blue-600 bg-blue-50 ring-2 ring-blue-600"
-                        : "border-gray-200"
+                        ? "border-rose-500 bg-rose-50 ring-2 ring-rose-500"
+                        : "border-gray-100"
                     }`}
                   >
                     {isSelected && (
-                      <div className="absolute top-1 right-1 bg-gray-800 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      <div className="absolute top-1 right-1 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                         <svg
                           className="w-3 h-3"
                           fill="none"
@@ -370,13 +413,13 @@ function CreateCollectionForm() {
                     )}
                     <div
                       className={`text-4xl mb-1 group-hover:scale-110 transition-transform ${
-                        isSelected ? "text-blue-900" : "text-gray-700"
+                        isSelected ? "text-rose-900" : "text-gray-800"
                       }`}
                     >
                       {k.character}
                     </div>
                     <div className="text-center">
-                      <span className="text-xs text-blue-600 font-medium">
+                      <span className="text-xs text-gray-500 font-medium">
                         {k.kanjiData.jlptLevel}
                       </span>
                     </div>
@@ -387,10 +430,10 @@ function CreateCollectionForm() {
 
             <div ref={observerTarget} className="py-6 text-center">
               {loadingMore && (
-                <div className="text-gray-600 text-sm">Loading more...</div>
+                <div className="text-gray-500 text-sm">Loading more...</div>
               )}
               {!hasMore && totalCount > 0 && (
-                <div className="text-gray-500 text-sm">All kanji loaded!</div>
+                <div className="text-gray-400 text-sm">All kanji loaded</div>
               )}
             </div>
           </>
@@ -404,7 +447,7 @@ export default function CreateCollectionPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-6xl animate-pulse">学</div>
         </div>
       }

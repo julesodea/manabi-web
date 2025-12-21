@@ -39,3 +39,13 @@ select {
     font-size: inherit;
   }
 }
+
+/* Hide scrollbar for category bars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

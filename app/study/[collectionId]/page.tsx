@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import {
   useCollection,
   useCollectionCharacters,
@@ -20,7 +19,6 @@ interface MultipleChoiceOption {
 
 export default function StudyPage() {
   const params = useParams();
-  const router = useRouter();
   const collectionId = params.collectionId as string;
 
   // React Query
@@ -52,6 +50,16 @@ export default function StudyPage() {
     null
   );
   const [shuffleMode, setShuffleMode] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll for sticky header shadow
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Determine study mode from collection
   const studyMode = collection?.studyMode || "flashcard";
@@ -230,7 +238,7 @@ export default function StudyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse">学</div>
           <p className="text-gray-600">Loading study session...</p>
@@ -241,10 +249,15 @@ export default function StudyPage() {
 
   if (!collection || characters.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Collection not found or empty</p>
-          <Button onClick={() => router.push("/")}>Go Home</Button>
+          <Link
+            href="/"
+            className="px-6 py-2 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition"
+          >
+            Go Home
+          </Link>
         </div>
       </div>
     );
@@ -257,17 +270,28 @@ export default function StudyPage() {
         : 0;
 
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b">
-          <div className="container mx-auto px-4 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Session Complete!
-            </h1>
+      <div className="min-h-screen bg-white">
+        <header
+          className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
+            scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+          }`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                  学
+                </div>
+                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                  Manabi
+                </span>
+              </Link>
+            </div>
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+        <main className="max-w-2xl mx-auto px-4 pt-24 pb-12">
+          <div className="bg-gray-50 rounded-2xl p-8 text-center">
             <div className="text-6xl mb-6">🎉</div>
 
             <h2 className="text-2xl font-bold mb-6 text-gray-900">
@@ -275,43 +299,47 @@ export default function StudyPage() {
             </h2>
 
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
                 <div className="text-3xl font-bold text-gray-900">
                   {sessionStats.total}
                 </div>
-                <div className="text-sm text-gray-600">Cards Studied</div>
+                <div className="text-sm text-gray-500">Cards Studied</div>
               </div>
-              <div className="bg-green-50 rounded-lg p-4">
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
                 <div className="text-3xl font-bold text-green-600">
                   {sessionStats.correct}
                 </div>
-                <div className="text-sm text-gray-600">Correct</div>
+                <div className="text-sm text-gray-500">Correct</div>
               </div>
-              <div className="bg-red-50 rounded-lg p-4">
-                <div className="text-3xl font-bold text-red-600">
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="text-3xl font-bold text-red-500">
                   {sessionStats.incorrect}
                 </div>
-                <div className="text-sm text-gray-600">Incorrect</div>
+                <div className="text-sm text-gray-500">Incorrect</div>
               </div>
             </div>
 
             <div className="mb-8">
-              <div className="text-sm text-gray-600 mb-2">Accuracy</div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">
+              <div className="text-sm text-gray-500 mb-2">Accuracy</div>
+              <div className="text-4xl font-bold text-rose-500 mb-2">
                 {accuracy}%
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  className="bg-rose-500 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${accuracy}%` }}
                 />
               </div>
             </div>
 
             <div className="flex gap-4 justify-center">
-              <Button onClick={() => router.push("/")}>Go Home</Button>
-              <Button
-                variant="primary"
+              <Link
+                href="/"
+                className="px-6 py-3 border border-gray-300 rounded-full font-medium hover:bg-gray-50 transition text-gray-700"
+              >
+                Go Home
+              </Link>
+              <button
                 onClick={() => {
                   setSessionComplete(false);
                   if (characterData) {
@@ -324,9 +352,10 @@ export default function StudyPage() {
                     startSession(collectionId, chars, characterData.kanjiData);
                   }
                 }}
+                className="px-6 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition"
               >
                 Study Again
-              </Button>
+              </button>
             </div>
           </div>
         </main>
@@ -335,45 +364,58 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
+          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <div>
-              <Link
-                href="/"
-                className="text-blue-600 hover:text-blue-700 text-sm mb-1 inline-block"
-              >
-                End Session
+            <div className="flex items-center gap-4">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                  学
+                </div>
+                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                  Manabi
+                </span>
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <div className="hidden sm:block h-6 w-px bg-gray-200" />
+              <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">
                 {collection.name}
               </h1>
             </div>
-            <div className="flex items-start gap-4">
+
+            <div className="flex items-center gap-4">
               {studyMode === "multiple_choice" && (
                 <button
                   onClick={() => setShuffleMode(!shuffleMode)}
-                  title="Toggle random order"
-                  className="text-sm text-gray-600"
+                  className="text-sm text-gray-600 hover:text-gray-900 transition"
                 >
-                  {shuffleMode ? "Shuffle" : "In Order"}
+                  {shuffleMode ? "Shuffled" : "In Order"}
                 </button>
               )}
               <div className="text-right">
-                <div className="text-sm text-gray-600">Progress</div>
-                <div className="text-lg font-semibold">
+                <div className="text-sm text-gray-500">Progress</div>
+                <div className="text-lg font-semibold text-gray-900">
                   {currentIndex + 1} / {characters.length}
                 </div>
               </div>
+              <Link
+                href="/"
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+              >
+                End
+              </Link>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+          <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-rose-500 h-2 rounded-full transition-all duration-300"
               style={{
                 width: `${((currentIndex + 1) / characters.length) * 100}%`,
               }}
@@ -383,22 +425,22 @@ export default function StudyPage() {
       </header>
 
       {/* Study Content */}
-      <main className="container mx-auto px-4 py-4 md:py-8">
-        <div className="max-w-2xl mx-auto h-[calc(100vh-220px)] flex flex-col">
+      <main className="max-w-2xl mx-auto px-4 pt-32 pb-8">
+        <div className="h-[calc(100vh-200px)] flex flex-col">
           {studyMode === "multiple_choice" ? (
             // Multiple Choice Mode
             <>
               {/* Kanji Card */}
               <div
                 className={`
-                  relative bg-white rounded-2xl flex-1 max-h-[300px]
+                  relative bg-gray-50 rounded-2xl flex-1 max-h-[300px] border border-gray-100
                   transition-all duration-500
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
                 `}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
-                  <div className="text-gray-700 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold">
+                  <div className="text-gray-800 text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
                     {currentCharacter?.character}
                   </div>
                   <p className="text-gray-500 text-sm mt-4">
@@ -416,16 +458,16 @@ export default function StudyPage() {
                     isSelected && answerResult === "incorrect";
 
                   let buttonClass =
-                    "bg-white border-2 border-gray-200 text-gray-900 hover:bg-gray-50";
+                    "bg-white border border-gray-200 text-gray-900 hover:border-gray-300 hover:shadow-md";
                   if (showCorrect) {
                     buttonClass =
-                      "bg-green-100 border-2 border-green-500 text-green-900";
+                      "bg-green-50 border-2 border-green-500 text-green-900";
                   } else if (showIncorrect) {
                     buttonClass =
-                      "bg-red-100 border-2 border-red-500 text-red-900";
+                      "bg-red-50 border-2 border-red-500 text-red-900";
                   } else if (isSelected) {
                     buttonClass =
-                      "bg-blue-100 border-2 border-blue-500 text-blue-900";
+                      "bg-rose-50 border-2 border-rose-500 text-rose-900";
                   }
 
                   return (
@@ -440,7 +482,7 @@ export default function StudyPage() {
                       `}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-gray-500 w-6">
+                        <span className="text-sm font-medium text-gray-400 w-6">
                           {index + 1}.
                         </span>
                         <span className="capitalize text-base md:text-lg font-medium">
@@ -454,7 +496,7 @@ export default function StudyPage() {
 
               {/* Hint for keyboard shortcuts */}
               {!answerResult && (
-                <p className="text-center text-sm text-gray-500 mt-4">
+                <p className="text-center text-sm text-gray-400 mt-4">
                   Press 1-4 to select an answer
                 </p>
               )}
@@ -465,8 +507,8 @@ export default function StudyPage() {
               {/* Card */}
               <div
                 className={`
-                  relative bg-white rounded-2xl cursor-pointer flex-1 max-h-[600px]
-                  transition-all duration-500
+                  relative bg-gray-50 rounded-2xl cursor-pointer flex-1 max-h-[500px] border border-gray-100
+                  transition-all duration-500 hover:shadow-lg
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
                 `}
@@ -476,30 +518,30 @@ export default function StudyPage() {
                   {!flipped ? (
                     // Front: Kanji character
                     <div className="text-center">
-                      <div className="text-gray-700 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-4 md:mb-8 font-bold">
+                      <div className="text-gray-800 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-4 md:mb-8">
                         {currentCharacter?.character}
                       </div>
-                      <p className="text-gray-500 text-sm">
+                      <p className="text-gray-400 text-sm">
                         Tap or press Space to reveal
                       </p>
                     </div>
                   ) : (
                     // Back: Meanings and readings
                     <div className="text-center w-full overflow-y-auto">
-                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 font-bold text-gray-400">
+                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 text-gray-300">
                         {currentCharacter?.character}
                       </div>
 
                       {/* Meanings */}
                       <div className="mb-4 md:mb-6">
-                        <h3 className="text-sm capitalize font-semibold text-gray-600 mb-2">
+                        <h3 className="text-sm capitalize font-semibold text-gray-500 mb-2">
                           Meanings
                         </h3>
                         <div className="flex flex-wrap gap-2 justify-center">
                           {currentKanjiData?.meanings.map((meaning, i) => (
                             <span
                               key={i}
-                              className="capitalize px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-lg text-base md:text-lg"
+                              className="capitalize px-3 py-1.5 md:px-4 md:py-2 bg-rose-100 text-rose-800 rounded-full text-base md:text-lg"
                             >
                               {meaning}
                             </span>
@@ -510,7 +552,7 @@ export default function StudyPage() {
                       {/* Readings */}
                       <div className="grid grid-cols-2 gap-4 mb-4 md:mb-6">
                         <div>
-                          <h4 className="text-xs font-semibold text-gray-600 mb-1">
+                          <h4 className="text-xs font-semibold text-gray-500 mb-1">
                             On'yomi
                           </h4>
                           <div className="text-sm text-gray-700">
@@ -519,7 +561,7 @@ export default function StudyPage() {
                           </div>
                         </div>
                         <div>
-                          <h4 className="text-xs font-semibold text-gray-600 mb-1">
+                          <h4 className="text-xs font-semibold text-gray-500 mb-1">
                             Kun'yomi
                           </h4>
                           <div className="text-sm text-gray-700">
@@ -530,7 +572,7 @@ export default function StudyPage() {
                       </div>
 
                       {/* JLPT Level */}
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-400">
                         {currentKanjiData?.jlptLevel} • Grade{" "}
                         {currentKanjiData?.grade}
                       </div>
@@ -542,35 +584,31 @@ export default function StudyPage() {
               {/* Answer buttons */}
               {flipped && !answerResult && (
                 <div className="mt-4 md:mt-6 grid grid-cols-2 gap-3 md:gap-4">
-                  <Button
-                    variant="danger"
-                    size="lg"
+                  <button
                     onClick={() => handleAnswer(false)}
-                    className="py-4 md:py-6"
+                    className="py-4 md:py-6 bg-red-500 hover:bg-red-600 text-white rounded-xl transition font-medium"
                   >
                     <div className="text-center">
                       <div className="text-sm md:text-base">Incorrect</div>
                       <div className="text-xs opacity-75">Press 1</div>
                     </div>
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="lg"
+                  </button>
+                  <button
                     onClick={() => handleAnswer(true)}
-                    className="py-4 md:py-6"
+                    className="py-4 md:py-6 bg-green-500 hover:bg-green-600 text-white rounded-xl transition font-medium"
                   >
                     <div className="text-center">
                       <div className="text-sm md:text-base">Correct</div>
                       <div className="text-xs opacity-75">Press 2</div>
                     </div>
-                  </Button>
+                  </button>
                 </div>
               )}
             </>
           )}
 
           {/* Session stats */}
-          <div className="mt-8 flex justify-center gap-8 text-sm text-gray-600">
+          <div className="mt-8 flex justify-center gap-8 text-sm text-gray-500">
             <div className="capitalize">
               <span className="font-semibold text-green-600">
                 {sessionStats.correct}
@@ -578,7 +616,7 @@ export default function StudyPage() {
               correct
             </div>
             <div className="capitalize">
-              <span className="capitalize font-semibold text-red-600">
+              <span className="capitalize font-semibold text-red-500">
                 {sessionStats.incorrect}
               </span>{" "}
               incorrect
