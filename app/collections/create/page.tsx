@@ -1,22 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCreateCollection } from "@/lib/hooks/useCollections";
+import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
 import { StudyMode } from "@/types";
 
-interface KanjiWithData {
-  id: string;
-  character: string;
-  kanjiData: {
-    meanings: string[];
-    jlptLevel: string;
-  };
-}
-
 const JLPT_LEVELS = ["All", "N5", "N4", "N3", "N2", "N1"];
-const PAGE_SIZE = 50;
 
 function CreateCollectionForm() {
   const router = useRouter();
@@ -30,15 +21,35 @@ function CreateCollectionForm() {
   const [scrolled, setScrolled] = useState(false);
 
   // Kanji grid state
-  const [displayedKanji, setDisplayedKanji] = useState<KanjiWithData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("All");
-  const [hasMore, setHasMore] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  // Debounce search query (same as kanji grid)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Use the same hooks as kanji grid
+  const { data: totalCount } = useKanjiCount(selectedLevel);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useKanjiInfinite({
+    query: debouncedSearchQuery,
+    jlptLevel: selectedLevel,
+  });
+
+  // Flatten paginated data
+  const displayedKanji = data?.pages.flatMap((page) => page.items) ?? [];
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -71,75 +82,12 @@ function CreateCollectionForm() {
     });
   };
 
-  // Fetch kanji
-  useEffect(() => {
-    async function fetchInitialKanji() {
-      setLoading(true);
-      setDisplayedKanji([]);
-      setHasMore(true);
-      try {
-        const levelParam =
-          selectedLevel !== "All" ? `jlptLevel=${selectedLevel}` : "";
-        const [countResponse, dataResponse] = await Promise.all([
-          fetch(`/api/kanji/count${levelParam ? `?${levelParam}` : ""}`),
-          fetch(
-            `/api/kanji?${levelParam}${
-              levelParam ? "&" : ""
-            }limit=${PAGE_SIZE}&offset=0`
-          ),
-        ]);
-
-        if (countResponse.ok) {
-          const { count } = await countResponse.json();
-          setTotalCount(count);
-        }
-
-        if (dataResponse.ok) {
-          const data = await dataResponse.json();
-          setDisplayedKanji(data);
-          setHasMore(data.length === PAGE_SIZE);
-        }
-      } catch (error) {
-        console.error("Failed to fetch kanji:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchInitialKanji();
-  }, [selectedLevel]);
-
-  // Load more kanji
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-
-    setLoadingMore(true);
-    try {
-      const levelParam =
-        selectedLevel !== "All" ? `jlptLevel=${selectedLevel}&` : "";
-      const offset = displayedKanji.length;
-      const response = await fetch(
-        `/api/kanji?${levelParam}limit=${PAGE_SIZE}&offset=${offset}`
-      );
-
-      if (response.ok) {
-        const newKanji = await response.json();
-        setDisplayedKanji((prev) => [...prev, ...newKanji]);
-        setHasMore(newKanji.length === PAGE_SIZE);
-      }
-    } catch (error) {
-      console.error("Failed to load more kanji:", error);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [selectedLevel, displayedKanji.length, loadingMore, hasMore]);
-
-  // Intersection Observer
+  // Intersection Observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          loadMore();
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { threshold: 0.1 }
@@ -155,18 +103,7 @@ function CreateCollectionForm() {
         observer.unobserve(currentTarget);
       }
     };
-  }, [loadMore, loading]);
-
-  // Filter kanji by search
-  const filteredKanji = displayedKanji.filter((k) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      k.character.includes(query) ||
-      k.kanjiData.meanings.some((m) => m.toLowerCase().includes(query)) ||
-      k.id.toLowerCase().includes(query)
-    );
-  });
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -363,12 +300,12 @@ function CreateCollectionForm() {
 
       {/* Kanji Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 animate-pulse">学</div>
             <p className="text-gray-600">Loading kanji...</p>
           </div>
-        ) : filteredKanji.length === 0 ? (
+        ) : displayedKanji.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl">
             <p className="text-gray-600 mb-2">No kanji found</p>
             <p className="text-sm text-gray-500">
@@ -378,10 +315,10 @@ function CreateCollectionForm() {
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {filteredKanji.length} of {totalCount} kanji
+              Showing {displayedKanji.length} of {totalCount ?? 0} kanji
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-              {filteredKanji.map((k) => {
+              {displayedKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
                 return (
                   <button
@@ -429,10 +366,10 @@ function CreateCollectionForm() {
             </div>
 
             <div ref={observerTarget} className="py-6 text-center">
-              {loadingMore && (
+              {isFetchingNextPage && (
                 <div className="text-gray-500 text-sm">Loading more...</div>
               )}
-              {!hasMore && totalCount > 0 && (
+              {!hasNextPage && (totalCount ?? 0) > 0 && (
                 <div className="text-gray-400 text-sm">All kanji loaded</div>
               )}
             </div>

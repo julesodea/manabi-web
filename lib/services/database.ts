@@ -107,42 +107,81 @@ export class DatabaseService {
       return [];
     }
 
-    // Filter results client-side for flexible matching
-    const filteredResults = allKanji.filter((item: any) => {
-      // Check if query matches the character directly
-      if (item.characters?.character === query) {
-        return true;
-      }
+    // Filter results client-side for flexible matching and calculate relevance score
+    const scoredResults = allKanji
+      .map((item: any) => {
+        let score = 0;
+        let matched = false;
 
-      // Check meanings (case-insensitive partial match)
-      if (item.meanings?.some((m: string) => m.toLowerCase().includes(queryLower))) {
-        return true;
-      }
+        // Check if query matches the character directly (highest priority)
+        if (item.characters?.character === query) {
+          score = 100;
+          matched = true;
+        }
 
-      // Check readings - original query
-      if (item.onyomi?.some((r: string) => r.includes(query))) return true;
-      if (item.kunyomi?.some((r: string) => r.includes(query))) return true;
-      if (item.nanori?.some((r: string) => r.includes(query))) return true;
+        // Check meanings
+        if (item.meanings) {
+          for (const meaning of item.meanings) {
+            const meaningLower = meaning.toLowerCase();
+            if (meaningLower === queryLower) {
+              // Exact match (e.g., "cat" matches "cat")
+              score = Math.max(score, 90);
+              matched = true;
+            } else if (meaningLower.split(/[\s,;]+/).includes(queryLower)) {
+              // Whole word match (e.g., "cat" matches "big cat" but not "category")
+              score = Math.max(score, 80);
+              matched = true;
+            } else if (meaningLower.startsWith(queryLower)) {
+              // Starts with query (e.g., "cat" matches "cattle")
+              score = Math.max(score, 70);
+              matched = true;
+            } else if (meaningLower.includes(queryLower)) {
+              // Contains query (e.g., "cat" matches "category")
+              score = Math.max(score, 50);
+              matched = true;
+            }
+          }
+        }
 
-      // Check readings - converted romaji to hiragana/katakana
-      if (searchHiragana) {
-        if (item.onyomi?.some((r: string) => r.includes(searchHiragana))) return true;
-        if (item.kunyomi?.some((r: string) => r.includes(searchHiragana))) return true;
-        if (item.nanori?.some((r: string) => r.includes(searchHiragana))) return true;
-      }
-      if (searchKatakana) {
-        if (item.onyomi?.some((r: string) => r.includes(searchKatakana))) return true;
-        if (item.kunyomi?.some((r: string) => r.includes(searchKatakana))) return true;
-        if (item.nanori?.some((r: string) => r.includes(searchKatakana))) return true;
-      }
+        // Check readings - original query
+        const checkReadings = (readings: string[] | undefined, searchTerm: string, baseScore: number) => {
+          if (!readings) return;
+          for (const reading of readings) {
+            if (reading === searchTerm) {
+              score = Math.max(score, baseScore);
+              matched = true;
+            } else if (reading.includes(searchTerm)) {
+              score = Math.max(score, baseScore - 20);
+              matched = true;
+            }
+          }
+        };
 
-      return false;
-    });
+        checkReadings(item.onyomi, query, 85);
+        checkReadings(item.kunyomi, query, 85);
+        checkReadings(item.nanori, query, 85);
+
+        // Check readings - converted romaji to hiragana/katakana
+        if (searchHiragana) {
+          checkReadings(item.onyomi, searchHiragana, 85);
+          checkReadings(item.kunyomi, searchHiragana, 85);
+          checkReadings(item.nanori, searchHiragana, 85);
+        }
+        if (searchKatakana) {
+          checkReadings(item.onyomi, searchKatakana, 85);
+          checkReadings(item.kunyomi, searchKatakana, 85);
+          checkReadings(item.nanori, searchKatakana, 85);
+        }
+
+        return { item, score, matched };
+      })
+      .filter(({ matched }) => matched)
+      .sort((a, b) => b.score - a.score);
 
     // Apply pagination
     const start = offset || 0;
-    const end = limit ? start + limit : filteredResults.length;
-    const paginatedResults = filteredResults.slice(start, end);
+    const end = limit ? start + limit : scoredResults.length;
+    const paginatedResults = scoredResults.slice(start, end).map(({ item }) => item);
 
     // Map the joined data
     return paginatedResults
