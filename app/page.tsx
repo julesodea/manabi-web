@@ -9,6 +9,7 @@ export default function Home() {
   const { data: collections = [], isLoading: loading } = useCollections();
   const { user, loading: authLoading, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Separate system and user collections
   const systemCollections = collections.filter((c) => c.type === "system");
@@ -61,36 +62,63 @@ export default function Home() {
               {!authLoading && (
                 <>
                   {user ? (
-                    <div className="flex items-center gap-2 border border-gray-300 rounded-full p-1 pl-3 hover:shadow-md transition cursor-pointer">
-                      <span className="text-sm font-medium text-gray-700">
-                        {user.user_metadata?.name ||
-                          user.user_metadata?.full_name ||
-                          user.user_metadata?.preferred_username ||
-                          user.email?.split("@")[0] ||
-                          "User"}
-                      </span>
+                    <div className="relative">
                       <button
-                        onClick={() => signOut()}
-                        className="text-sm font-medium text-gray-700"
+                        onClick={() => setUserMenuOpen(!userMenuOpen)}
+                        className="flex items-center gap-2 border border-gray-300 rounded-full p-1 pl-3 hover:shadow-md transition cursor-pointer"
                       >
-                        Sign out
+                        <span className="text-sm font-medium text-gray-700">
+                          {user.user_metadata?.name ||
+                            user.user_metadata?.full_name ||
+                            user.user_metadata?.preferred_username ||
+                            user.email?.split("@")[0] ||
+                            "User"}
+                        </span>
+                        {user.user_metadata?.avatar_url ? (
+                          <img
+                            src={user.user_metadata.avatar_url}
+                            alt="Profile"
+                            className="w-7 h-7 rounded-full"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 bg-gray-500 text-white rounded-full flex items-center justify-center">
+                            <svg
+                              className="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg>
+                          </div>
+                        )}
                       </button>
-                      {user.user_metadata?.avatar_url ? (
-                        <img
-                          src={user.user_metadata.avatar_url}
-                          alt="Profile"
-                          className="w-7 h-7 rounded-full"
-                        />
-                      ) : (
-                        <div className="w-7 h-7 bg-gray-500 text-white rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                          </svg>
-                        </div>
+
+                      {/* Dropdown Menu */}
+                      {userMenuOpen && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setUserMenuOpen(false)}
+                          />
+                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                            <Link
+                              href="/account"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => setUserMenuOpen(false)}
+                            >
+                              Account
+                            </Link>
+                            <button
+                              onClick={() => {
+                                signOut();
+                                setUserMenuOpen(false);
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            >
+                              Sign out
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
                   ) : (
@@ -117,66 +145,203 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-12 sm:pt-32 sm:pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight">
-              Learn Kanji, <span className="text-rose-500">your way</span>
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-gray-600">
-              Browse, search, and create custom collections to master Japanese
-              characters at your own pace.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+      {/* Hero Section - only for non-logged-in users */}
+      {!user && (
+        <section className="pt-24 pb-12 sm:pt-32 sm:pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight">
+                Learn Kanji, <span className="text-rose-500">your way</span>
+              </h1>
+              <p className="mt-6 text-lg sm:text-xl text-gray-600">
+                Browse, search, and create custom collections to master Japanese
+                characters at your own pace.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/kanji-grid"
+                  className="px-8 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition shadow-lg hover:shadow-xl"
+                >
+                  Start Browsing
+                </Link>
+                <Link
+                  href="/collections/create"
+                  className="px-8 py-3 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition"
+                >
+                  Create Collection
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Stats Section - for non-logged-in users */}
+      {!user && (
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  2,136
+                </div>
+                <div className="text-sm text-gray-500 mt-1">Jōyō Kanji</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  N5-N1
+                </div>
+                <div className="text-sm text-gray-500 mt-1">JLPT Levels</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  {collections.length}
+                </div>
+                <div className="text-sm text-gray-500 mt-1">Collections</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  Free
+                </div>
+                <div className="text-sm text-gray-500 mt-1">Browse forever</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Welcome Back Dashboard - for logged-in users */}
+      {user && (
+        <section className="pt-24 pb-8 sm:pt-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Welcome Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                Welcome back,{" "}
+                <span className="text-rose-500">
+                  {user.user_metadata?.name ||
+                    user.user_metadata?.full_name ||
+                    user.user_metadata?.preferred_username ||
+                    user.email?.split("@")[0] ||
+                    "there"}
+                </span>
+              </h1>
+              <p className="mt-2 text-gray-600">
+                Continue your Japanese learning journey
+              </p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-rose-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {userCollections.length}
+                </div>
+                <div className="text-sm text-gray-500">Collections</div>
+              </div>
+
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-amber-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-sm text-gray-500">Day Streak</div>
+              </div>
+
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-emerald-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-sm text-gray-500">Kanji Learned</div>
+              </div>
+
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-blue-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-sm text-gray-500">Reviews Due</div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/kanji-grid"
-                className="px-8 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition shadow-lg hover:shadow-xl"
+                className="px-5 py-2.5 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition shadow-sm"
               >
-                Start Browsing
+                Browse Kanji
               </Link>
               <Link
                 href="/collections/create"
-                className="px-8 py-3 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition"
+                className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition"
               >
                 Create Collection
               </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-                2,136
-              </div>
-              <div className="text-sm text-gray-500 mt-1">Jōyō Kanji</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-                N5-N1
-              </div>
-              <div className="text-sm text-gray-500 mt-1">JLPT Levels</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-                {collections.length}
-              </div>
-              <div className="text-sm text-gray-500 mt-1">Collections</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-                Free
-              </div>
-              <div className="text-sm text-gray-500 mt-1">Forever</div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* My Collections Section */}
       <section className="py-12">
