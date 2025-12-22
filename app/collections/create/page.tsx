@@ -252,13 +252,13 @@ function CreateCollectionForm() {
       <div className="sticky top-[72px] z-40 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 flex-1">
+            <div className="flex items-center bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 flex-1">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search kanji by character, meaning..."
-                className="grow bg-transparent border-none outline-none px-4 py-2.5 text-sm placeholder-gray-400 rounded-l-full"
+                className="grow bg-transparent border-none outline-none px-6 py-2.5 text-sm font-medium placeholder-gray-500 rounded-l-full text-gray-700"
               />
               <div className="pr-2 py-1">
                 <div className="p-2 bg-rose-500 rounded-full text-white">

@@ -131,7 +131,7 @@ function KanjiGridContent() {
               <input
                 type="text"
                 placeholder="Search meanings, readings..."
-                className="flex-grow bg-transparent border-none outline-none px-6 py-2.5 text-sm font-medium placeholder-gray-500 rounded-l-full text-gray-700"
+                className="grow bg-transparent border-none outline-none px-6 py-2.5 text-sm font-medium placeholder-gray-500 rounded-l-full text-gray-700"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
