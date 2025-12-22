@@ -6,14 +6,33 @@ import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
 
 export default function Home() {
-  const { data: collections = [], isLoading: loading } = useCollections();
   const { user, loading: authLoading, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [shouldLoadCollections, setShouldLoadCollections] = useState(false);
+
+  // Defer loading collections until needed
+  const { data: collections = [], isLoading: loading } = useCollections(shouldLoadCollections);
 
   // Separate system and user collections
   const systemCollections = collections.filter((c) => c.type === "system");
   const userCollections = collections.filter((c) => c.type === "user");
+
+  // Start loading collections after a short delay or when user is logged in
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldLoadCollections(true);
+    }, 100); // Small delay to prioritize initial render
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Load immediately if user is logged in (they'll see the dashboard)
+  useEffect(() => {
+    if (user) {
+      setShouldLoadCollections(true);
+    }
+  }, [user]);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {

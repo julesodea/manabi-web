@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Collection, StudyMode } from '@/types';
 
 // Fetch all collections
-export function useCollections() {
+export function useCollections(enabled: boolean = true) {
   return useQuery({
     queryKey: ['collections'],
     queryFn: async () => {
@@ -10,6 +10,9 @@ export function useCollections() {
       if (!response.ok) throw new Error('Failed to load collections');
       return response.json() as Promise<Collection[]>;
     },
+    enabled,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
   });
 }
 
