@@ -349,16 +349,23 @@ function CreateCollectionForm() {
                       </div>
                     )}
                     <div
-                      className={`text-4xl mb-1 group-hover:scale-110 transition-transform ${
+                      className={`text-3xl mb-1 group-hover:scale-110 transition-transform ${
                         isSelected ? "text-rose-900" : "text-gray-800"
                       }`}
                     >
                       {k.character}
                     </div>
-                    <div className="text-center">
-                      <span className="text-xs text-gray-500 font-medium">
-                        {k.kanjiData.jlptLevel}
-                      </span>
+                    <div className="text-center w-full px-1 space-y-0.5">
+                      {k.kanjiData.readings.onyomi[0] && (
+                        <div className="text-[10px] text-gray-500 truncate">
+                          {k.kanjiData.readings.onyomi[0]}
+                        </div>
+                      )}
+                      {k.kanjiData.readings.kunyomi[0] && (
+                        <div className="text-[10px] text-gray-400 truncate">
+                          {k.kanjiData.readings.kunyomi[0]}
+                        </div>
+                      )}
                     </div>
                   </button>
                 );

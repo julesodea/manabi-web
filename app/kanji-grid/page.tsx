@@ -308,12 +308,16 @@ function KanjiGridContent() {
 
                     {/* Card Details */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 truncate">
+                      <h3 className="font-semibold text-gray-900 truncate capitalize">
                         {k.kanjiData.meanings.slice(0, 2).join(", ")}
                       </h3>
                       <p className="text-gray-500 text-sm mt-0.5 truncate">
-                        {k.kanjiData.readings.onyomi.slice(0, 2).join(", ") ||
-                          k.kanjiData.readings.kunyomi.slice(0, 2).join(", ")}
+                        {[
+                          k.kanjiData.readings.onyomi[0],
+                          k.kanjiData.readings.kunyomi[0],
+                        ]
+                          .filter(Boolean)
+                          .join("、")}
                       </p>
                     </div>
                   </div>
