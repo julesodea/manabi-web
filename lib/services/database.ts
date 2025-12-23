@@ -86,21 +86,25 @@ export class DatabaseService {
 
     // For meaning/reading search on arrays, PostgREST array operators require exact matches
     // We'll fetch data and filter client-side for flexible matching
-    // This is still efficient because we limit the initial fetch
+    // The ORDER BY clause ensures consistent results from Supabase
 
     let baseQuery = supabase
       .from('kanji_data')
       .select(`
         *,
         characters!kanji_data_character_id_fkey (*)
-      `);
+      `)
+      .order('character_id');
 
+    // Apply JLPT filter at database level BEFORE limiting
     if (jlptLevel && jlptLevel !== 'All') {
       baseQuery = baseQuery.eq('jlpt_level', jlptLevel);
     }
 
-    // Limit to reasonable amount for client-side filtering
-    const { data: allKanji, error } = await baseQuery.limit(2136);
+    // Fetch all matching kanji for search
+    // Note: Supabase has a default limit of 1000 rows, so we need to override it
+    // Using a high limit to get all jōyō kanji (2,136) plus any extras
+    const { data: allKanji, error } = await baseQuery.limit(10000);
 
     if (error || !allKanji) {
       console.error('Error fetching kanji for search:', error);

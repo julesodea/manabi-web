@@ -249,7 +249,7 @@ function KanjiGridContent() {
                 setSearchQuery("");
                 setSelectedLevel("All");
               }}
-              className="mt-6 px-6 py-2 border border-black rounded-lg hover:bg-gray-100 transition font-medium"
+              className="mt-6 px-6 py-2 border border-gray-900 text-gray-900 rounded-lg hover:bg-gray-100 transition font-medium"
             >
               Clear all filters
             </button>
