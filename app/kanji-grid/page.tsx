@@ -19,21 +19,41 @@ function KanjiGridContent() {
   const searchParams = useSearchParams();
   const selectionModeParam = searchParams.get("select") === "true";
 
-  const [selectedLevel, setSelectedLevel] = useState("All");
+  // Get search and level from URL params
+  const urlSearchQuery = searchParams.get("q") || "";
+  const urlLevel = searchParams.get("level") || "All";
+
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(urlSearchQuery);
   const [scrolled, setScrolled] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Debounce search query
+  // Sync URL params with local state on mount/change
+  useEffect(() => {
+    setSearchQuery(urlSearchQuery);
+    setDebouncedSearchQuery(urlSearchQuery);
+  }, [urlSearchQuery]);
+
+  // Update URL when debounced search changes
   useEffect(() => {
     const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (searchQuery) {
+        params.set("q", searchQuery);
+      } else {
+        params.delete("q");
+      }
+
+      const newUrl = params.toString() ? `?${params.toString()}` : "/kanji-grid";
+      router.replace(newUrl, { scroll: false });
+
       setDebouncedSearchQuery(searchQuery);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, searchParams, router]);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -45,11 +65,11 @@ function KanjiGridContent() {
   }, []);
 
   // TanStack Query hooks
-  const { data: totalCount } = useKanjiCount(selectedLevel);
+  const { data: totalCount } = useKanjiCount(urlLevel);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useKanjiInfinite({
       query: debouncedSearchQuery || undefined,
-      jlptLevel: selectedLevel,
+      jlptLevel: urlLevel,
     });
 
   // Flatten paginated data
@@ -200,9 +220,18 @@ function KanjiGridContent() {
             {JLPT_LEVELS.map((level) => (
               <button
                 key={level.value}
-                onClick={() => setSelectedLevel(level.value)}
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  if (level.value === "All") {
+                    params.delete("level");
+                  } else {
+                    params.set("level", level.value);
+                  }
+                  const newUrl = params.toString() ? `?${params.toString()}` : "/kanji-grid";
+                  router.replace(newUrl, { scroll: false });
+                }}
                 className={`flex flex-col items-center gap-1 min-w-[48px] cursor-pointer group transition-all duration-200 pb-2 border-b-2 ${
-                  selectedLevel === level.value
+                  urlLevel === level.value
                     ? "opacity-100 text-black border-black"
                     : "opacity-60 text-gray-500 hover:opacity-100 border-transparent"
                 }`}
@@ -247,7 +276,7 @@ function KanjiGridContent() {
             <button
               onClick={() => {
                 setSearchQuery("");
-                setSelectedLevel("All");
+                router.replace("/kanji-grid", { scroll: false });
               }}
               className="mt-6 px-6 py-2 border border-gray-900 text-gray-900 rounded-lg hover:bg-gray-100 transition font-medium"
             >
