@@ -105,8 +105,6 @@ function EditCollectionForm() {
           setHasMore(data.length === PAGE_SIZE);
         }
       } catch (error) {
-        console.error("Failed to fetch kanji:", error);
-      } finally {
         setLoading(false);
       }
     }
@@ -133,8 +131,6 @@ function EditCollectionForm() {
         setHasMore(newKanji.length === PAGE_SIZE);
       }
     } catch (error) {
-      console.error("Failed to load more kanji:", error);
-    } finally {
       setLoadingMore(false);
     }
   }, [selectedLevel, displayedKanji.length, loadingMore, hasMore]);
@@ -199,7 +195,6 @@ function EditCollectionForm() {
       router.push("/collections/manage");
     } catch (err) {
       setError("Failed to update collection. Please try again.");
-      console.error("Update collection error:", err);
     }
   };
 

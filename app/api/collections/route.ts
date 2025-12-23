@@ -6,14 +6,11 @@ import { getServerUser } from '@/lib/supabase/server-client';
 export async function GET() {
   try {
     const user = await getServerUser();
-    console.log('GET collections - user:', user?.id, user?.email);
 
     // Get all collections (system + user's own if authenticated)
     const collections = await DatabaseService.getAllCollections(user?.id);
-    console.log('GET collections - found:', collections.length, 'user collections:', collections.filter(c => c.type === 'user').length);
     return NextResponse.json(collections);
   } catch (error) {
-    console.error('Error fetching collections:', error);
     return NextResponse.json({ error: 'Failed to fetch collections' }, { status: 500 });
   }
 }
@@ -49,11 +46,6 @@ export async function POST(request: NextRequest) {
     const created = await DatabaseService.createCollection(collection, user?.id || null);
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
-    console.error('Error creating collection:', error);
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
     return NextResponse.json({
       error: 'Failed to create collection',
       details: error instanceof Error ? error.message : String(error)

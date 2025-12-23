@@ -130,7 +130,6 @@ function CreateCollectionForm() {
       router.push("/");
     } catch (err) {
       setError("Failed to create collection. Please try again.");
-      console.error("Create collection error:", err);
     }
   };
 

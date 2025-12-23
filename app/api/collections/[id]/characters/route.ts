@@ -10,7 +10,6 @@ export async function GET(
     const result = await DatabaseService.getCharactersByCollection(id);
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching characters:', error);
     return NextResponse.json({ error: 'Failed to fetch characters' }, { status: 500 });
   }
 }

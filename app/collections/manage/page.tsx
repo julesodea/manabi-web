@@ -52,7 +52,6 @@ export default function ManageCollectionsPage() {
       await deleteCollection.mutateAsync(deleteModal.collectionId);
       setDeleteModal({ isOpen: false, collectionId: null, collectionName: null });
     } catch (error) {
-      console.error("Failed to delete collection:", error);
       alert("Failed to delete collection. Please try again.");
     } finally {
       setDeletingId(null);

@@ -20,7 +20,6 @@ export class DatabaseService {
       .single();
 
     if (error) {
-      console.error('Error fetching character:', error);
       return null;
     }
 
@@ -35,7 +34,6 @@ export class DatabaseService {
       .single();
 
     if (error) {
-      console.error('Error fetching kanji data:', error);
       return null;
     }
 
@@ -64,7 +62,6 @@ export class DatabaseService {
     const { data, error } = await query;
 
     if (error || !data) {
-      console.error('Error fetching kanji:', error);
       return [];
     }
 
@@ -107,7 +104,6 @@ export class DatabaseService {
     const { data: allKanji, error } = await baseQuery.limit(10000);
 
     if (error || !allKanji) {
-      console.error('Error fetching kanji for search:', error);
       return [];
     }
 
@@ -207,7 +203,6 @@ export class DatabaseService {
       .order('order_index', { ascending: true });
 
     if (systemError) {
-      console.error('Error fetching system collections:', systemError);
       return [];
     }
 
@@ -222,7 +217,7 @@ export class DatabaseService {
         .order('order_index', { ascending: true });
 
       if (error) {
-        console.error('Error fetching user collections:', error);
+        userCollections = [];
       } else {
         userCollections = data || [];
       }
@@ -253,7 +248,6 @@ export class DatabaseService {
       .single();
 
     if (error) {
-      console.error('Error fetching collection:', error);
       return null;
     }
 
@@ -277,19 +271,14 @@ export class DatabaseService {
       .in('id', collection.characterIds);
 
     if (charactersError) {
-      console.error('Error fetching characters:', charactersError);
       return { characters: [], kanjiData: {}, collectionId };
     }
 
     // Fetch kanji data for these characters
-    const { data: kanjiDataList, error: kanjiError } = await supabase
+    const { data: kanjiDataList } = await supabase
       .from('kanji_data')
       .select('*')
       .in('character_id', collection.characterIds);
-
-    if (kanjiError) {
-      console.error('Error fetching kanji data:', kanjiError);
-    }
 
     const characters: Character[] = charactersData.map(this.mapToCharacter);
     const kanjiData: { [id: string]: KanjiData } = {};
@@ -312,7 +301,6 @@ export class DatabaseService {
       .order('order_index', { ascending: true });
 
     if (error) {
-      console.error('Error fetching user collections:', error);
       return [];
     }
 
@@ -339,7 +327,6 @@ export class DatabaseService {
       .single();
 
     if (error) {
-      console.error('Error creating collection:', error);
       throw error;
     }
 
@@ -362,7 +349,6 @@ export class DatabaseService {
       .single();
 
     if (error) {
-      console.error('Error updating collection:', error);
       throw error;
     }
 
@@ -378,7 +364,6 @@ export class DatabaseService {
       .eq('id', collectionId);
 
     if (error) {
-      console.error('Error deleting collection:', error);
       throw error;
     }
   }
@@ -394,7 +379,6 @@ export class DatabaseService {
 
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
-      console.error('Error fetching learning progress:', error);
       return null;
     }
 
@@ -419,7 +403,6 @@ export class DatabaseService {
       });
 
     if (error) {
-      console.error('Error updating learning progress:', error);
       throw error;
     }
   }
@@ -433,7 +416,6 @@ export class DatabaseService {
       .lte('next_review_date', now);
 
     if (error) {
-      console.error('Error fetching review items:', error);
       return [];
     }
 
@@ -457,7 +439,6 @@ export class DatabaseService {
         // Create initial stats if not found
         return this.createUserStats(userId);
       }
-      console.error('Error fetching user stats:', error);
       return null;
     }
 
@@ -481,7 +462,6 @@ export class DatabaseService {
       .single();
 
     if (error) {
-      console.error('Error creating user stats:', error);
       return null;
     }
 

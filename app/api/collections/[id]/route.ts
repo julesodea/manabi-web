@@ -16,7 +16,6 @@ export async function GET(
 
     return NextResponse.json(collection);
   } catch (error) {
-    console.error('Error fetching collection:', error);
     return NextResponse.json({ error: 'Failed to fetch collection' }, { status: 500 });
   }
 }
@@ -58,13 +57,11 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Error updating collection:', error);
       return NextResponse.json({ error: 'Failed to update collection' }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error updating collection:', error);
     return NextResponse.json({ error: 'Failed to update collection' }, { status: 500 });
   }
 }
@@ -98,13 +95,11 @@ export async function DELETE(
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting collection:', error);
       return NextResponse.json({ error: 'Failed to delete collection' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting collection:', error);
     return NextResponse.json({ error: 'Failed to delete collection' }, { status: 500 });
   }
 }

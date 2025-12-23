@@ -39,7 +39,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching kanji data:', error);
     return NextResponse.json({ error: 'Failed to fetch kanji data' }, { status: 500 });
   }
 }
