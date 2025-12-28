@@ -99,12 +99,33 @@ export class DatabaseService {
     }
 
     // Fetch all matching kanji for search
-    // Note: Supabase has a default limit of 1000 rows, so we need to override it
-    // Using a high limit to get all jōyō kanji (2,136) plus any extras
-    const { data: allKanji, error } = await baseQuery.limit(10000);
+    // Note: Supabase has a hard limit of 1000 rows per request
+    // We need to paginate to get all kanji when no JLPT filter is applied
+    let allKanji: any[] = [];
+    let fetchMore = true;
+    let currentOffset = 0;
+    const BATCH_SIZE = 1000;
 
-    if (error || !allKanji) {
-      return [];
+    while (fetchMore) {
+      const { data: batch, error } = await baseQuery
+        .range(currentOffset, currentOffset + BATCH_SIZE - 1);
+
+      if (error) {
+        console.error('[searchKanji] Error fetching batch:', error);
+        return [];
+      }
+
+      if (!batch || batch.length === 0) {
+        fetchMore = false;
+      } else {
+        allKanji = allKanji.concat(batch);
+        currentOffset += BATCH_SIZE;
+
+        // Stop if we got less than a full batch (means we're at the end)
+        if (batch.length < BATCH_SIZE) {
+          fetchMore = false;
+        }
+      }
     }
 
     // Filter results client-side for flexible matching and calculate relevance score

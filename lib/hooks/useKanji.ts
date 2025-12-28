@@ -68,9 +68,13 @@ export function useKanjiInfinite({ query, jlptLevel }: KanjiSearchParams) {
       params.set('offset', pageParam.toString());
 
       const endpoint = query ? '/api/kanji/search' : '/api/kanji';
-      const response = await fetch(`${endpoint}?${params.toString()}`);
+      const url = `${endpoint}?${params.toString()}`;
 
-      if (!response.ok) throw new Error('Failed to fetch kanji');
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch kanji');
+      }
 
       const data = await response.json() as KanjiWithData[];
       return {

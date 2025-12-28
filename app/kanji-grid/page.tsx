@@ -36,7 +36,7 @@ function KanjiGridContent() {
     setDebouncedSearchQuery(urlSearchQuery);
   }, [urlSearchQuery]);
 
-  // Update URL when debounced search changes
+  // Update URL when search query changes
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
@@ -48,7 +48,12 @@ function KanjiGridContent() {
       }
 
       const newUrl = params.toString() ? `?${params.toString()}` : "/kanji-grid";
-      router.replace(newUrl, { scroll: false });
+      const currentUrl = searchParams.toString() ? `?${searchParams.toString()}` : "/kanji-grid";
+
+      // Only update URL if it's actually different
+      if (newUrl !== currentUrl) {
+        router.replace(newUrl, { scroll: false });
+      }
 
       setDebouncedSearchQuery(searchQuery);
     }, 300);
