@@ -12,6 +12,10 @@ interface KanjiWithData {
   kanjiData: {
     meanings: string[];
     jlptLevel: string;
+    readings: {
+      onyomi: string[];
+      kunyomi: string[];
+    };
   };
 }
 
@@ -105,6 +109,8 @@ function EditCollectionForm() {
           setHasMore(data.length === PAGE_SIZE);
         }
       } catch (error) {
+        console.error('Error fetching kanji:', error);
+      } finally {
         setLoading(false);
       }
     }
@@ -131,6 +137,8 @@ function EditCollectionForm() {
         setHasMore(newKanji.length === PAGE_SIZE);
       }
     } catch (error) {
+      console.error('Error loading more kanji:', error);
+    } finally {
       setLoadingMore(false);
     }
   }, [selectedLevel, displayedKanji.length, loadingMore, hasMore]);
@@ -347,7 +355,7 @@ function EditCollectionForm() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search kanji by character, meaning..."
-                className="grow bg-transparent border-none outline-none px-4 py-2.5 text-sm placeholder-gray-400 rounded-l-full"
+                className="grow bg-transparent border-none outline-none px-4 py-2.5 text-sm placeholder-gray-400 rounded-l-full text-gray-900"
               />
               <div className="pr-2 py-1">
                 <div className="p-2 bg-rose-500 rounded-full text-white">
@@ -406,7 +414,7 @@ function EditCollectionForm() {
             <div className="mb-4 text-sm text-gray-500">
               Showing {filteredKanji.length} of {totalCount} kanji
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {filteredKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
                 return (
@@ -414,14 +422,14 @@ function EditCollectionForm() {
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className={`aspect-square bg-gray-50 border rounded-xl transition-all duration-200 flex flex-col items-center justify-center p-2 group relative hover:shadow-md ${
+                    className={`bg-gray-50 border rounded-xl transition-all duration-200 flex flex-col p-3 group relative hover:shadow-md ${
                       isSelected
                         ? "border-rose-500 bg-rose-50 ring-2 ring-rose-500"
                         : "border-gray-100"
                     }`}
                   >
                     {isSelected && (
-                      <div className="absolute top-1 right-1 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      <div className="absolute top-2 right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                         <svg
                           className="w-3 h-3"
                           fill="none"
@@ -437,17 +445,46 @@ function EditCollectionForm() {
                         </svg>
                       </div>
                     )}
-                    <div
-                      className={`text-4xl mb-1 group-hover:scale-110 transition-transform ${
-                        isSelected ? "text-rose-900" : "text-gray-800"
-                      }`}
-                    >
-                      {k.character}
+
+                    {/* Kanji Character */}
+                    <div className="flex items-center justify-center mb-2">
+                      <div
+                        className={`text-6xl group-hover:scale-110 transition-transform ${
+                          isSelected ? "text-rose-900" : "text-gray-800"
+                        }`}
+                      >
+                        {k.character}
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <span className="text-xs text-gray-500 font-medium">
+
+                    {/* JLPT Level Badge */}
+                    <div className="mb-2">
+                      <span className="inline-block px-2 py-0.5 bg-white/90 rounded text-xs font-semibold text-gray-700 border border-gray-200">
                         {k.kanjiData.jlptLevel}
                       </span>
+                    </div>
+
+                    {/* Meanings */}
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-gray-900 capitalize truncate">
+                        {k.kanjiData.meanings.slice(0, 2).join(", ")}
+                      </p>
+                    </div>
+
+                    {/* Readings */}
+                    <div className="text-xs text-gray-600 space-y-0.5">
+                      {k.kanjiData.readings.onyomi.length > 0 && (
+                        <p className="truncate">
+                          <span className="font-medium">On: </span>
+                          {k.kanjiData.readings.onyomi.slice(0, 2).join("、")}
+                        </p>
+                      )}
+                      {k.kanjiData.readings.kunyomi.length > 0 && (
+                        <p className="truncate">
+                          <span className="font-medium">Kun: </span>
+                          {k.kanjiData.readings.kunyomi.slice(0, 2).join("、")}
+                        </p>
+                      )}
                     </div>
                   </button>
                 );

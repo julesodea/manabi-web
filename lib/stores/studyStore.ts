@@ -15,14 +15,18 @@ interface StudyState {
     total: number;
   };
 
+  // Track incorrect character IDs
+  incorrectCharacterIds: string[];
+
   // Actions
   startSession: (collectionId: string, characters: Character[], kanjiData: { [id: string]: KanjiData }) => void;
   nextCharacter: () => void;
-  recordAnswer: (isCorrect: boolean) => void;
+  recordAnswer: (isCorrect: boolean, characterId: string) => void;
   resetSession: () => void;
+  getIncorrectCharacters: () => Character[];
 }
 
-export const useStudyStore = create<StudyState>((set) => ({
+export const useStudyStore = create<StudyState>((set, get) => ({
   currentCollectionId: null,
   currentIndex: 0,
   characters: [],
@@ -32,6 +36,7 @@ export const useStudyStore = create<StudyState>((set) => ({
     incorrect: 0,
     total: 0,
   },
+  incorrectCharacterIds: [],
 
   startSession: (collectionId, characters, kanjiData) => set({
     currentCollectionId: collectionId,
@@ -39,19 +44,30 @@ export const useStudyStore = create<StudyState>((set) => ({
     characters,
     kanjiData,
     sessionStats: { correct: 0, incorrect: 0, total: 0 },
+    incorrectCharacterIds: [],
   }),
 
   nextCharacter: () => set((state) => ({
     currentIndex: state.currentIndex + 1,
   })),
 
-  recordAnswer: (isCorrect) => set((state) => ({
+  recordAnswer: (isCorrect, characterId) => set((state) => ({
     sessionStats: {
       correct: state.sessionStats.correct + (isCorrect ? 1 : 0),
       incorrect: state.sessionStats.incorrect + (isCorrect ? 0 : 1),
       total: state.sessionStats.total + 1,
     },
+    incorrectCharacterIds: isCorrect
+      ? state.incorrectCharacterIds
+      : [...state.incorrectCharacterIds, characterId],
   })),
+
+  getIncorrectCharacters: () => {
+    const state = get();
+    return state.characters.filter(char =>
+      state.incorrectCharacterIds.includes(char.id)
+    );
+  },
 
   resetSession: () => set({
     currentCollectionId: null,
@@ -59,5 +75,6 @@ export const useStudyStore = create<StudyState>((set) => ({
     characters: [],
     kanjiData: {},
     sessionStats: { correct: 0, incorrect: 0, total: 0 },
+    incorrectCharacterIds: [],
   }),
 }));

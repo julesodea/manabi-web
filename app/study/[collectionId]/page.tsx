@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   useCollection,
@@ -19,6 +19,7 @@ interface MultipleChoiceOption {
 
 export default function StudyPage() {
   const params = useParams();
+  const router = useRouter();
   const collectionId = params.collectionId as string;
 
   // React Query
@@ -36,6 +37,8 @@ export default function StudyPage() {
     nextCharacter,
     recordAnswer: recordAnswerInStore,
     resetSession,
+    getIncorrectCharacters,
+    incorrectCharacterIds,
   } = useStudyStore();
 
   const currentCharacter = characters[currentIndex];
@@ -51,6 +54,7 @@ export default function StudyPage() {
   );
   const [shuffleMode, setShuffleMode] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [sessionKey, setSessionKey] = useState(0);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -96,7 +100,7 @@ export default function StudyPage() {
 
     // Shuffle all options
     return options.sort(() => Math.random() - 0.5);
-  }, [studyMode, currentKanjiData, kanjiData, currentCharacter?.id]);
+  }, [studyMode, currentKanjiData, kanjiData, currentCharacter?.id, sessionKey]);
 
   // Load collection data and start session
   useEffect(() => {
@@ -124,7 +128,7 @@ export default function StudyPage() {
       setAnswerResult(isCorrect ? "correct" : "incorrect");
 
       // Record answer in store
-      recordAnswerInStore(isCorrect);
+      recordAnswerInStore(isCorrect, currentCharacter.id);
 
       // Wait a moment before moving to next card
       setTimeout(() => {
@@ -165,7 +169,7 @@ export default function StudyPage() {
       setAnswerResult(isCorrect ? "correct" : "incorrect");
 
       // Record answer in store
-      recordAnswerInStore(isCorrect);
+      recordAnswerInStore(isCorrect, currentCharacter.id);
 
       // Wait a moment before moving to next card
       setTimeout(() => {
@@ -269,6 +273,26 @@ export default function StudyPage() {
         ? Math.round((sessionStats.correct / sessionStats.total) * 100)
         : 0;
 
+    const hasFailedCards = incorrectCharacterIds.length > 0;
+
+    const handleRetryFailedCards = () => {
+      setSessionComplete(false);
+      setFlipped(false);
+      setAnswerResult(null);
+      setSelectedOptionIndex(null);
+      setSessionKey(prev => prev + 1); // Force regeneration of multiple choice options
+
+      const failedChars = getIncorrectCharacters();
+
+      // Keep the full kanjiData to generate proper multiple choice options
+      startSession(collectionId, failedChars, kanjiData);
+    };
+
+    const handleCreateCollectionFromFailed = () => {
+      const failedIds = incorrectCharacterIds.join(',');
+      router.push(`/collections/create?characterIds=${encodeURIComponent(failedIds)}`);
+    };
+
     return (
       <div className="min-h-screen bg-white">
         <header
@@ -332,7 +356,29 @@ export default function StudyPage() {
               </div>
             </div>
 
-            <div className="flex gap-4 justify-center">
+            {hasFailedCards && (
+              <div className="mb-8 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                <p className="text-sm text-orange-800 mb-3">
+                  You got {incorrectCharacterIds.length} card{incorrectCharacterIds.length > 1 ? 's' : ''} wrong. Want to practice them?
+                </p>
+                <div className="flex gap-3 justify-center flex-wrap">
+                  <button
+                    onClick={handleRetryFailedCards}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition"
+                  >
+                    Retry Failed Cards
+                  </button>
+                  <button
+                    onClick={handleCreateCollectionFromFailed}
+                    className="px-4 py-2 border border-orange-500 text-orange-700 rounded-full text-sm font-medium hover:bg-orange-50 transition"
+                  >
+                    Save as New Collection
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-4 justify-center flex-wrap">
               <Link
                 href="/"
                 className="px-6 py-3 border border-gray-300 rounded-full font-medium hover:bg-gray-50 transition text-gray-700"
