@@ -90,12 +90,16 @@ export default function KanjiDetailPage() {
             <span className="px-4 py-1.5 bg-rose-500 text-white rounded-full text-sm font-bold">
               {kanji.kanjiData.jlptLevel}
             </span>
-            <span className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-sm">
-              Grade {kanji.kanjiData.grade}
-            </span>
-            <span className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-sm">
-              {kanji.strokeCount} strokes
-            </span>
+            {kanji.kanjiData.grade !== 0 && (
+              <span className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-sm">
+                Grade {kanji.kanjiData.grade}
+              </span>
+            )}
+            {kanji.strokeCount !== 0 && (
+              <span className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-sm">
+                {kanji.strokeCount} strokes
+              </span>
+            )}
           </div>
         </div>
 
