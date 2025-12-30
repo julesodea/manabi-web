@@ -55,6 +55,10 @@ export default function StudyPage() {
   const [shuffleMode, setShuffleMode] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [sessionKey, setSessionKey] = useState(0);
+  const [userInput, setUserInput] = useState("");
+  const [inputResult, setInputResult] = useState<
+    "correct" | "incorrect" | null
+  >(null);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -100,7 +104,13 @@ export default function StudyPage() {
 
     // Shuffle all options
     return options.sort(() => Math.random() - 0.5);
-  }, [studyMode, currentKanjiData, kanjiData, currentCharacter?.id, sessionKey]);
+  }, [
+    studyMode,
+    currentKanjiData,
+    kanjiData,
+    currentCharacter?.id,
+    sessionKey,
+  ]);
 
   // Load collection data and start session
   useEffect(() => {
@@ -112,6 +122,72 @@ export default function StudyPage() {
       startSession(collectionId, chars, characterData.kanjiData);
     }
   }, [characterData, loading, collectionId, startSession, shuffleMode]);
+
+  // Check if user input matches any reading or meaning
+  const checkUserInput = useCallback(
+    (input: string): boolean => {
+      if (!currentKanjiData || !input.trim()) return false;
+
+      const normalizedInput = input.trim().toLowerCase();
+
+      // Check against meanings
+      const meaningMatch = currentKanjiData.meanings.some(
+        (meaning) => meaning.toLowerCase() === normalizedInput
+      );
+
+      // Check against onyomi readings
+      const onyomiMatch = currentKanjiData.readings.onyomi.some(
+        (reading) => reading.toLowerCase() === normalizedInput
+      );
+
+      // Check against kunyomi readings
+      const kunyomiMatch = currentKanjiData.readings.kunyomi.some(
+        (reading) => reading.toLowerCase() === normalizedInput
+      );
+
+      return meaningMatch || onyomiMatch || kunyomiMatch;
+    },
+    [currentKanjiData]
+  );
+
+  // Handle input submission
+  const handleInputSubmit = useCallback(() => {
+    if (!currentCharacter || answerResult || !userInput.trim()) return;
+
+    const isCorrect = checkUserInput(userInput);
+    setInputResult(isCorrect ? "correct" : "incorrect");
+    setAnswerResult(isCorrect ? "correct" : "incorrect");
+    setFlipped(true);
+
+    // Record answer in store
+    recordAnswerInStore(isCorrect, currentCharacter.id);
+
+    // Wait a moment before moving to next card
+    setTimeout(() => {
+      const nextIndex = currentIndex + 1;
+
+      if (nextIndex >= characters.length) {
+        // Session complete
+        setSessionComplete(true);
+      } else {
+        // Move to next card
+        nextCharacter();
+        setFlipped(false);
+        setAnswerResult(null);
+        setInputResult(null);
+        setUserInput("");
+      }
+    }, 2000);
+  }, [
+    currentCharacter,
+    currentIndex,
+    characters.length,
+    answerResult,
+    userInput,
+    checkUserInput,
+    nextCharacter,
+    recordAnswerInStore,
+  ]);
 
   // Handle card flip
   const handleFlip = useCallback(() => {
@@ -213,16 +289,10 @@ export default function StudyPage() {
           }
         }
       } else {
-        // Flashcard mode
-        if (e.key === " " && !flipped) {
+        // Flashcard mode with input
+        if (e.key === "Enter" && !answerResult && userInput.trim()) {
           e.preventDefault();
-          handleFlip();
-        } else if (flipped && !answerResult) {
-          if (e.key === "1") {
-            handleAnswer(false);
-          } else if (e.key === "2") {
-            handleAnswer(true);
-          }
+          handleInputSubmit();
         }
       }
     };
@@ -230,13 +300,12 @@ export default function StudyPage() {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [
-    flipped,
     answerResult,
     sessionComplete,
     studyMode,
     selectedOptionIndex,
-    handleFlip,
-    handleAnswer,
+    userInput,
+    handleInputSubmit,
     handleMultipleChoiceSelect,
   ]);
 
@@ -280,7 +349,7 @@ export default function StudyPage() {
       setFlipped(false);
       setAnswerResult(null);
       setSelectedOptionIndex(null);
-      setSessionKey(prev => prev + 1); // Force regeneration of multiple choice options
+      setSessionKey((prev) => prev + 1); // Force regeneration of multiple choice options
 
       const failedChars = getIncorrectCharacters();
 
@@ -289,8 +358,10 @@ export default function StudyPage() {
     };
 
     const handleCreateCollectionFromFailed = () => {
-      const failedIds = incorrectCharacterIds.join(',');
-      router.push(`/collections/create?characterIds=${encodeURIComponent(failedIds)}`);
+      const failedIds = incorrectCharacterIds.join(",");
+      router.push(
+        `/collections/create?characterIds=${encodeURIComponent(failedIds)}`
+      );
     };
 
     return (
@@ -359,7 +430,9 @@ export default function StudyPage() {
             {hasFailedCards && (
               <div className="mb-8 p-4 bg-orange-50 border border-orange-200 rounded-xl">
                 <p className="text-sm text-orange-800 mb-3">
-                  You got {incorrectCharacterIds.length} card{incorrectCharacterIds.length > 1 ? 's' : ''} wrong. Want to practice them?
+                  You got {incorrectCharacterIds.length} card
+                  {incorrectCharacterIds.length > 1 ? "s" : ""} wrong. Want to
+                  practice them?
                 </p>
                 <div className="flex gap-3 justify-center flex-wrap">
                   <button
@@ -553,29 +626,60 @@ export default function StudyPage() {
               {/* Card */}
               <div
                 className={`
-                  relative bg-gray-50 rounded-2xl cursor-pointer flex-1 max-h-[500px] border border-gray-100
-                  transition-all duration-500 hover:shadow-lg
+                  relative bg-gray-50 rounded-2xl flex-1 max-h-[500px] border border-gray-100
+                  transition-all duration-500
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
                 `}
-                onClick={handleFlip}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
                   {!flipped ? (
-                    // Front: Kanji character
-                    <div className="text-center">
-                      <div className="text-gray-800 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-4 md:mb-8">
+                    // Front: Kanji character with input
+                    <div className="text-center w-full">
+                      <div className="text-gray-800 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8">
                         {currentCharacter?.character}
                       </div>
-                      <p className="text-gray-400 text-sm">
-                        Tap or press Space to reveal
+                      <p className="text-gray-500 text-sm mb-4">
+                        Type the reading or meaning
+                      </p>
+                      <input
+                        type="text"
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && userInput.trim()) {
+                            handleInputSubmit();
+                          }
+                        }}
+                        disabled={!!answerResult}
+                        placeholder="Answer"
+                        className="w-full max-w-xs px-4 py-2.5 border-2 border-gray-300 rounded-xl text-center text-base text-gray-900 placeholder:text-gray-400 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      />
+                      <p className="text-gray-400 text-xs mt-2">
+                        Press Enter to check
                       </p>
                     </div>
                   ) : (
-                    // Back: Meanings and readings
+                    // Back: Meanings and readings with result
                     <div className="text-center w-full overflow-y-auto">
-                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 text-gray-300">
+                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 text-gray-800">
                         {currentCharacter?.character}
+                      </div>
+
+                      {/* User's answer */}
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-500 mb-1">
+                          You answered:
+                        </p>
+                        <p
+                          className={`text-lg font-semibold ${
+                            inputResult === "correct"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {userInput}
+                        </p>
                       </div>
 
                       {/* Meanings */}
@@ -627,26 +731,15 @@ export default function StudyPage() {
                 </div>
               </div>
 
-              {/* Answer buttons */}
-              {flipped && !answerResult && (
-                <div className="mt-4 md:mt-6 grid grid-cols-2 gap-3 md:gap-4">
+              {/* Submit button (shown only if not submitted yet) */}
+              {!flipped && !answerResult && (
+                <div className="mt-4 md:mt-6">
                   <button
-                    onClick={() => handleAnswer(false)}
-                    className="py-4 md:py-6 bg-red-500 hover:bg-red-600 text-white rounded-xl transition font-medium"
+                    onClick={handleInputSubmit}
+                    disabled={!userInput.trim()}
+                    className="w-full py-4 md:py-6 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="text-center">
-                      <div className="text-sm md:text-base">Incorrect</div>
-                      <div className="text-xs opacity-75">Press 1</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleAnswer(true)}
-                    className="py-4 md:py-6 bg-green-500 hover:bg-green-600 text-white rounded-xl transition font-medium"
-                  >
-                    <div className="text-center">
-                      <div className="text-sm md:text-base">Correct</div>
-                      <div className="text-xs opacity-75">Press 2</div>
-                    </div>
+                    Check Answer
                   </button>
                 </div>
               )}
