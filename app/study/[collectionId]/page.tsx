@@ -461,6 +461,12 @@ export default function StudyPage() {
               <button
                 onClick={() => {
                   setSessionComplete(false);
+                  setFlipped(false);
+                  setAnswerResult(null);
+                  setInputResult(null);
+                  setUserInput("");
+                  setSelectedOptionIndex(null);
+                  setSessionKey((prev) => prev + 1);
                   if (characterData) {
                     const chars = shuffleMode
                       ? [...characterData.characters].sort(
