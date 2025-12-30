@@ -514,20 +514,62 @@ export default function StudyPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              {studyMode === "multiple_choice" && (
-                <button
-                  onClick={() => setShuffleMode(!shuffleMode)}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition"
-                >
-                  {shuffleMode ? "Shuffled" : "In Order"}
-                </button>
-              )}
               <div className="text-right">
                 <div className="text-sm text-gray-500">Progress</div>
                 <div className="text-lg font-semibold text-gray-900">
                   {currentIndex + 1} / {characters.length}
                 </div>
               </div>
+              {studyMode === "multiple_choice" && (
+                <button
+                  onClick={() => setShuffleMode(!shuffleMode)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
+                    shuffleMode
+                      ? "bg-rose-500 text-white border-rose-500 hover:bg-rose-600 hover:border-rose-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {shuffleMode ? (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+                          />
+                        </svg>
+                        Shuffled
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                          />
+                        </svg>
+                        In Order
+                      </>
+                    )}
+                  </span>
+                </button>
+              )}
               <Link
                 href="/"
                 className="px-4 py-2 text-gray-700 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
@@ -610,8 +652,8 @@ export default function StudyPage() {
                         <span className="text-sm font-medium text-gray-400 w-6">
                           {index + 1}.
                         </span>
-                        <span className="capitalize text-base md:text-lg font-medium">
-                          {option.meaning}
+                        <span className="text-base md:text-lg font-medium">
+                          {option.meaning.charAt(0).toUpperCase() + option.meaning.slice(1)}
                         </span>
                       </div>
                     </button>
@@ -690,16 +732,16 @@ export default function StudyPage() {
 
                       {/* Meanings */}
                       <div className="mb-4 md:mb-6">
-                        <h3 className="text-sm capitalize font-semibold text-gray-500 mb-2">
+                        <h3 className="text-sm font-semibold text-gray-500 mb-2">
                           Meanings
                         </h3>
                         <div className="flex flex-wrap gap-2 justify-center">
                           {currentKanjiData?.meanings.map((meaning, i) => (
                             <span
                               key={i}
-                              className="capitalize px-3 py-1.5 md:px-4 md:py-2 bg-rose-100 text-rose-800 rounded-full text-base md:text-lg"
+                              className="px-3 py-1.5 md:px-4 md:py-2 bg-rose-100 text-rose-800 rounded-full text-base md:text-lg"
                             >
-                              {meaning}
+                              {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
                             </span>
                           ))}
                         </div>

@@ -266,7 +266,11 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-gray-900">
-                  {userCollections.length}
+                  {loading || !shouldLoadCollections ? (
+                    <div className="h-8 w-12 bg-gray-100 animate-pulse rounded-lg"></div>
+                  ) : (
+                    userCollections.length
+                  )}
                 </div>
                 <div className="text-sm text-gray-500">Collections</div>
               </div>
@@ -289,7 +293,13 @@ export default function Home() {
                     </svg>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {loading || !shouldLoadCollections ? (
+                    <div className="h-8 w-8 bg-gray-100 animate-pulse rounded-lg"></div>
+                  ) : (
+                    0
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">Day Streak</div>
               </div>
 
@@ -311,7 +321,13 @@ export default function Home() {
                     </svg>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {loading || !shouldLoadCollections ? (
+                    <div className="h-8 w-8 bg-gray-100 animate-pulse rounded-lg"></div>
+                  ) : (
+                    0
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">Kanji Learned</div>
               </div>
 
@@ -333,7 +349,13 @@ export default function Home() {
                     </svg>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {loading || !shouldLoadCollections ? (
+                    <div className="h-8 w-8 bg-gray-100 animate-pulse rounded-lg"></div>
+                  ) : (
+                    0
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">Reviews Due</div>
               </div>
             </div>

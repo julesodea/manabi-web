@@ -109,7 +109,7 @@ function EditCollectionForm() {
           setHasMore(data.length === PAGE_SIZE);
         }
       } catch (error) {
-        console.error('Error fetching kanji:', error);
+        console.error("Error fetching kanji:", error);
       } finally {
         setLoading(false);
       }
@@ -137,7 +137,7 @@ function EditCollectionForm() {
         setHasMore(newKanji.length === PAGE_SIZE);
       }
     } catch (error) {
-      console.error('Error loading more kanji:', error);
+      console.error("Error loading more kanji:", error);
     } finally {
       setLoadingMore(false);
     }
@@ -333,7 +333,9 @@ function EditCollectionForm() {
               </button>
               <button
                 type="submit"
-                disabled={updateCollection.isPending || selectedKanji.size === 0}
+                disabled={
+                  updateCollection.isPending || selectedKanji.size === 0
+                }
                 className="flex-1 px-4 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {updateCollection.isPending
@@ -349,7 +351,7 @@ function EditCollectionForm() {
       <div className="sticky top-[72px] z-40 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 flex-1">
+            <div className="flex items-center bg-white border border-gray-200 rounded-full duration-200 flex-1">
               <input
                 type="text"
                 value={searchQuery}
@@ -466,8 +468,13 @@ function EditCollectionForm() {
 
                     {/* Meanings */}
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-gray-900 capitalize truncate">
-                        {k.kanjiData.meanings.slice(0, 2).join(", ")}
+                      <p className="text-xs font-semibold text-gray-900 truncate">
+                        {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                          <span key={i}>
+                            {i > 0 && ", "}
+                            {m.charAt(0).toUpperCase() + m.slice(1)}
+                          </span>
+                        ))}
                       </p>
                     </div>
 

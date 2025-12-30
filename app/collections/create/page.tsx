@@ -37,16 +37,11 @@ function CreateCollectionForm() {
 
   // Use the same hooks as kanji grid
   const { data: totalCount } = useKanjiCount(selectedLevel);
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useKanjiInfinite({
-    query: debouncedSearchQuery,
-    jlptLevel: selectedLevel,
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useKanjiInfinite({
+      query: debouncedSearchQuery,
+      jlptLevel: selectedLevel,
+    });
 
   // Flatten paginated data
   const displayedKanji = data?.pages.flatMap((page) => page.items) ?? [];
@@ -251,7 +246,7 @@ function CreateCollectionForm() {
       <div className="sticky top-[72px] z-40 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 flex-1">
+            <div className="flex items-center bg-white border border-gray-300 rounded-full duration-200 flex-1">
               <input
                 type="text"
                 value={searchQuery}
@@ -368,8 +363,13 @@ function CreateCollectionForm() {
 
                     {/* Meanings */}
                     <div className="mb-2">
-                      <p className="text-xs font-semibold text-gray-900 capitalize truncate">
-                        {k.kanjiData.meanings.slice(0, 2).join(", ")}
+                      <p className="text-xs font-semibold text-gray-900 truncate">
+                        {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                          <span key={i}>
+                            {i > 0 && ", "}
+                            {m.charAt(0).toUpperCase() + m.slice(1)}
+                          </span>
+                        ))}
                       </p>
                     </div>
 

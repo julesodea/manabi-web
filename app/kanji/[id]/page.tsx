@@ -112,7 +112,7 @@ export default function KanjiDetailPage() {
                 key={i}
                 className="px-4 py-2 bg-rose-50 text-rose-800 rounded-full font-medium"
               >
-                {meaning}
+                {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
               </span>
             ))}
           </div>

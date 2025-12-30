@@ -301,7 +301,7 @@ function KanjiGridContent() {
                       className={`relative aspect-square bg-gray-50 rounded-xl overflow-hidden mb-3 border transition-all duration-300 ${
                         isSelected
                           ? "border-rose-500 ring-2 ring-rose-500 bg-rose-50"
-                          : "border-gray-100 group-hover:shadow-lg"
+                          : "border-gray-100"
                       }`}
                     >
                       {/* Selection Indicator */}
@@ -342,8 +342,13 @@ function KanjiGridContent() {
 
                     {/* Card Details */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 truncate capitalize">
-                        {k.kanjiData.meanings.slice(0, 2).join(", ")}
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                          <span key={i}>
+                            {i > 0 && ", "}
+                            {m.charAt(0).toUpperCase() + m.slice(1)}
+                          </span>
+                        ))}
                       </h3>
                       <p className="text-gray-500 text-sm mt-0.5 truncate">
                         {[
@@ -394,7 +399,7 @@ function KanjiGridContent() {
         <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40">
           <button
             onClick={createCollection}
-            className="bg-gray-900 hover:scale-105 active:scale-95 transition-all text-white px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2"
+            className="bg-gray-900 transition-all text-white px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2"
           >
             Create Collection ({selectedKanji.size})
           </button>
