@@ -205,7 +205,11 @@ export default function Home() {
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-                  {collections.length}
+                  {loading || !shouldLoadCollections ? (
+                    <div className="h-10 w-16 bg-gray-200 animate-pulse rounded mx-auto"></div>
+                  ) : (
+                    collections.length
+                  )}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">Collections</div>
               </div>
@@ -368,7 +372,7 @@ export default function Home() {
             )}
           </div>
 
-          {loading ? (
+          {loading || !shouldLoadCollections ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse">
