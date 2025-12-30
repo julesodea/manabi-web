@@ -316,7 +316,7 @@ function CreateCollectionForm() {
             <div className="mb-4 text-sm text-gray-500">
               Showing {displayedKanji.length} of {totalCount ?? 0} kanji
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {displayedKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
                 return (
@@ -324,14 +324,14 @@ function CreateCollectionForm() {
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className={`aspect-square bg-gray-50 border rounded-xl transition-all duration-200 flex flex-col items-center justify-center p-2 group relative hover:shadow-md ${
+                    className={`bg-gray-50 border rounded-xl transition-all duration-200 flex flex-col p-3 group relative hover:shadow-md ${
                       isSelected
                         ? "border-rose-500 bg-rose-50 ring-2 ring-rose-500"
                         : "border-gray-100"
                     }`}
                   >
                     {isSelected && (
-                      <div className="absolute top-1 right-1 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      <div className="absolute top-2 right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                         <svg
                           className="w-3 h-3"
                           fill="none"
@@ -347,23 +347,45 @@ function CreateCollectionForm() {
                         </svg>
                       </div>
                     )}
-                    <div
-                      className={`text-3xl mb-1 group-hover:scale-110 transition-transform ${
-                        isSelected ? "text-rose-900" : "text-gray-800"
-                      }`}
-                    >
-                      {k.character}
+
+                    {/* Kanji Character */}
+                    <div className="flex items-center justify-center mb-2">
+                      <div
+                        className={`text-6xl ${
+                          isSelected ? "text-rose-900" : "text-gray-800"
+                        }`}
+                      >
+                        {k.character}
+                      </div>
                     </div>
-                    <div className="text-center w-full px-1 space-y-0.5">
-                      {k.kanjiData.readings.onyomi[0] && (
-                        <div className="text-[10px] text-gray-500 truncate">
-                          {k.kanjiData.readings.onyomi[0]}
-                        </div>
+
+                    {/* JLPT Level Badge */}
+                    <div className="mb-2">
+                      <span className="inline-block px-2 py-0.5 bg-white/90 rounded text-xs font-semibold text-gray-700 border border-gray-200">
+                        {k.kanjiData.jlptLevel}
+                      </span>
+                    </div>
+
+                    {/* Meanings */}
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-gray-900 capitalize truncate">
+                        {k.kanjiData.meanings.slice(0, 2).join(", ")}
+                      </p>
+                    </div>
+
+                    {/* Readings */}
+                    <div className="text-xs text-gray-600 space-y-0.5">
+                      {k.kanjiData.readings.onyomi.length > 0 && (
+                        <p className="truncate">
+                          <span className="font-medium">On: </span>
+                          {k.kanjiData.readings.onyomi.slice(0, 2).join("、")}
+                        </p>
                       )}
-                      {k.kanjiData.readings.kunyomi[0] && (
-                        <div className="text-[10px] text-gray-400 truncate">
-                          {k.kanjiData.readings.kunyomi[0]}
-                        </div>
+                      {k.kanjiData.readings.kunyomi.length > 0 && (
+                        <p className="truncate">
+                          <span className="font-medium">Kun: </span>
+                          {k.kanjiData.readings.kunyomi.slice(0, 2).join("、")}
+                        </p>
                       )}
                     </div>
                   </button>

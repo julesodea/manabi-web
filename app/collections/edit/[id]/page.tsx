@@ -449,7 +449,7 @@ function EditCollectionForm() {
                     {/* Kanji Character */}
                     <div className="flex items-center justify-center mb-2">
                       <div
-                        className={`text-6xl group-hover:scale-110 transition-transform ${
+                        className={`text-6xl ${
                           isSelected ? "text-rose-900" : "text-gray-800"
                         }`}
                       >
