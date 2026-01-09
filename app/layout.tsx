@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
@@ -14,7 +14,6 @@ export const metadata: Metadata = {
   title: "Manabi - Learn Japanese Kanji",
   description: "Master Japanese kanji with Manabi",
   manifest: "/manifest.json",
-  themeColor: "#f43f5e",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -31,13 +30,21 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#f43f5e",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ backgroundColor: "#f43f5e" }}>
       <body className={`${notoSansJP.variable} antialiased font-sans`}>
         <AuthProvider>
           <QueryProvider>{children}</QueryProvider>
