@@ -9,6 +9,7 @@ import {
 } from "@/lib/hooks/useCollections";
 import { useStudyStore } from "@/lib/stores/studyStore";
 import { KanjiData } from "@/types";
+import { toHiragana, toKatakana } from "wanakana";
 
 type AnswerResult = "correct" | "incorrect" | null;
 
@@ -128,22 +129,46 @@ export default function StudyPage() {
     (input: string): boolean => {
       if (!currentKanjiData || !input.trim()) return false;
 
-      const normalizedInput = input.trim().toLowerCase();
+      const trimmedInput = input.trim();
+      const normalizedInput = trimmedInput.toLowerCase();
 
       // Check against meanings
       const meaningMatch = currentKanjiData.meanings.some(
         (meaning) => meaning.toLowerCase() === normalizedInput
       );
 
+      // Convert romaji input to hiragana and katakana for comparison
+      // wanakana will convert romaji to kana, or return kana as-is if already kana
+      let hiraganaInput: string;
+      let katakanaInput: string;
+      
+      try {
+        hiraganaInput = toHiragana(trimmedInput, { IMEMode: false });
+        katakanaInput = toKatakana(trimmedInput, { IMEMode: false });
+      } catch (e) {
+        // If conversion fails, use the original input
+        hiraganaInput = trimmedInput;
+        katakanaInput = trimmedInput;
+      }
+
+      // Helper function to check if a reading matches the input
+      const readingMatches = (reading: string): boolean => {
+        // Compare exact match (case-sensitive for kana)
+        if (reading === trimmedInput || reading === hiraganaInput || reading === katakanaInput) {
+          return true;
+        }
+        // Compare case-insensitive (for romaji)
+        if (reading.toLowerCase() === normalizedInput) {
+          return true;
+        }
+        return false;
+      };
+
       // Check against onyomi readings
-      const onyomiMatch = currentKanjiData.readings.onyomi.some(
-        (reading) => reading.toLowerCase() === normalizedInput
-      );
+      const onyomiMatch = currentKanjiData.readings.onyomi.some(readingMatches);
 
       // Check against kunyomi readings
-      const kunyomiMatch = currentKanjiData.readings.kunyomi.some(
-        (reading) => reading.toLowerCase() === normalizedInput
-      );
+      const kunyomiMatch = currentKanjiData.readings.kunyomi.some(readingMatches);
 
       return meaningMatch || onyomiMatch || kunyomiMatch;
     },
