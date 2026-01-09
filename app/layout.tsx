@@ -13,6 +13,22 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "Manabi - Learn Japanese Kanji",
   description: "Master Japanese kanji with Manabi",
+  manifest: "/manifest.json",
+  themeColor: "#f43f5e",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Manabi",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "Manabi",
+  },
 };
 
 export default function RootLayout({
