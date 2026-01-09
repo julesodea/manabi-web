@@ -24,6 +24,7 @@ export const metadata: Metadata = {
     apple: "/icon.svg",
   },
   other: {
+    "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "apple-mobile-web-app-title": "Manabi",
@@ -36,6 +37,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -45,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" style={{ backgroundColor: "#f43f5e" }}>
-      <body className={`${notoSansJP.variable} antialiased font-sans`}>
+      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f43f5e" }}>
         <AuthProvider>
           <QueryProvider>{children}</QueryProvider>
         </AuthProvider>

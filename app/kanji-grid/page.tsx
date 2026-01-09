@@ -413,8 +413,8 @@ export default function KanjiGridPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-white flex items-center justify-center">
-          <div className="text-6xl animate-pulse">学</div>
+        <div className="min-h-screen bg-rose-500 flex items-center justify-center">
+          <div className="text-6xl text-white animate-pulse">学</div>
         </div>
       }
     >

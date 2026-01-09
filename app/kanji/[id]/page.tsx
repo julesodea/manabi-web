@@ -23,10 +23,10 @@ export default function KanjiDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-rose-500 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse">学</div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="text-6xl mb-4 animate-pulse text-white">学</div>
+          <p className="text-white">Loading...</p>
         </div>
       </div>
     );

@@ -3,10 +3,11 @@
   "short_name": "Manabi",
   "description": "Master Japanese kanji with Manabi",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f43f5e",
   "theme_color": "#f43f5e",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icon.svg",
@@ -26,5 +27,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }

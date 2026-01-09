@@ -19,8 +19,12 @@
   }
 }
 
+html {
+  background-color: #f43f5e;
+}
+
 body {
-  background: var(--background);
+  background: #f43f5e;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
