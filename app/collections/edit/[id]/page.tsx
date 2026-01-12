@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useCollection, useUpdateCollection } from "@/lib/hooks/useCollections";
 import { StudyMode } from "@/types";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 interface KanjiWithData {
   id: string;
@@ -26,6 +27,7 @@ function EditCollectionForm() {
   const router = useRouter();
   const params = useParams();
   const collectionId = params.id as string;
+  const { colors } = useTheme();
 
   const { data: collection, isLoading: loadingCollection } =
     useCollection(collectionId);
@@ -224,7 +226,10 @@ function EditCollectionForm() {
           <p className="text-gray-600 mb-4">Collection not found</p>
           <Link
             href="/collections/manage"
-            className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-medium  transition"
+            className="px-6 py-3 text-white rounded-full font-medium shadow-lg"
+            style={{
+              background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+            }}
           >
             Back to Manage
           </Link>
@@ -234,34 +239,37 @@ function EditCollectionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f8f9fc]">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white duration-300 ${
-          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
+          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-[#5B7FFF] text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
-              <div className="hidden sm:block h-6 w-px bg-gray-200" />
-              <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">
+              <div className="hidden sm:block h-6 w-px bg-white/30" />
+              <h1 className="text-lg font-semibold text-white hidden sm:block">
                 Edit Collection
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-sm text-gray-500">Selected</div>
-                <div className="text-xl font-bold text-[#5B7FFF]">
+                <div className="text-sm text-white/80">Selected</div>
+                <div className="text-xl font-bold text-white">
                   {selectedKanji.size}
                 </div>
               </div>
@@ -356,7 +364,7 @@ function EditCollectionForm() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search kanji by character, meaning..."
+                placeholder="Search Kanji by character, meaning..."
                 className="grow bg-transparent border-none outline-none px-4 py-2.5 text-sm placeholder-gray-400 rounded-l-full text-gray-900"
               />
               <div className="pr-2 py-1">
@@ -402,11 +410,11 @@ function EditCollectionForm() {
         {loading ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 animate-pulse">学</div>
-            <p className="text-gray-600">Loading kanji...</p>
+            <p className="text-gray-600">Loading Kanji...</p>
           </div>
         ) : filteredKanji.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl">
-            <p className="text-gray-600 mb-2">No kanji found</p>
+            <p className="text-gray-600 mb-2">No Kanji found</p>
             <p className="text-sm text-gray-500">
               Try a different search or filter
             </p>
@@ -414,7 +422,7 @@ function EditCollectionForm() {
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {filteredKanji.length} of {totalCount} kanji
+              Showing {filteredKanji.length} of {totalCount} Kanji
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {filteredKanji.map((k) => {

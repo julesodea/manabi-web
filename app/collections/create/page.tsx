@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCreateCollection } from "@/lib/hooks/useCollections";
 import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
 import { StudyMode } from "@/types";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 const JLPT_LEVELS = ["All", "N5", "N4", "N3", "N2", "N1"];
 
@@ -13,6 +14,7 @@ function CreateCollectionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const createCollection = useCreateCollection();
+  const { colors } = useTheme();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -132,31 +134,34 @@ function CreateCollectionForm() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white duration-300 ${
-          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
+          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-[#5B7FFF] text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
-              <div className="hidden sm:block h-6 w-px bg-gray-200" />
-              <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">
+              <div className="hidden sm:block h-6 w-px bg-white/30" />
+              <h1 className="text-lg font-semibold text-white hidden sm:block">
                 Create Collection
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-sm text-gray-500">Selected</div>
-                <div className="text-xl font-bold text-[#5B7FFF]">
+                <div className="text-sm text-white/80">Selected</div>
+                <div className="text-xl font-bold text-white">
                   {selectedKanji.size}
                 </div>
               </div>
@@ -180,7 +185,10 @@ function CreateCollectionForm() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B7FFF] focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                style={{
+                  ['--tw-ring-color' as string]: `${colors.primary}33`,
+                }}
                 placeholder="Collection Name *"
                 required
               />
@@ -188,7 +196,10 @@ function CreateCollectionForm() {
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B7FFF] focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                style={{
+                  ['--tw-ring-color' as string]: `${colors.primary}33`,
+                }}
                 placeholder="Description (optional)"
               />
             </div>
@@ -199,9 +210,18 @@ function CreateCollectionForm() {
                 onClick={() => setStudyMode("flashcard")}
                 className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "flashcard"
-                    ? "border-[#5B7FFF] bg-[#E8ECFF] text-rose-900"
+                    ? ""
                     : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
+                style={
+                  studyMode === "flashcard"
+                    ? {
+                        borderColor: colors.primary,
+                        backgroundColor: colors.primaryLight,
+                        color: colors.primaryDark,
+                      }
+                    : undefined
+                }
               >
                 Flashcard
               </button>
@@ -210,9 +230,18 @@ function CreateCollectionForm() {
                 onClick={() => setStudyMode("multiple_choice")}
                 className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "multiple_choice"
-                    ? "border-[#5B7FFF] bg-[#E8ECFF] text-rose-900"
+                    ? ""
                     : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
+                style={
+                  studyMode === "multiple_choice"
+                    ? {
+                        borderColor: colors.primary,
+                        backgroundColor: colors.primaryLight,
+                        color: colors.primaryDark,
+                      }
+                    : undefined
+                }
               >
                 Multiple Choice
               </button>
@@ -231,7 +260,10 @@ function CreateCollectionForm() {
                 disabled={
                   createCollection.isPending || selectedKanji.size === 0
                 }
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-medium  transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 text-white rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                }}
               >
                 {createCollection.isPending
                   ? "Creating..."
@@ -251,11 +283,16 @@ function CreateCollectionForm() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search kanji by character, meaning..."
+                placeholder="Search Kanji by character, meaning..."
                 className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-6 py-2.5 text-sm font-medium placeholder-gray-500 rounded-l-full text-gray-700"
               />
               <div className="pr-2 py-1">
-                <div className="p-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full text-white">
+                <div
+                  className="p-2 rounded-full text-white"
+                  style={{
+                    background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  }}
+                >
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -280,9 +317,16 @@ function CreateCollectionForm() {
                   onClick={() => setSelectedLevel(level)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
                     selectedLevel === level
-                      ? "bg-gray-900 text-white"
+                      ? "text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
+                  style={
+                    selectedLevel === level
+                      ? {
+                          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                        }
+                      : undefined
+                  }
                 >
                   {level}
                 </button>
@@ -297,11 +341,11 @@ function CreateCollectionForm() {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 animate-pulse">学</div>
-            <p className="text-gray-600">Loading kanji...</p>
+            <p className="text-gray-600">Loading Kanji...</p>
           </div>
         ) : displayedKanji.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl">
-            <p className="text-gray-600 mb-2">No kanji found</p>
+            <p className="text-gray-600 mb-2">No Kanji found</p>
             <p className="text-sm text-gray-500">
               Try a different search or filter
             </p>
@@ -309,7 +353,7 @@ function CreateCollectionForm() {
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {displayedKanji.length} of {totalCount ?? 0} kanji
+              Showing {displayedKanji.length} of {totalCount ?? 0} Kanji
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {displayedKanji.map((k) => {
@@ -319,14 +363,26 @@ function CreateCollectionForm() {
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className={`bg-gray-50 border rounded-xl duration-200 flex flex-col p-3 group relative  ${
-                      isSelected
-                        ? "border-[#5B7FFF] bg-[#E8ECFF] ring-2 ring-[#5B7FFF]"
-                        : "border-gray-100"
+                    className={`border rounded-xl duration-200 flex flex-col p-3 group relative ${
+                      isSelected ? "ring-2" : "bg-gray-50 border-gray-100"
                     }`}
+                    style={
+                      isSelected
+                        ? {
+                            borderColor: colors.primary,
+                            backgroundColor: colors.primaryLight,
+                            boxShadow: `0 0 0 2px ${colors.primary}`,
+                          }
+                        : undefined
+                    }
                   >
                     {isSelected && (
-                      <div className="absolute top-2 right-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      <div
+                        className="absolute top-2 right-2 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                        style={{
+                          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                        }}
+                      >
                         <svg
                           className="w-3 h-3"
                           fill="none"
@@ -346,9 +402,12 @@ function CreateCollectionForm() {
                     {/* Kanji Character */}
                     <div className="flex items-center justify-center mb-2">
                       <div
-                        className={`text-6xl ${
-                          isSelected ? "text-rose-900" : "text-gray-800"
-                        }`}
+                        className="text-6xl"
+                        style={
+                          isSelected
+                            ? { color: colors.primaryDark }
+                            : { color: "#1F2937" }
+                        }
                       >
                         {k.character}
                       </div>

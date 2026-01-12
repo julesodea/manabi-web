@@ -8,11 +8,13 @@ import {
   useCollections,
   useDeleteCollection,
 } from "@/lib/hooks/useCollections";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 export default function ManageCollectionsPage() {
   const router = useRouter();
   const { data: collections = [], isLoading } = useCollections();
   const deleteCollection = useDeleteCollection();
+  const { colors } = useTheme();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
@@ -63,26 +65,29 @@ export default function ManageCollectionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f8f9fc]">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white duration-300 ${
-          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
+          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-[#5B7FFF] text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
-              <div className="hidden sm:block h-6 w-px bg-gray-200" />
-              <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">
+              <div className="hidden sm:block h-6 w-px bg-white/30" />
+              <h1 className="text-lg font-semibold text-white hidden sm:block">
                 Manage Collections
               </h1>
             </div>
@@ -90,13 +95,17 @@ export default function ManageCollectionsPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/"
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-full text-sm font-medium transition"
+                className="px-4 py-2 text-white/90 hover:bg-white/20 rounded-full text-sm font-medium transition"
               >
                 Home
               </Link>
               <Link
                 href="/collections/create"
-                className="px-4 py-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full text-sm font-medium  transition"
+                className="px-4 py-2 bg-white text-white rounded-full text-sm font-medium shadow-lg"
+                style={{ 
+                  background: 'white',
+                  color: colors.primary 
+                }}
               >
                 Create New
               </Link>
@@ -126,7 +135,10 @@ export default function ManageCollectionsPage() {
             </p>
             <Link
               href="/collections/create"
-              className="inline-block px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-medium  transition"
+              className="inline-block px-6 py-3 text-white rounded-full font-medium shadow-lg"
+              style={{
+                background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+              }}
             >
               Create Your First Collection
             </Link>
@@ -148,7 +160,7 @@ export default function ManageCollectionsPage() {
                     </p>
                   )}
                   <div className="flex gap-4 text-sm text-gray-500">
-                    <span>{collection.characterIds.length} kanji</span>
+                    <span>{collection.characterIds.length} Kanji</span>
                     <span className="capitalize">
                       {collection.studyMode.replace("_", " ")}
                     </span>
@@ -158,7 +170,10 @@ export default function ManageCollectionsPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/study/${collection.id}`}
-                    className="px-4 py-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full text-sm font-medium  transition"
+                    className="px-4 py-2 text-white rounded-full text-sm font-medium shadow-lg"
+                    style={{
+                      background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                    }}
                   >
                     Study
                   </Link>

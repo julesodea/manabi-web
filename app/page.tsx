@@ -4,15 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 export default function Home() {
   const { user, loading: authLoading, signOut } = useAuth();
+  const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [shouldLoadCollections, setShouldLoadCollections] = useState(false);
 
   // Defer loading collections until needed
-  const { data: collections = [], isLoading: loading } = useCollections(shouldLoadCollections);
+  const { data: collections = [], isLoading: loading } = useCollections(
+    shouldLoadCollections
+  );
 
   // Separate system and user collections
   const systemCollections = collections.filter((c) => c.type === "system");
@@ -47,9 +51,12 @@ export default function Home() {
     <div className="min-h-screen bg-[#f8f9fc] pb-20 sm:pb-0">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -121,11 +128,11 @@ export default function Home() {
                           />
                           <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                             <Link
-                              href="/account"
+                              href="/settings"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                               onClick={() => setUserMenuOpen(false)}
                             >
-                              Account
+                              Settings
                             </Link>
                             <button
                               onClick={() => {
@@ -141,12 +148,22 @@ export default function Home() {
                       )}
                     </div>
                   ) : (
-                    <Link
-                      href="/login"
-                      className="px-4 py-2 border border-white/30 rounded-full hover:bg-white/20 transition"
-                    >
-                      <span className="text-sm font-medium text-white">Sign in</span>
-                    </Link>
+                    <>
+                      <Link
+                        href="/settings"
+                        className="hidden sm:block px-4 py-2 text-white/90 hover:bg-white/20 rounded-full text-sm font-medium transition"
+                      >
+                        Settings
+                      </Link>
+                      <Link
+                        href="/login"
+                        className="px-4 py-2 border border-white/30 rounded-full hover:bg-white/20 transition"
+                      >
+                        <span className="text-sm font-medium text-white">
+                          Sign in
+                        </span>
+                      </Link>
+                    </>
                   )}
                 </>
               )}
@@ -161,7 +178,15 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight">
-                Learn Kanji, <span className="bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] bg-clip-text text-transparent">your way</span>
+                Learn Kanji,{" "}
+                <span
+                  className="bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  }}
+                >
+                  your way
+                </span>
               </h1>
               <p className="mt-6 text-xl sm:text-2xl text-gray-600 leading-relaxed">
                 Browse, search, and create custom collections to master Japanese
@@ -170,7 +195,10 @@ export default function Home() {
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/kanji-grid"
-                  className="px-8 py-4 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-xl text-lg hover:shadow-2xl"
+                  className="px-8 py-4 text-white rounded-full font-semibold shadow-xl text-lg hover:shadow-2xl"
+                  style={{
+                    background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  }}
                 >
                   Start Browsing
                 </Link>
@@ -232,7 +260,7 @@ export default function Home() {
             <div className="mb-8">
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
                 Welcome back,{" "}
-                <span className="text-[#5B7FFF]">
+                <span style={{ color: colors.primary }}>
                   {user.user_metadata?.name ||
                     user.user_metadata?.full_name ||
                     user.user_metadata?.preferred_username ||
@@ -247,116 +275,120 @@ export default function Home() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] rounded-2xl flex items-center justify-center shadow-md">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                      />
-                    </svg>
-                  </div>
+              <div className="rounded-xl p-5 border border-gray-200">
+                <div
+                  className="text-2xl mb-2"
+                  style={{ color: colors.primary }}
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
                   {loading || !shouldLoadCollections ? (
-                    <div className="h-9 w-16 bg-gray-100 animate-pulse rounded-xl"></div>
+                    <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
                     userCollections.length
                   )}
                 </div>
-                <div className="text-sm font-medium text-gray-600">Collections</div>
+                <div className="text-sm text-gray-600">Collections</div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] rounded-2xl flex items-center justify-center shadow-md">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
-                  </div>
+              <div className="rounded-xl p-5 border border-gray-200">
+                <div
+                  className="text-2xl mb-2"
+                  style={{ color: colors.primary }}
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
                   {loading || !shouldLoadCollections ? (
-                    <div className="h-9 w-12 bg-gray-100 animate-pulse rounded-xl"></div>
+                    <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
                     0
                   )}
                 </div>
-                <div className="text-sm font-medium text-gray-600">Day Streak</div>
+                <div className="text-sm text-gray-600">Day Streak</div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] rounded-2xl flex items-center justify-center shadow-md">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
+              <div className="rounded-xl p-5 border border-gray-200">
+                <div
+                  className="text-2xl mb-2"
+                  style={{ color: colors.primary }}
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
                   {loading || !shouldLoadCollections ? (
-                    <div className="h-9 w-12 bg-gray-100 animate-pulse rounded-xl"></div>
+                    <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
                     0
                   )}
                 </div>
-                <div className="text-sm font-medium text-gray-600">Kanji Learned</div>
+                <div className="text-sm text-gray-600">Kanji Learned</div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] rounded-2xl flex items-center justify-center shadow-md">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
+              <div className="rounded-xl p-5 border border-gray-200">
+                <div
+                  className="text-2xl mb-2"
+                  style={{ color: colors.primary }}
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
                   {loading || !shouldLoadCollections ? (
-                    <div className="h-9 w-12 bg-gray-100 animate-pulse rounded-xl"></div>
+                    <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
                     0
                   )}
                 </div>
-                <div className="text-sm font-medium text-gray-600">Reviews Due</div>
+                <div className="text-sm text-gray-600">Reviews Due</div>
               </div>
             </div>
 
@@ -364,7 +396,10 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/kanji-grid"
-                className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-lg "
+                className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+                style={{
+                  background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                }}
               >
                 Browse Kanji
               </Link>
@@ -387,7 +422,8 @@ export default function Home() {
             {userCollections.length > 0 && (
               <Link
                 href="/collections/manage"
-                className="text-sm font-medium text-[#5B7FFF] hover:text-[#4A6FEE]"
+                className="text-sm font-medium"
+                style={{ color: colors.primary }}
               >
                 Manage all
               </Link>
@@ -395,12 +431,17 @@ export default function Home() {
           </div>
 
           {loading || !shouldLoadCollections ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-[4/3] bg-gray-100 rounded-xl mb-3"></div>
-                  <div className="h-5 bg-gray-100 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-100 rounded w-1/2"></div>
+                <div key={i} className="animate-pulse rounded-xl border border-gray-200 p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-100 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-100 rounded w-1/3"></div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -410,33 +451,39 @@ export default function Home() {
                 <Link
                   key={collection.id}
                   href={`/study/${collection.id}`}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer block rounded-xl border border-gray-200 p-5 hover:border-gray-300 transition-colors"
                 >
-                  <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center p-6">
-                      <span className="text-6xl font-bold text-white/90 drop-shadow-lg">
-                        {collection.name.charAt(0)}
-                      </span>
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-xl"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+                      }}
+                    >
+                      {collection.name.charAt(0)}
                     </div>
-                    <div className="p-5 space-y-2">
-                      <h3 className="font-bold text-gray-900 text-lg">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-base mb-1">
                         {collection.name}
                       </h3>
-                      <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-2 leading-relaxed">
                         {collection.description || "Custom collection"}
                       </p>
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                          </svg>
-                          <span>{collection.characterIds.length} kanji</span>
-                        </div>
-                        <button className="text-gray-400">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-                          </svg>
-                        </button>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                          />
+                        </svg>
+                        <span>{collection.characterIds.length} Kanji</span>
                       </div>
                     </div>
                   </div>
@@ -446,15 +493,19 @@ export default function Home() {
           ) : (
             <Link
               href="/collections/create"
-              className="block border-2 border-dashed border-gray-200 rounded-xl p-8 hover:border-gray-300 hover:bg-gray-50 cursor-pointer"
+              className="block border-2 border-dashed border-gray-200 rounded-xl p-8 hover:border-gray-300 transition-colors"
             >
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <div
+                  className="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-4"
+                  style={{ backgroundColor: colors.primaryLight }}
+                >
                   <svg
-                    className="w-6 h-6 text-gray-400"
+                    className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: colors.primary }}
                   >
                     <path
                       strokeLinecap="round"
@@ -468,7 +519,7 @@ export default function Home() {
                   Create your first collection
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  Select kanji to build a custom study set
+                  Select Kanji to build a custom study set
                 </p>
               </div>
             </Link>
@@ -494,33 +545,36 @@ export default function Home() {
                 <Link
                   key={collection.id}
                   href={`/study/${collection.id}`}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer block rounded-xl border border-gray-200 p-5 hover:border-gray-300 transition-colors"
                 >
-                  <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center p-6 relative">
-                      <div className="absolute top-4 left-4 bg-white text-[#5B7FFF] px-3 py-1.5 rounded-xl text-xs font-bold shadow-md">
-                        {collection.metadata?.jlptLevel}
-                      </div>
-                      <span className="text-7xl font-bold text-white/75 drop-shadow-lg">
-                        {collection.metadata?.jlptLevel || "漢"}
-                      </span>
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-lg"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+                      }}
+                    >
+                      {collection.metadata?.jlptLevel || "漢"}
                     </div>
-                    <div className="p-5 space-y-2">
-                      <h3 className="font-bold text-gray-900 text-lg">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-base mb-2">
                         {collection.name}
                       </h3>
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                          </svg>
-                          <span>{collection.characterIds.length} kanji</span>
-                        </div>
-                        <button className="text-gray-400">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-                          </svg>
-                        </button>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                          />
+                        </svg>
+                        <span>{collection.characterIds.length} Kanji</span>
                       </div>
                     </div>
                   </div>
@@ -563,20 +617,43 @@ export default function Home() {
         <div className="grid grid-cols-5 h-16">
           <Link
             href="/"
-            className="flex flex-col items-center justify-center gap-1 text-[#5B7FFF]"
+            className="flex flex-col items-center justify-center gap-1"
+            style={{ color: colors.primary }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
             </svg>
             <span className="text-xs font-medium">Explore</span>
           </Link>
 
           <Link
             href="/collections/manage"
-            className="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-[#5B7FFF] transition-colors"
+            className="flex flex-col items-center justify-center gap-1 text-gray-500 transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.color = colors.primary)}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '')}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
             </svg>
             <span className="text-xs font-medium">Collections</span>
           </Link>
@@ -584,32 +661,76 @@ export default function Home() {
           <button className="flex flex-col items-center justify-center relative">
             <Link
               href="/collections/create"
-              className="absolute -top-6 w-14 h-14 bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] rounded-full flex items-center justify-center shadow-lg "
+              className="absolute -top-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
+              style={{
+                background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+              }}
             >
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </Link>
           </button>
 
           <Link
             href="/kanji-grid"
-            className="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-[#5B7FFF] transition-colors"
+            className="flex flex-col items-center justify-center gap-1 text-gray-500 transition-colors"
+            style={{ ['--hover-color' as string]: colors.primary }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = colors.primary)}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '')}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
             <span className="text-xs font-medium">Cards</span>
           </Link>
 
           <Link
-            href="/login"
-            className="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-[#5B7FFF] transition-colors"
+            href="/settings"
+            className="flex flex-col items-center justify-center gap-1 text-gray-500 transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.color = colors.primary)}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '')}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
-            <span className="text-xs font-medium">Profile</span>
+            <span className="text-xs font-medium">Settings</span>
           </Link>
         </div>
       </nav>

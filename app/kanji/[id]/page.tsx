@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useKanji } from "@/lib/hooks/useKanji";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 export default function KanjiDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
   const { data: kanji, isLoading, error } = useKanji(id);
+  const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
 
   // Handle scroll for sticky header shadow
@@ -23,7 +25,12 @@ export default function KanjiDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
+      >
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse text-white">学</div>
           <p className="text-white">Loading...</p>
@@ -34,12 +41,20 @@ export default function KanjiDetailPage() {
 
   if (error || !kanji) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
+      >
         <div className="text-center bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4">
           <p className="text-gray-600 mb-4">Kanji not found</p>
           <button
             onClick={() => router.back()}
-            className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-lg"
+            className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+            style={{
+              background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+            }}
           >
             Go Back
           </button>
@@ -52,9 +67,12 @@ export default function KanjiDetailPage() {
     <div className="min-h-screen bg-[#f8f9fc]">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -87,16 +105,33 @@ export default function KanjiDetailPage() {
         <div className="bg-white rounded-3xl p-8 mb-8 text-center shadow-xl border border-gray-100">
           <div className="text-9xl mb-6 text-gray-900 font-bold">{kanji.character}</div>
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span className="px-4 py-1.5 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full text-sm font-bold shadow-md">
+            <span
+              className="px-4 py-1.5 text-white rounded-full text-sm font-bold shadow-md"
+              style={{
+                background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+              }}
+            >
               {kanji.kanjiData.jlptLevel}
             </span>
             {kanji.kanjiData.grade !== 0 && (
-              <span className="px-4 py-1.5 bg-[#E8ECFF] text-[#4A6FEE] rounded-full text-sm font-semibold">
+              <span
+                className="px-4 py-1.5 rounded-full text-sm font-semibold"
+                style={{
+                  backgroundColor: colors.primaryLight,
+                  color: colors.primaryDark,
+                }}
+              >
                 Grade {kanji.kanjiData.grade}
               </span>
             )}
             {kanji.strokeCount !== 0 && (
-              <span className="px-4 py-1.5 bg-[#E8ECFF] text-[#4A6FEE] rounded-full text-sm font-semibold">
+              <span
+                className="px-4 py-1.5 rounded-full text-sm font-semibold"
+                style={{
+                  backgroundColor: colors.primaryLight,
+                  color: colors.primaryDark,
+                }}
+              >
                 {kanji.strokeCount} strokes
               </span>
             )}
@@ -110,7 +145,7 @@ export default function KanjiDetailPage() {
             {kanji.kanjiData.meanings.map((meaning, i) => (
               <span
                 key={i}
-                className="px-4 py-2 bg-[#E8ECFF] text-[#5B7FFF] rounded-full font-medium"
+                className="px-4 py-2 bg-[#E8ECFF] text-theme-primary rounded-full font-medium"
               >
                 {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
               </span>
@@ -129,7 +164,11 @@ export default function KanjiDetailPage() {
                 kanji.kanjiData.readings.onyomi.map((reading, i) => (
                   <div
                     key={i}
-                    className="text-lg text-gray-700 bg-[#E8ECFF] px-4 py-2.5 rounded-xl font-medium"
+                    className="text-lg px-4 py-2.5 rounded-xl font-medium"
+                    style={{
+                      backgroundColor: colors.primaryLight,
+                      color: colors.primaryDark,
+                    }}
                   >
                     {reading}
                   </div>
@@ -149,7 +188,11 @@ export default function KanjiDetailPage() {
                 kanji.kanjiData.readings.kunyomi.map((reading, i) => (
                   <div
                     key={i}
-                    className="text-lg text-gray-700 bg-[#E8ECFF] px-4 py-2.5 rounded-xl font-medium"
+                    className="text-lg px-4 py-2.5 rounded-xl font-medium"
+                    style={{
+                      backgroundColor: colors.primaryLight,
+                      color: colors.primaryDark,
+                    }}
                   >
                     {reading}
                   </div>
@@ -171,7 +214,11 @@ export default function KanjiDetailPage() {
               {kanji.kanjiData.readings.nanori.map((reading, i) => (
                 <span
                   key={i}
-                  className="px-4 py-2 bg-[#E8ECFF] text-[#4A6FEE] rounded-full font-medium"
+                  className="px-4 py-2 rounded-full font-medium"
+                  style={{
+                    backgroundColor: colors.primaryLight,
+                    color: colors.primaryDark,
+                  }}
                 >
                   {reading}
                 </span>

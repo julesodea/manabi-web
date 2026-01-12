@@ -4,10 +4,12 @@ import { useAuth } from "@/lib/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (user && !loading) {
@@ -17,14 +19,24 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
+      >
         <div className="text-6xl text-white animate-pulse">学</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex flex-col items-center justify-center px-4">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-4"
+      style={{
+        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+      }}
+    >
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         <div className="mb-6">

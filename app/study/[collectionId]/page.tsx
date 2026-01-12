@@ -10,6 +10,7 @@ import {
 import { useStudyStore } from "@/lib/stores/studyStore";
 import { KanjiData } from "@/types";
 import { toHiragana, toKatakana } from "wanakana";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 type AnswerResult = "correct" | "incorrect" | null;
 
@@ -22,6 +23,7 @@ export default function StudyPage() {
   const params = useParams();
   const router = useRouter();
   const collectionId = params.collectionId as string;
+  const { colors } = useTheme();
 
   // React Query
   const { data: collection } = useCollection(collectionId);
@@ -141,7 +143,7 @@ export default function StudyPage() {
       // wanakana will convert romaji to kana, or return kana as-is if already kana
       let hiraganaInput: string;
       let katakanaInput: string;
-      
+
       try {
         hiraganaInput = toHiragana(trimmedInput, { IMEMode: false });
         katakanaInput = toKatakana(trimmedInput, { IMEMode: false });
@@ -154,7 +156,11 @@ export default function StudyPage() {
       // Helper function to check if a reading matches the input
       const readingMatches = (reading: string): boolean => {
         // Compare exact match (case-sensitive for kana)
-        if (reading === trimmedInput || reading === hiraganaInput || reading === katakanaInput) {
+        if (
+          reading === trimmedInput ||
+          reading === hiraganaInput ||
+          reading === katakanaInput
+        ) {
           return true;
         }
         // Compare case-insensitive (for romaji)
@@ -168,7 +174,8 @@ export default function StudyPage() {
       const onyomiMatch = currentKanjiData.readings.onyomi.some(readingMatches);
 
       // Check against kunyomi readings
-      const kunyomiMatch = currentKanjiData.readings.kunyomi.some(readingMatches);
+      const kunyomiMatch =
+        currentKanjiData.readings.kunyomi.some(readingMatches);
 
       return meaningMatch || onyomiMatch || kunyomiMatch;
     },
@@ -336,7 +343,12 @@ export default function StudyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+      <div
+        className="font-medium min-h-screen flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
+      >
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse text-white">学</div>
           <p className="text-white">Loading study session...</p>
@@ -347,12 +359,20 @@ export default function StudyPage() {
 
   if (!collection || characters.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
+      >
         <div className="text-center bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4">
           <p className="text-gray-600 mb-4">Collection not found or empty</p>
           <Link
             href="/"
-            className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-lg inline-block"
+            className="px-6 py-3 text-white rounded-full font-semibold shadow-lg inline-block"
+            style={{
+              background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+            }}
           >
             Go Home
           </Link>
@@ -390,11 +410,19 @@ export default function StudyPage() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]">
+      <div
+        className="min-h-screen"
+        style={{
+          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
+      >
         <header
-          className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+          className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
             scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
           }`}
+          style={{
+            background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
@@ -440,14 +468,22 @@ export default function StudyPage() {
             </div>
 
             <div className="mb-8">
-              <div className="text-sm text-gray-600 mb-2 font-medium">Accuracy</div>
-              <div className="text-4xl font-bold text-[#5B7FFF] mb-2">
+              <div className="text-sm text-gray-600 mb-2 font-medium">
+                Accuracy
+              </div>
+              <div
+                className="text-4xl font-bold mb-2"
+                style={{ color: colors.primary }}
+              >
                 {accuracy}%
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] h-3 rounded-full duration-500"
-                  style={{ width: `${accuracy}%` }}
+                  className="h-3 rounded-full duration-500"
+                  style={{
+                    width: `${accuracy}%`,
+                    background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  }}
                 />
               </div>
             </div>
@@ -502,7 +538,10 @@ export default function StudyPage() {
                     startSession(collectionId, chars, characterData.kanjiData);
                   }
                 }}
-                className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-lg"
+                className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+                style={{
+                  background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                }}
               >
                 Study Again
               </button>
@@ -514,12 +553,20 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]">
+    <div
+      className="min-h-screen"
+      style={{
+        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+      }}
+    >
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -636,7 +683,7 @@ export default function StudyPage() {
                     {currentCharacter?.character}
                   </div>
                   <p className="text-gray-600 text-sm mt-4 font-medium">
-                    What does this kanji mean?
+                    What does this Kanji mean?
                   </p>
                 </div>
               </div>
@@ -649,8 +696,7 @@ export default function StudyPage() {
                   const showIncorrect =
                     isSelected && answerResult === "incorrect";
 
-                  let buttonClass =
-                    "bg-white shadow-lg text-gray-900";
+                  let buttonClass = "bg-white shadow-lg text-gray-900";
                   if (showCorrect) {
                     buttonClass =
                       "bg-green-50 border-2 border-green-500 text-green-900 shadow-lg";
@@ -658,8 +704,7 @@ export default function StudyPage() {
                     buttonClass =
                       "bg-red-50 border-2 border-red-500 text-red-900 shadow-lg";
                   } else if (isSelected) {
-                    buttonClass =
-                      "bg-white border-2 border-white text-gray-900 shadow-xl";
+                    buttonClass = "bg-white border-2 text-gray-900 shadow-xl";
                   }
 
                   return (
@@ -672,13 +717,19 @@ export default function StudyPage() {
                         disabled:cursor-default
                         ${buttonClass}
                       `}
+                      style={
+                        isSelected && !showCorrect && !showIncorrect
+                          ? { borderColor: colors.primary }
+                          : undefined
+                      }
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium text-gray-400 w-6">
                           {index + 1}.
                         </span>
                         <span className="text-base md:text-lg font-medium">
-                          {option.meaning.charAt(0).toUpperCase() + option.meaning.slice(1)}
+                          {option.meaning.charAt(0).toUpperCase() +
+                            option.meaning.slice(1)}
                         </span>
                       </div>
                     </button>
@@ -726,7 +777,12 @@ export default function StudyPage() {
                         }}
                         disabled={!!answerResult}
                         placeholder="Type your answer..."
-                        className="w-full max-w-xs px-4 py-3 border-2 border-gray-200 rounded-xl text-center text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#5B7FFF] focus:ring-2 focus:ring-[#5B7FFF]/20 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        autoFocus
+                        className="w-full max-w-xs px-4 py-3 border-2 rounded-xl text-center text-base text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        style={{
+                          borderColor: colors.primary,
+                          ["--tw-ring-color" as string]: `${colors.primary}33`,
+                        }}
                       />
                       <p className="text-gray-500 text-xs mt-2">
                         Press Enter to check
@@ -764,9 +820,14 @@ export default function StudyPage() {
                           {currentKanjiData?.meanings.map((meaning, i) => (
                             <span
                               key={i}
-                              className="px-3 py-1.5 md:px-4 md:py-2 bg-[#E8ECFF] text-[#5B7FFF] rounded-full text-base md:text-lg"
+                              className="px-3 py-1.5 md:px-4 md:py-2 rounded-full text-base md:text-lg font-medium"
+                              style={{
+                                backgroundColor: colors.primaryLight,
+                                color: colors.primaryDark,
+                              }}
                             >
-                              {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
+                              {meaning.charAt(0).toUpperCase() +
+                                meaning.slice(1)}
                             </span>
                           ))}
                         </div>
@@ -810,7 +871,8 @@ export default function StudyPage() {
                   <button
                     onClick={handleInputSubmit}
                     disabled={!userInput.trim()}
-                    className="w-full py-4 md:py-6 bg-white text-[#5B7FFF] rounded-2xl font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-4 md:py-6 bg-white rounded-2xl font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ color: colors.primary }}
                   >
                     Check Answer
                   </button>

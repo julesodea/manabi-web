@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -18,6 +19,7 @@ function KanjiGridContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectionModeParam = searchParams.get("select") === "true";
+  const { colors } = useTheme();
 
   // Get search and level from URL params
   const urlSearchQuery = searchParams.get("q") || "";
@@ -26,7 +28,8 @@ function KanjiGridContent() {
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
   const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(urlSearchQuery);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] =
+    useState(urlSearchQuery);
   const [scrolled, setScrolled] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -47,8 +50,12 @@ function KanjiGridContent() {
         params.delete("q");
       }
 
-      const newUrl = params.toString() ? `?${params.toString()}` : "/kanji-grid";
-      const currentUrl = searchParams.toString() ? `?${searchParams.toString()}` : "/kanji-grid";
+      const newUrl = params.toString()
+        ? `?${params.toString()}`
+        : "/kanji-grid";
+      const currentUrl = searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "/kanji-grid";
 
       // Only update URL if it's actually different
       if (newUrl !== currentUrl) {
@@ -135,9 +142,12 @@ function KanjiGridContent() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
+        style={{
+          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -197,7 +207,8 @@ function KanjiGridContent() {
                   {selectedKanji.size > 0 && (
                     <button
                       onClick={createCollection}
-                      className="hidden sm:block px-4 py-2 bg-white text-[#5B7FFF] rounded-full text-sm font-semibold shadow-lg"
+                      className="hidden sm:block px-4 py-2 bg-white rounded-full text-sm font-semibold shadow-lg"
+                      style={{ color: colors.primary }}
                     >
                       Create Collection ({selectedKanji.size})
                     </button>
@@ -232,7 +243,9 @@ function KanjiGridContent() {
                   } else {
                     params.set("level", level.value);
                   }
-                  const newUrl = params.toString() ? `?${params.toString()}` : "/kanji-grid";
+                  const newUrl = params.toString()
+                    ? `?${params.toString()}`
+                    : "/kanji-grid";
                   router.replace(newUrl, { scroll: false });
                 }}
                 className={`flex flex-col items-center gap-1 min-w-[48px] cursor-pointer group duration-200 pb-2 border-b-2 ${
@@ -252,7 +265,7 @@ function KanjiGridContent() {
                 : searchQuery
                 ? `${displayedKanji.length} found`
                 : totalCount
-                ? `${totalCount} kanji`
+                ? `${totalCount} Kanji`
                 : ""}
             </div>
           </div>
@@ -299,15 +312,17 @@ function KanjiGridContent() {
                     <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                       {/* Card Image Area */}
                       <div
-                        className={`relative aspect-square duration-300 ${
-                          isSelected
-                            ? "bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]"
-                            : "bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]"
-                        }`}
+                        className="relative aspect-square duration-300"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+                        }}
                       >
                         {/* Selection Indicator */}
                         {selectionMode && isSelected && (
-                          <div className="absolute top-3 right-3 z-10 bg-white text-[#5B7FFF] rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
+                          <div
+                            className="absolute top-3 right-3 z-10 bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg"
+                            style={{ color: colors.primary }}
+                          >
                             <svg
                               className="w-5 h-5"
                               fill="none"
@@ -326,13 +341,16 @@ function KanjiGridContent() {
 
                         {/* Kanji Character */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-7xl sm:text-8xl text-white font-bold drop-shadow-lg">
+                          <span className="text-7xl sm:text-8xl text-white">
                             {k.character}
                           </span>
                         </div>
 
                         {/* Level Badge */}
-                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-md text-xs font-bold text-[#5B7FFF]">
+                        <div
+                          className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-md text-xs font-bold"
+                          style={{ color: colors.primary }}
+                        >
                           {k.kanjiData.jlptLevel}
                         </div>
                       </div>
@@ -384,7 +402,7 @@ function KanjiGridContent() {
               )}
               {!hasNextPage && totalCount && totalCount > 0 && (
                 <div className="text-gray-400 text-sm">
-                  All {totalCount} kanji loaded
+                  All {totalCount} Kanji loaded
                 </div>
               )}
             </div>
