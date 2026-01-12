@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -62,6 +62,7 @@ export default function StudyPage() {
   const [inputResult, setInputResult] = useState<
     "correct" | "incorrect" | null
   >(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -125,6 +126,23 @@ export default function StudyPage() {
       startSession(collectionId, chars, characterData.kanjiData);
     }
   }, [characterData, loading, collectionId, startSession, shuffleMode]);
+
+  // Auto-focus input on iOS and other devices when card changes
+  useEffect(() => {
+    if (
+      studyMode === "flashcard" &&
+      !flipped &&
+      !answerResult &&
+      !sessionComplete &&
+      inputRef.current
+    ) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, answerResult, flipped, sessionComplete, studyMode]);
 
   // Check if user input matches any reading or meaning
   const checkUserInput = useCallback(
@@ -767,6 +785,7 @@ export default function StudyPage() {
                         Type the reading or meaning
                       </p>
                       <input
+                        ref={inputRef}
                         type="text"
                         value={userInput}
                         onChange={(e) => setUserInput(e.target.value)}
