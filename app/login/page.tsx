@@ -17,14 +17,14 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-rose-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
         <div className="text-6xl text-white animate-pulse">学</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-rose-500 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         <div className="mb-6">
@@ -40,7 +40,7 @@ export default function LoginPage() {
         <div className="mb-8">
           <button
             onClick={signInWithGoogle}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 group"
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 duration-200 group"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24">
               <path

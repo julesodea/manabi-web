@@ -336,7 +336,7 @@ export default function StudyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-rose-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse text-white">学</div>
           <p className="text-white">Loading study session...</p>
@@ -347,12 +347,12 @@ export default function StudyPage() {
 
   if (!collection || characters.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+        <div className="text-center bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4">
           <p className="text-gray-600 mb-4">Collection not found or empty</p>
           <Link
             href="/"
-            className="px-6 py-2 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition"
+            className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-lg inline-block"
           >
             Go Home
           </Link>
@@ -390,19 +390,19 @@ export default function StudyPage() {
     };
 
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]">
         <header
-          className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
-            scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+          className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+            scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
           }`}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
@@ -411,7 +411,7 @@ export default function StudyPage() {
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-24 pb-12">
-          <div className="bg-gray-50 rounded-2xl p-8 text-center">
+          <div className="bg-white rounded-3xl p-8 text-center shadow-2xl">
             <div className="text-6xl mb-6">🎉</div>
 
             <h2 className="text-2xl font-bold mb-6 text-gray-900">
@@ -440,21 +440,21 @@ export default function StudyPage() {
             </div>
 
             <div className="mb-8">
-              <div className="text-sm text-gray-500 mb-2">Accuracy</div>
-              <div className="text-4xl font-bold text-rose-500 mb-2">
+              <div className="text-sm text-gray-600 mb-2 font-medium">Accuracy</div>
+              <div className="text-4xl font-bold text-[#5B7FFF] mb-2">
                 {accuracy}%
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-rose-500 h-3 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] h-3 rounded-full duration-500"
                   style={{ width: `${accuracy}%` }}
                 />
               </div>
             </div>
 
             {hasFailedCards && (
-              <div className="mb-8 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-                <p className="text-sm text-orange-800 mb-3">
+              <div className="mb-8 p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl">
+                <p className="text-sm text-orange-800 mb-3 font-medium">
                   You got {incorrectCharacterIds.length} card
                   {incorrectCharacterIds.length > 1 ? "s" : ""} wrong. Want to
                   practice them?
@@ -462,13 +462,13 @@ export default function StudyPage() {
                 <div className="flex gap-3 justify-center flex-wrap">
                   <button
                     onClick={handleRetryFailedCards}
-                    className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition"
+                    className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-semibold shadow-md"
                   >
                     Retry Failed Cards
                   </button>
                   <button
                     onClick={handleCreateCollectionFromFailed}
-                    className="px-4 py-2 border border-orange-500 text-orange-700 rounded-full text-sm font-medium hover:bg-orange-50 transition"
+                    className="px-4 py-2 border-2 border-orange-500 text-orange-700 rounded-full text-sm font-semibold"
                   >
                     Save as New Collection
                   </button>
@@ -479,7 +479,7 @@ export default function StudyPage() {
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
                 href="/"
-                className="px-6 py-3 border border-gray-300 rounded-full font-medium hover:bg-gray-50 transition text-gray-700"
+                className="px-6 py-3 border-2 border-gray-300 rounded-full font-semibold text-gray-700"
               >
                 Go Home
               </Link>
@@ -502,7 +502,7 @@ export default function StudyPage() {
                     startSession(collectionId, chars, characterData.kanjiData);
                   }
                 }}
-                className="px-6 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition"
+                className="px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-semibold shadow-lg"
               >
                 Study Again
               </button>
@@ -514,44 +514,44 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
-          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
-              <div className="hidden sm:block h-6 w-px bg-gray-200" />
-              <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">
+              <div className="hidden sm:block h-6 w-px bg-white/30" />
+              <h1 className="text-lg font-semibold text-white hidden sm:block">
                 {collection.name}
               </h1>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-sm text-gray-500">Progress</div>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-sm text-white/80">Progress</div>
+                <div className="text-lg font-semibold text-white">
                   {currentIndex + 1} / {characters.length}
                 </div>
               </div>
               {studyMode === "multiple_choice" && (
                 <button
                   onClick={() => setShuffleMode(!shuffleMode)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium duration-200 border ${
                     shuffleMode
-                      ? "bg-rose-500 text-white border-rose-500 hover:bg-rose-600 hover:border-rose-600"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                      ? "bg-white/20 text-white border-white/30"
+                      : "bg-white/10 text-white border-white/30 hover:bg-white/20"
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -597,7 +597,7 @@ export default function StudyPage() {
               )}
               <Link
                 href="/"
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
               >
                 End
               </Link>
@@ -605,9 +605,9 @@ export default function StudyPage() {
           </div>
 
           {/* Progress bar */}
-          <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
+          <div className="mt-4 w-full bg-white/20 rounded-full h-2">
             <div
-              className="bg-rose-500 h-2 rounded-full transition-all duration-300"
+              className="bg-white h-2 rounded-full duration-300"
               style={{
                 width: `${((currentIndex + 1) / characters.length) * 100}%`,
               }}
@@ -625,17 +625,17 @@ export default function StudyPage() {
               {/* Kanji Card */}
               <div
                 className={`
-                  relative bg-gray-50 rounded-2xl flex-1 max-h-[300px] border border-gray-100
-                  transition-all duration-500
+                  relative bg-white rounded-3xl flex-1 max-h-[300px] shadow-2xl
+                  duration-500
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
                 `}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
-                  <div className="text-gray-800 text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
+                  <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold">
                     {currentCharacter?.character}
                   </div>
-                  <p className="text-gray-500 text-sm mt-4">
+                  <p className="text-gray-600 text-sm mt-4 font-medium">
                     What does this kanji mean?
                   </p>
                 </div>
@@ -650,16 +650,16 @@ export default function StudyPage() {
                     isSelected && answerResult === "incorrect";
 
                   let buttonClass =
-                    "bg-white border border-gray-200 text-gray-900 hover:border-gray-300 hover:shadow-md";
+                    "bg-white shadow-lg text-gray-900";
                   if (showCorrect) {
                     buttonClass =
-                      "bg-green-50 border-2 border-green-500 text-green-900";
+                      "bg-green-50 border-2 border-green-500 text-green-900 shadow-lg";
                   } else if (showIncorrect) {
                     buttonClass =
-                      "bg-red-50 border-2 border-red-500 text-red-900";
+                      "bg-red-50 border-2 border-red-500 text-red-900 shadow-lg";
                   } else if (isSelected) {
                     buttonClass =
-                      "bg-rose-50 border-2 border-rose-500 text-rose-900";
+                      "bg-white border-2 border-white text-gray-900 shadow-xl";
                   }
 
                   return (
@@ -668,7 +668,7 @@ export default function StudyPage() {
                       onClick={() => handleMultipleChoiceSelect(index)}
                       disabled={answerResult !== null}
                       className={`
-                        p-4 md:p-6 rounded-xl transition-all duration-200 text-left
+                        p-4 md:p-6 rounded-2xl duration-200 text-left
                         disabled:cursor-default
                         ${buttonClass}
                       `}
@@ -688,7 +688,7 @@ export default function StudyPage() {
 
               {/* Hint for keyboard shortcuts */}
               {!answerResult && (
-                <p className="text-center text-sm text-gray-400 mt-4">
+                <p className="text-center text-sm text-white/80 mt-4">
                   Press 1-4 to select an answer
                 </p>
               )}
@@ -699,8 +699,8 @@ export default function StudyPage() {
               {/* Card */}
               <div
                 className={`
-                  relative bg-gray-50 rounded-2xl flex-1 max-h-[500px] border border-gray-100
-                  transition-all duration-500
+                  relative bg-white rounded-3xl flex-1 max-h-[500px] shadow-2xl
+                  duration-500
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
                 `}
@@ -709,10 +709,10 @@ export default function StudyPage() {
                   {!flipped ? (
                     // Front: Kanji character with input
                     <div className="text-center w-full">
-                      <div className="text-gray-800 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8">
+                      <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8 font-bold">
                         {currentCharacter?.character}
                       </div>
-                      <p className="text-gray-500 text-sm mb-4">
+                      <p className="text-gray-600 text-sm mb-4 font-medium">
                         Type the reading or meaning
                       </p>
                       <input
@@ -725,10 +725,10 @@ export default function StudyPage() {
                           }
                         }}
                         disabled={!!answerResult}
-                        placeholder="Answer"
-                        className="w-full max-w-xs px-4 py-2.5 border-2 border-gray-300 rounded-xl text-center text-base text-gray-900 placeholder:text-gray-400 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        placeholder="Type your answer..."
+                        className="w-full max-w-xs px-4 py-3 border-2 border-gray-200 rounded-xl text-center text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#5B7FFF] focus:ring-2 focus:ring-[#5B7FFF]/20 disabled:bg-gray-100 disabled:cursor-not-allowed"
                       />
-                      <p className="text-gray-400 text-xs mt-2">
+                      <p className="text-gray-500 text-xs mt-2">
                         Press Enter to check
                       </p>
                     </div>
@@ -764,7 +764,7 @@ export default function StudyPage() {
                           {currentKanjiData?.meanings.map((meaning, i) => (
                             <span
                               key={i}
-                              className="px-3 py-1.5 md:px-4 md:py-2 bg-rose-100 text-rose-800 rounded-full text-base md:text-lg"
+                              className="px-3 py-1.5 md:px-4 md:py-2 bg-[#E8ECFF] text-[#5B7FFF] rounded-full text-base md:text-lg"
                             >
                               {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
                             </span>
@@ -810,7 +810,7 @@ export default function StudyPage() {
                   <button
                     onClick={handleInputSubmit}
                     disabled={!userInput.trim()}
-                    className="w-full py-4 md:py-6 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-4 md:py-6 bg-white text-[#5B7FFF] rounded-2xl font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Check Answer
                   </button>
@@ -820,15 +820,15 @@ export default function StudyPage() {
           )}
 
           {/* Session stats */}
-          <div className="mt-8 flex justify-center gap-8 text-sm text-gray-500">
+          <div className="mt-8 flex justify-center gap-8 text-sm text-white/90">
             <div className="capitalize">
-              <span className="font-semibold text-green-600">
+              <span className="font-semibold text-white">
                 {sessionStats.correct}
               </span>{" "}
               correct
             </div>
             <div className="capitalize">
-              <span className="capitalize font-semibold text-red-500">
+              <span className="capitalize font-semibold text-white">
                 {sessionStats.incorrect}
               </span>{" "}
               incorrect

@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f43f5e",
+  themeColor: "#5B7FFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -45,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ backgroundColor: "#f43f5e" }}>
-      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f43f5e" }}>
+    <html lang="en" style={{ backgroundColor: "#f8f9fc" }}>
+      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f8f9fc" }}>
         <AuthProvider>
           <QueryProvider>{children}</QueryProvider>
         </AuthProvider>

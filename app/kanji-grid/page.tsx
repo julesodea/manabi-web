@@ -135,33 +135,33 @@ function KanjiGridContent() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
-          scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
+        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] duration-300 ${
+          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                 学
               </div>
-              <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+              <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                 Manabi
               </span>
             </Link>
 
             {/* Search Bar */}
-            <div className="hidden md:flex items-center bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 w-full max-w-md mx-4">
+            <div className="hidden md:flex items-center bg-white/10 backdrop-blur-sm border border-white/30 rounded-full w-full max-w-md mx-4">
               <input
                 type="text"
                 placeholder="Search meanings, readings..."
-                className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-6 py-2.5 text-sm font-medium placeholder-gray-500 rounded-l-full text-gray-700"
+                className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-6 py-2.5 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div className="pr-2 py-1">
-                <div className="p-2 bg-rose-500 rounded-full text-white">
+                <div className="p-2 bg-white/20 rounded-full text-white">
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -184,7 +184,7 @@ function KanjiGridContent() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-full text-gray-700 focus:outline-none focus:ring-0"
+                className="w-full px-3 py-1.5 text-sm bg-white/10 border border-white/30 rounded-full text-white placeholder-white/60 focus:outline-none focus:ring-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -197,14 +197,14 @@ function KanjiGridContent() {
                   {selectedKanji.size > 0 && (
                     <button
                       onClick={createCollection}
-                      className="hidden sm:block px-4 py-2 bg-rose-500 text-white rounded-full text-sm font-medium hover:bg-rose-600 transition"
+                      className="hidden sm:block px-4 py-2 bg-white text-[#5B7FFF] rounded-full text-sm font-semibold shadow-lg"
                     >
                       Create Collection ({selectedKanji.size})
                     </button>
                   )}
                   <button
                     onClick={() => setSelectionMode(false)}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                    className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
                   >
                     Cancel
                   </button>
@@ -212,7 +212,7 @@ function KanjiGridContent() {
               ) : (
                 <button
                   onClick={() => setSelectionMode(true)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                  className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
                 >
                   Select
                 </button>
@@ -235,10 +235,10 @@ function KanjiGridContent() {
                   const newUrl = params.toString() ? `?${params.toString()}` : "/kanji-grid";
                   router.replace(newUrl, { scroll: false });
                 }}
-                className={`flex flex-col items-center gap-1 min-w-[48px] cursor-pointer group transition-all duration-200 pb-2 border-b-2 ${
+                className={`flex flex-col items-center gap-1 min-w-[48px] cursor-pointer group duration-200 pb-2 border-b-2 ${
                   urlLevel === level.value
-                    ? "opacity-100 text-black border-black"
-                    : "opacity-60 text-gray-500 hover:opacity-100 border-transparent"
+                    ? "opacity-100 text-white border-white"
+                    : "opacity-70 text-white/70 hover:opacity-100 border-transparent"
                 }`}
               >
                 <span className="text-xs font-medium whitespace-nowrap">
@@ -246,7 +246,7 @@ function KanjiGridContent() {
                 </span>
               </button>
             ))}
-            <div className="ml-auto text-sm text-gray-500">
+            <div className="ml-auto text-sm text-white/90">
               {isLoading
                 ? "Loading..."
                 : searchQuery
@@ -296,68 +296,66 @@ function KanjiGridContent() {
 
                 const cardContent = (
                   <div className="group cursor-pointer">
-                    {/* Card Image Area */}
-                    <div
-                      className={`relative aspect-square bg-gray-50 rounded-xl overflow-hidden mb-3 border transition-all duration-300 ${
-                        isSelected
-                          ? "border-rose-500 ring-2 ring-rose-500 bg-rose-50"
-                          : "border-gray-100"
-                      }`}
-                    >
-                      {/* Selection Indicator */}
-                      {selectionMode && isSelected && (
-                        <div className="absolute top-3 right-3 z-10 bg-rose-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      )}
+                    <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                      {/* Card Image Area */}
+                      <div
+                        className={`relative aspect-square duration-300 ${
+                          isSelected
+                            ? "bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]"
+                            : "bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]"
+                        }`}
+                      >
+                        {/* Selection Indicator */}
+                        {selectionMode && isSelected && (
+                          <div className="absolute top-3 right-3 z-10 bg-white text-[#5B7FFF] rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        )}
 
-                      {/* Kanji Character */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span
-                          className={`text-7xl sm:text-8xl ${
-                            isSelected ? "text-rose-900" : "text-gray-800"
-                          }`}
-                        >
-                          {k.character}
-                        </span>
-                      </div>
-
-                      {/* Level Badge */}
-                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm border border-gray-100 text-xs font-bold text-gray-800">
-                        {k.kanjiData.jlptLevel}
-                      </div>
-                    </div>
-
-                    {/* Card Details */}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 truncate">
-                        {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
-                          <span key={i}>
-                            {i > 0 && ", "}
-                            {m.charAt(0).toUpperCase() + m.slice(1)}
+                        {/* Kanji Character */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-7xl sm:text-8xl text-white font-bold drop-shadow-lg">
+                            {k.character}
                           </span>
-                        ))}
-                      </h3>
-                      <p className="text-gray-500 text-sm mt-0.5 truncate">
-                        {[
-                          k.kanjiData.readings.onyomi[0],
-                          k.kanjiData.readings.kunyomi[0],
-                        ]
-                          .filter(Boolean)
-                          .join("、")}
-                      </p>
+                        </div>
+
+                        {/* Level Badge */}
+                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-md text-xs font-bold text-[#5B7FFF]">
+                          {k.kanjiData.jlptLevel}
+                        </div>
+                      </div>
+
+                      {/* Card Details */}
+                      <div className="p-4">
+                        <h3 className="font-semibold text-gray-900 truncate text-base">
+                          {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                            <span key={i}>
+                              {i > 0 && ", "}
+                              {m.charAt(0).toUpperCase() + m.slice(1)}
+                            </span>
+                          ))}
+                        </h3>
+                        <p className="text-gray-600 text-sm mt-1 truncate">
+                          {[
+                            k.kanjiData.readings.onyomi[0],
+                            k.kanjiData.readings.kunyomi[0],
+                          ]
+                            .filter(Boolean)
+                            .join("、")}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
@@ -399,7 +397,7 @@ function KanjiGridContent() {
         <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40">
           <button
             onClick={createCollection}
-            className="bg-gray-900 transition-all text-white px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2"
+            className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2"
           >
             Create Collection ({selectedKanji.size})
           </button>
@@ -413,7 +411,7 @@ export default function KanjiGridPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-rose-500 flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
           <div className="text-6xl text-white animate-pulse">学</div>
         </div>
       }

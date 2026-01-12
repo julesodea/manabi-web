@@ -15,19 +15,19 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+    "font-medium rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md";
 
   const variantStyles = {
-    primary: "bg-gray-800 hover:bg-gray-800 text-white",
-    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-900",
-    danger: "bg-red-600 hover:bg-red-700 text-white",
-    ghost: "bg-transparent hover:bg-gray-100 text-gray-700",
+    primary: "bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white",
+    secondary: "bg-white text-gray-900 border-2 border-gray-200",
+    danger: "bg-red-600 text-white",
+    ghost: "bg-transparent text-gray-700 shadow-none",
   };
 
   const sizeStyles = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
+    sm: "px-4 py-2 text-sm",
+    md: "px-6 py-3 text-base",
+    lg: "px-8 py-4 text-lg",
   };
 
   return (

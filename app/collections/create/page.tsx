@@ -132,7 +132,7 @@ function CreateCollectionForm() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 bg-white duration-300 ${
           scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
         }`}
       >
@@ -140,10 +140,10 @@ function CreateCollectionForm() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-[#5B7FFF] text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
@@ -156,7 +156,7 @@ function CreateCollectionForm() {
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <div className="text-sm text-gray-500">Selected</div>
-                <div className="text-xl font-bold text-rose-500">
+                <div className="text-xl font-bold text-[#5B7FFF]">
                   {selectedKanji.size}
                 </div>
               </div>
@@ -180,7 +180,7 @@ function CreateCollectionForm() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B7FFF] focus:border-transparent text-gray-900 placeholder:text-gray-400"
                 placeholder="Collection Name *"
                 required
               />
@@ -188,7 +188,7 @@ function CreateCollectionForm() {
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B7FFF] focus:border-transparent text-gray-900 placeholder:text-gray-400"
                 placeholder="Description (optional)"
               />
             </div>
@@ -199,7 +199,7 @@ function CreateCollectionForm() {
                 onClick={() => setStudyMode("flashcard")}
                 className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "flashcard"
-                    ? "border-rose-500 bg-rose-50 text-rose-900"
+                    ? "border-[#5B7FFF] bg-[#E8ECFF] text-rose-900"
                     : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -210,7 +210,7 @@ function CreateCollectionForm() {
                 onClick={() => setStudyMode("multiple_choice")}
                 className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "multiple_choice"
-                    ? "border-rose-500 bg-rose-50 text-rose-900"
+                    ? "border-[#5B7FFF] bg-[#E8ECFF] text-rose-900"
                     : "border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -231,7 +231,7 @@ function CreateCollectionForm() {
                 disabled={
                   createCollection.isPending || selectedKanji.size === 0
                 }
-                className="flex-1 px-4 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-medium  transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createCollection.isPending
                   ? "Creating..."
@@ -255,7 +255,7 @@ function CreateCollectionForm() {
                 className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-6 py-2.5 text-sm font-medium placeholder-gray-500 rounded-l-full text-gray-700"
               />
               <div className="pr-2 py-1">
-                <div className="p-2 bg-rose-500 rounded-full text-white">
+                <div className="p-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full text-white">
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -319,14 +319,14 @@ function CreateCollectionForm() {
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className={`bg-gray-50 border rounded-xl transition-all duration-200 flex flex-col p-3 group relative hover:shadow-md ${
+                    className={`bg-gray-50 border rounded-xl duration-200 flex flex-col p-3 group relative  ${
                       isSelected
-                        ? "border-rose-500 bg-rose-50 ring-2 ring-rose-500"
+                        ? "border-[#5B7FFF] bg-[#E8ECFF] ring-2 ring-[#5B7FFF]"
                         : "border-gray-100"
                     }`}
                   >
                     {isSelected && (
-                      <div className="absolute top-2 right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      <div className="absolute top-2 right-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full w-5 h-5 flex items-center justify-center">
                         <svg
                           className="w-3 h-3"
                           fill="none"

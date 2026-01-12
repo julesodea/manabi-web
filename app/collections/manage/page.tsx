@@ -66,7 +66,7 @@ export default function ManageCollectionsPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 bg-white duration-300 ${
           scrolled ? "shadow-md py-3" : "py-4 border-b border-gray-100"
         }`}
       >
@@ -74,10 +74,10 @@ export default function ManageCollectionsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full flex items-center justify-center text-white font-bold">
                   学
                 </div>
-                <span className="text-rose-500 text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-[#5B7FFF] text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
@@ -96,7 +96,7 @@ export default function ManageCollectionsPage() {
               </Link>
               <Link
                 href="/collections/create"
-                className="px-4 py-2 bg-rose-500 text-white rounded-full text-sm font-medium hover:bg-rose-600 transition"
+                className="px-4 py-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full text-sm font-medium  transition"
               >
                 Create New
               </Link>
@@ -126,7 +126,7 @@ export default function ManageCollectionsPage() {
             </p>
             <Link
               href="/collections/create"
-              className="inline-block px-6 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition"
+              className="inline-block px-6 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-medium  transition"
             >
               Create Your First Collection
             </Link>
@@ -158,7 +158,7 @@ export default function ManageCollectionsPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/study/${collection.id}`}
-                    className="px-4 py-2 bg-rose-500 text-white rounded-full text-sm font-medium hover:bg-rose-600 transition"
+                    className="px-4 py-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full text-sm font-medium  transition"
                   >
                     Study
                   </Link>
