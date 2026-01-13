@@ -264,7 +264,7 @@ function KanjiGridContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <div className="pr-1.5 py-0.5">
+                <div className="pr-2 py-0.5">
                   <div className="p-1.5 bg-white/20 rounded-full text-white">
                     <svg
                       className="w-3.5 h-3.5"
