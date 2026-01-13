@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#5B7FFF",
+  themeColor: "#EF4444",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -65,6 +65,70 @@ export default function RootLayout({
         />
       </head>
       <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f8f9fc" }} suppressHydrationWarning>
+        {/* PWA Splash Screen */}
+        <div id="splash-screen" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#EF4444',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 1,
+          transition: 'opacity 0.3s ease-out',
+          pointerEvents: 'none'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '48px',
+              color: 'white',
+              fontWeight: 'bold'
+            }}>
+              学
+            </div>
+            <div style={{
+              color: 'white',
+              fontSize: '32px',
+              fontWeight: 'bold',
+              letterSpacing: '-0.025em'
+            }}>
+              Manabi
+            </div>
+          </div>
+        </div>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('load', function() {
+                setTimeout(function() {
+                  var splash = document.getElementById('splash-screen');
+                  if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(function() {
+                      splash.style.display = 'none';
+                    }, 300);
+                  }
+                }, 100);
+              });
+            `,
+          }}
+        />
         <AuthProvider>
           <QueryProvider>
             <ThemeProvider>{children}</ThemeProvider>
