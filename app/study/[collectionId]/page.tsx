@@ -795,7 +795,7 @@ export default function StudyPage() {
                       <p className="text-gray-600 text-sm mb-4 font-medium">
                         Type the reading or meaning
                       </p>
-                      <div className="w-full max-w-xs mx-auto flex items-center gap-2">
+                      <div className="w-full px-4 flex justify-center">
                         <input
                           ref={inputRef}
                           type="text"
@@ -813,7 +813,7 @@ export default function StudyPage() {
                           }}
                           disabled={!!answerResult}
                           placeholder="Type your answer..."
-                          className="flex-1 px-4 py-3 border-2 rounded-xl text-center text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="w-full max-w-xs px-4 py-3 border-2 rounded-xl text-center text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           style={{
                             borderColor: colors.primary,
                             fontSize: "16px", // Prevents iOS zoom on focus

@@ -150,19 +150,20 @@ function KanjiGridContent() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 cursor-pointer">
               <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                 学
               </div>
-              <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
+              <span className="text-white text-xl font-bold tracking-tight">
                 Manabi
               </span>
             </Link>
 
             {/* Search Bar */}
-            <div className="hidden md:flex items-center bg-white/10 backdrop-blur-sm border border-white/30 rounded-full w-full max-w-md mx-4">
+            <div className="flex items-center bg-white/10 backdrop-blur-sm border border-white/30 rounded-full w-full max-w-md mx-4">
               <input
                 type="text"
                 placeholder="Search meanings, readings..."
@@ -189,17 +190,6 @@ function KanjiGridContent() {
               </div>
             </div>
 
-            {/* Mobile Search */}
-            <div className="md:hidden">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full px-3 py-1.5 text-sm bg-white/10 border border-white/30 rounded-full text-white placeholder-white/60 focus:outline-none focus:ring-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
             {/* Right Menu */}
             <div className="flex items-center gap-2">
               {selectionMode ? (
@@ -207,7 +197,7 @@ function KanjiGridContent() {
                   {selectedKanji.size > 0 && (
                     <button
                       onClick={createCollection}
-                      className="hidden sm:block px-4 py-2 bg-white rounded-full text-sm font-semibold shadow-lg"
+                      className="px-4 py-2 bg-white rounded-full text-sm font-semibold shadow-lg"
                       style={{ color: colors.primary }}
                     >
                       Create Collection ({selectedKanji.size})
@@ -228,6 +218,70 @@ function KanjiGridContent() {
                   Select
                 </button>
               )}
+            </div>
+          </div>
+
+          {/* Mobile Layout */}
+          <div className="md:hidden">
+            {/* Top Row: Logo and Select Button */}
+            <div className="flex items-center justify-between mb-3">
+              <Link href="/" className="flex items-center gap-2 cursor-pointer">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
+                  学
+                </div>
+                <span className="text-white text-xl font-bold tracking-tight">
+                  Manabi
+                </span>
+              </Link>
+
+              {/* Right Menu */}
+              <div className="flex items-center gap-2">
+                {selectionMode ? (
+                  <button
+                    onClick={() => setSelectionMode(false)}
+                    className="px-3 py-1.5 text-white border border-white/30 rounded-full text-xs font-medium hover:bg-white/20 transition"
+                  >
+                    Cancel
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setSelectionMode(true)}
+                    className="px-3 py-1.5 text-white border border-white/30 rounded-full text-xs font-medium hover:bg-white/20 transition"
+                  >
+                    Select
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Row: Search Bar */}
+            <div className="w-full">
+              <div className="flex items-center bg-white/10 backdrop-blur-sm border border-white/30 rounded-full">
+                <input
+                  type="text"
+                  placeholder="Search meanings, readings..."
+                  className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <div className="pr-1.5 py-0.5">
+                  <div className="p-1.5 bg-white/20 rounded-full text-white">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
