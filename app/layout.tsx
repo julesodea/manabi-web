@@ -47,8 +47,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ backgroundColor: "#f8f9fc" }}>
-      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f8f9fc" }}>
+    <html lang="en" style={{ backgroundColor: "#f8f9fc" }} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var savedTheme = localStorage.getItem('theme-color') || 'blue';
+                  document.documentElement.setAttribute('data-theme', savedTheme);
+                } catch (e) {
+                  document.documentElement.setAttribute('data-theme', 'blue');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f8f9fc" }} suppressHydrationWarning>
         <AuthProvider>
           <QueryProvider>
             <ThemeProvider>{children}</ThemeProvider>

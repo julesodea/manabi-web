@@ -28,7 +28,7 @@ export default function KanjiDetailPage() {
       <div
         className="min-h-screen flex items-center justify-center"
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="text-center">
@@ -44,7 +44,7 @@ export default function KanjiDetailPage() {
       <div
         className="min-h-screen flex items-center justify-center"
         style={{
-          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="text-center bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4">
@@ -53,7 +53,7 @@ export default function KanjiDetailPage() {
             onClick={() => router.back()}
             className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
             style={{
-              background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+              backgroundColor: colors.primary,
             }}
           >
             Go Back
@@ -71,7 +71,7 @@ export default function KanjiDetailPage() {
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,7 +110,7 @@ export default function KanjiDetailPage() {
             <span
               className="px-4 py-1.5 text-white rounded-full text-sm font-bold shadow-md"
               style={{
-                background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                backgroundColor: colors.primary,
               }}
             >
               {kanji.kanjiData.jlptLevel}

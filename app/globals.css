@@ -1,13 +1,60 @@
 @import "tailwindcss";
 
+/* Hide body until theme is loaded to prevent FOUC */
+html:not(.theme-loaded) body {
+  visibility: hidden;
+  opacity: 0;
+}
+
+html.theme-loaded body {
+  visibility: visible;
+  opacity: 1;
+  animation: fadeIn 0.15s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 :root {
   --background: #f8f9fc;
   --foreground: #1a1a2e;
-  --theme-primary: #5B7FFF;
-  --theme-primary-dark: #4A6FEE;
-  --theme-primary-light: #E8ECFF;
+  /* Default theme - will be overridden by data-theme attribute */
+  --theme-primary: #3B82F6;
+  --theme-primary-dark: #2563EB;
+  --theme-primary-light: #DBEAFE;
   --gray-900: #111827;
   --white: #ffffff;
+}
+
+/* Theme overrides based on data-theme attribute */
+[data-theme="red"] {
+  --theme-primary: #EF4444;
+  --theme-primary-dark: #DC2626;
+  --theme-primary-light: #FEE2E2;
+}
+
+[data-theme="green"] {
+  --theme-primary: #22C55E;
+  --theme-primary-dark: #16A34A;
+  --theme-primary-light: #DCFCE7;
+}
+
+[data-theme="black"] {
+  --theme-primary: #1E293B;
+  --theme-primary-dark: #0F172A;
+  --theme-primary-light: #E2E8F0;
+}
+
+[data-theme="blue"] {
+  --theme-primary: #3B82F6;
+  --theme-primary-dark: #2563EB;
+  --theme-primary-light: #DBEAFE;
 }
 
 @theme inline {

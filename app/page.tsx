@@ -48,24 +48,24 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] pb-20 sm:pb-0">
+    <div className="min-h-screen bg-[#f8f9fc] pb-20 sm:pb-0" style={{ opacity: authLoading ? 0 : 1, transition: 'opacity 0.3s' }}>
       {/* Header */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+              <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
                 学
               </div>
-              <span className="text-white text-xl font-bold tracking-tight">
+              <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
                 Manabi
               </span>
             </div>
@@ -180,9 +180,8 @@ export default function Home() {
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight">
                 Learn Kanji,{" "}
                 <span
-                  className="bg-clip-text text-transparent"
                   style={{
-                    backgroundImage: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                    color: colors.primary,
                   }}
                 >
                   your way
@@ -197,7 +196,7 @@ export default function Home() {
                   href="/kanji-grid"
                   className="px-8 py-4 text-white rounded-full font-semibold shadow-xl text-lg hover:shadow-2xl"
                   style={{
-                    background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                    backgroundColor: colors.primary,
                   }}
                 >
                   Start Browsing
@@ -398,7 +397,7 @@ export default function Home() {
                 href="/kanji-grid"
                 className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
                 style={{
-                  background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  backgroundColor: colors.primary,
                 }}
               >
                 Browse Kanji
@@ -457,7 +456,7 @@ export default function Home() {
                     <div
                       className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-xl"
                       style={{
-                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+                        backgroundColor: colors.primary,
                       }}
                     >
                       {collection.name.charAt(0)}
@@ -551,7 +550,7 @@ export default function Home() {
                     <div
                       className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-lg"
                       style={{
-                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+                        backgroundColor: colors.primary,
                       }}
                     >
                       {collection.metadata?.jlptLevel || "漢"}
@@ -663,7 +662,7 @@ export default function Home() {
               href="/collections/create"
               className="absolute -top-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
               style={{
-                background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+                backgroundColor: colors.primary,
               }}
             >
               <svg

@@ -228,7 +228,7 @@ function EditCollectionForm() {
             href="/collections/manage"
             className="px-6 py-3 text-white rounded-full font-medium shadow-lg"
             style={{
-              background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+              backgroundColor: colors.primary,
             }}
           >
             Back to Manage
@@ -246,7 +246,7 @@ function EditCollectionForm() {
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

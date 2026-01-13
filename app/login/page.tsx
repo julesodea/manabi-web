@@ -22,7 +22,7 @@ export default function LoginPage() {
       <div
         className="min-h-screen flex items-center justify-center"
         style={{
-          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="text-6xl text-white animate-pulse">学</div>
@@ -34,7 +34,7 @@ export default function LoginPage() {
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4"
       style={{
-        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        backgroundColor: colors.primary,
       }}
     >
       <div className="w-full max-w-md text-center">

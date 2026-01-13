@@ -72,7 +72,7 @@ export default function ManageCollectionsPage() {
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,7 +137,7 @@ export default function ManageCollectionsPage() {
               href="/collections/create"
               className="inline-block px-6 py-3 text-white rounded-full font-medium shadow-lg"
               style={{
-                background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                backgroundColor: colors.primary,
               }}
             >
               Create Your First Collection
@@ -172,7 +172,7 @@ export default function ManageCollectionsPage() {
                     href={`/study/${collection.id}`}
                     className="px-4 py-2 text-white rounded-full text-sm font-medium shadow-lg"
                     style={{
-                      background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                      backgroundColor: colors.primary,
                     }}
                   >
                     Study

@@ -5,40 +5,39 @@ import Link from "next/link";
 import { useTheme, ThemeColor } from "@/lib/providers/ThemeProvider";
 import { useAuth } from "@/lib/providers/AuthProvider";
 
-const themeOptions: { color: ThemeColor; name: string; description: string }[] = [
-  {
-    color: "blue",
-    name: "Ocean Blue",
-    description: "Calm and professional",
-  },
-  {
-    color: "red",
-    name: "Sunset Red",
-    description: "Warm and energetic",
-  },
-  {
-    color: "green",
-    name: "Forest Green",
-    description: "Fresh and natural",
-  },
-  {
-    color: "purple",
-    name: "Royal Purple",
-    description: "Creative and elegant",
-  },
-  {
-    color: "black",
-    name: "Midnight Black",
-    description: "Sleek and modern",
-  },
-];
+const themeOptions: { color: ThemeColor; name: string; description: string }[] =
+  [
+    {
+      color: "blue",
+      name: "Ocean Blue",
+      description: "Calm and professional",
+    },
+    {
+      color: "red",
+      name: "Sunset Red",
+      description: "Warm and energetic",
+    },
+    {
+      color: "green",
+      name: "Forest Green",
+      description: "Fresh and natural",
+    },
+    {
+      color: "black",
+      name: "Midnight Black",
+      description: "Sleek and modern",
+    },
+  ];
 
-const previewGradients: Record<ThemeColor, string> = {
-  blue: "bg-gradient-to-br from-[#5B7FFF] to-[#4A6FEE]",
-  red: "bg-gradient-to-br from-[#F87171] to-[#EF4444]",
-  green: "bg-gradient-to-br from-[#4ADE80] to-[#22C55E]",
-  purple: "bg-gradient-to-br from-[#C084FC] to-[#A855F7]",
-  black: "bg-gradient-to-br from-[#374151] to-[#1F2937]",
+// Helper to get theme colors for preview
+const getThemeColors = (color: ThemeColor) => {
+  const colorMap: Record<ThemeColor, { primary: string; primaryDark: string }> = {
+    blue: { primary: "#3B82F6", primaryDark: "#2563EB" }, // blue-500, blue-600
+    red: { primary: "#EF4444", primaryDark: "#DC2626" }, // red-500, red-600
+    green: { primary: "#22C55E", primaryDark: "#16A34A" }, // green-500, green-600
+    black: { primary: "#1E293B", primaryDark: "#0F172A" }, // slate-800, slate-900
+  };
+  return colorMap[color];
 };
 
 export default function SettingsPage() {
@@ -65,9 +64,10 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-[#f8f9fc]">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r ${previewGradients[themeColor]} duration-300 ${
-          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"}`}
+        style={{
+          backgroundColor: colors.primary,
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -114,7 +114,9 @@ export default function SettingsPage() {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <p className="text-green-800 font-medium">Theme updated successfully!</p>
+            <p className="text-green-800 font-medium">
+              Theme updated successfully!
+            </p>
           </div>
         )}
 
@@ -173,7 +175,10 @@ export default function SettingsPage() {
               >
                 {/* Color Preview */}
                 <div
-                  className={`w-full h-24 ${previewGradients[option.color]} rounded-xl mb-4 shadow-md flex items-center justify-center`}
+                  className="w-full h-24 rounded-xl mb-4 shadow-md flex items-center justify-center"
+                  style={{
+                    backgroundColor: getThemeColors(option.color).primary,
+                  }}
                 >
                   <span className="text-4xl text-white font-bold drop-shadow-lg">
                     学
@@ -186,7 +191,9 @@ export default function SettingsPage() {
                     <h3 className="font-bold text-gray-900 mb-1">
                       {option.name}
                     </h3>
-                    <p className="text-sm text-gray-600">{option.description}</p>
+                    <p className="text-sm text-gray-600">
+                      {option.description}
+                    </p>
                   </div>
 
                   {/* Selected Indicator */}
@@ -230,7 +237,10 @@ export default function SettingsPage() {
             <div>
               <p className="text-sm text-gray-600 mb-2">Primary Button</p>
               <button
-                className={`px-6 py-3 bg-gradient-to-r ${previewGradients[themeColor]} text-white rounded-full font-semibold shadow-lg`}
+                className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+                style={{
+                  backgroundColor: colors.primary,
+                }}
               >
                 Start Learning
               </button>
@@ -241,7 +251,10 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-600 mb-2">Collection Card</p>
               <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 max-w-xs">
                 <div
-                  className={`aspect-[4/3] bg-gradient-to-br ${previewGradients[themeColor]} flex items-center justify-center p-6`}
+                  className="aspect-[4/3] flex items-center justify-center p-6"
+                  style={{
+                    backgroundColor: colors.primary,
+                  }}
                 >
                   <span className="text-6xl font-bold text-white/90 drop-shadow-lg">
                     漢
@@ -266,8 +279,18 @@ export default function SettingsPage() {
             href="/"
             className="flex flex-col items-center justify-center gap-1 text-gray-500"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
             </svg>
             <span className="text-xs font-medium">Home</span>
           </Link>
@@ -276,8 +299,18 @@ export default function SettingsPage() {
             href="/collections/manage"
             className="flex flex-col items-center justify-center gap-1 text-gray-500"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
             </svg>
             <span className="text-xs font-medium">Collections</span>
           </Link>
@@ -285,10 +318,23 @@ export default function SettingsPage() {
           <button className="flex flex-col items-center justify-center relative">
             <Link
               href="/collections/create"
-              className={`absolute -top-6 w-14 h-14 bg-gradient-to-br ${previewGradients[themeColor]} rounded-full flex items-center justify-center shadow-lg`}
+              className="absolute -top-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
+              style={{
+                backgroundColor: colors.primary,
+              }}
             >
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </Link>
           </button>
@@ -297,8 +343,18 @@ export default function SettingsPage() {
             href="/kanji-grid"
             className="flex flex-col items-center justify-center gap-1 text-gray-500"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
             <span className="text-xs font-medium">Cards</span>
           </Link>
@@ -308,9 +364,24 @@ export default function SettingsPage() {
             className="flex flex-col items-center justify-center gap-1"
             style={{ color: colors.primary }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
             <span className="text-xs font-medium">Settings</span>
           </Link>

@@ -375,7 +375,7 @@ export default function StudyPage() {
       <div
         className="font-medium min-h-screen flex items-center justify-center"
         style={{
-          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="text-center">
@@ -391,7 +391,7 @@ export default function StudyPage() {
       <div
         className="min-h-screen flex items-center justify-center"
         style={{
-          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="text-center bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4">
@@ -400,7 +400,7 @@ export default function StudyPage() {
             href="/"
             className="px-6 py-3 text-white rounded-full font-semibold shadow-lg inline-block"
             style={{
-              background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+              backgroundColor: colors.primary,
             }}
           >
             Go Home
@@ -442,7 +442,7 @@ export default function StudyPage() {
       <div
         className="min-h-screen"
         style={{
-          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <header
@@ -450,7 +450,7 @@ export default function StudyPage() {
             scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
           }`}
           style={{
-            background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+            backgroundColor: colors.primary,
           }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -511,7 +511,7 @@ export default function StudyPage() {
                   className="h-3 rounded-full duration-500"
                   style={{
                     width: `${accuracy}%`,
-                    background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                    backgroundColor: colors.primary,
                   }}
                 />
               </div>
@@ -569,7 +569,7 @@ export default function StudyPage() {
                 }}
                 className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
                 style={{
-                  background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  backgroundColor: colors.primary,
                 }}
               >
                 Study Again
@@ -585,7 +585,7 @@ export default function StudyPage() {
     <div
       className="min-h-screen"
       style={{
-        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
+        backgroundColor: colors.primary,
       }}
     >
       {/* Header */}
@@ -594,7 +594,7 @@ export default function StudyPage() {
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

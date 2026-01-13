@@ -138,7 +138,7 @@ function CreateCollectionForm() {
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -262,7 +262,7 @@ function CreateCollectionForm() {
                 }
                 className="flex-1 px-4 py-3 text-white rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                  backgroundColor: colors.primary,
                 }}
               >
                 {createCollection.isPending
@@ -290,7 +290,7 @@ function CreateCollectionForm() {
                 <div
                   className="p-2 rounded-full text-white"
                   style={{
-                    background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                    backgroundColor: colors.primary,
                   }}
                 >
                   <svg
@@ -323,7 +323,7 @@ function CreateCollectionForm() {
                   style={
                     selectedLevel === level
                       ? {
-                          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                          backgroundColor: colors.primary,
                         }
                       : undefined
                   }
@@ -380,7 +380,7 @@ function CreateCollectionForm() {
                       <div
                         className="absolute top-2 right-2 text-white rounded-full w-5 h-5 flex items-center justify-center"
                         style={{
-                          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+                          backgroundColor: colors.primary,
                         }}
                       >
                         <svg

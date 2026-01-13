@@ -146,7 +146,7 @@ function KanjiGridContent() {
           scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
         }`}
         style={{
-          background: `linear-gradient(to right, ${colors.primary}, ${colors.primaryDark})`,
+          backgroundColor: colors.primary,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -166,14 +166,14 @@ function KanjiGridContent() {
               <input
                 type="text"
                 placeholder="Search meanings, readings..."
-                className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-6 py-2.5 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
+                className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <div className="pr-2 py-1">
-                <div className="p-2 bg-white/20 rounded-full text-white">
+              <div className="pr-1.5 py-0.5">
+                <div className="p-1.5 bg-white/20 rounded-full text-white">
                   <svg
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth={3}
@@ -418,7 +418,12 @@ export default function KanjiGridPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] flex items-center justify-center">
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{
+            backgroundColor: 'var(--theme-primary)'
+          }}
+        >
           <div className="text-6xl text-white animate-pulse">学</div>
         </div>
       }
