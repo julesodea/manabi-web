@@ -127,54 +127,25 @@ export default function StudyPage() {
     }
   }, [characterData, loading, collectionId, startSession, shuffleMode]);
 
-  // Auto-focus input on iOS and other devices when card changes
-  // iOS Safari requires user interaction, so we try multiple strategies
+  // Auto-focus input on desktop (not iOS) when card changes
   useEffect(() => {
+    // Detect if device is iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     if (
+      !isIOS &&
       studyMode === "flashcard" &&
       !flipped &&
       !answerResult &&
       !sessionComplete &&
       inputRef.current
     ) {
-      // Try multiple times with increasing delays for iOS Safari
-      const timers = [
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 100),
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 300),
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 500),
-      ];
-      return () => timers.forEach(clearTimeout);
+      // Focus input on desktop
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   }, [currentIndex, answerResult, flipped, sessionComplete, studyMode]);
-
-  // Handle card tap to focus input (iOS workaround)
-  const handleCardTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // Don't focus if clicking directly on the input
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.closest('input')) {
-      return;
-    }
-    
-    if (
-      studyMode === "flashcard" &&
-      !flipped &&
-      !answerResult &&
-      inputRef.current
-    ) {
-      // Use requestAnimationFrame for better iOS compatibility
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 0);
-      });
-    }
-  }, [studyMode, flipped, answerResult]);
 
   // Check if user input matches any reading or meaning
   const checkUserInput = useCallback(
@@ -259,14 +230,13 @@ export default function StudyPage() {
         setInputResult(null);
         setUserInput("");
 
-        // Focus input immediately - we're still in the user interaction context
-        // Multiple attempts to ensure it works on iOS
-        requestAnimationFrame(() => {
-          inputRef.current?.focus();
-          setTimeout(() => inputRef.current?.focus(), 50);
-          setTimeout(() => inputRef.current?.focus(), 150);
-          setTimeout(() => inputRef.current?.focus(), 300);
-        });
+        // Auto-focus on desktop after moving to next card
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (!isIOS) {
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 100);
+        }
       }
     }, 2000);
   }, [
@@ -738,7 +708,7 @@ export default function StudyPage() {
                 `}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
-                  <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold">
+                  <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
                     {currentCharacter?.character}
                   </div>
                   <p className="text-gray-600 text-sm mt-4 font-medium">
@@ -813,25 +783,19 @@ export default function StudyPage() {
                   duration-500
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
-                  ${!answerResult && !flipped ? "cursor-pointer" : ""}
                 `}
-                onClick={handleCardTap}
-                onTouchStart={handleCardTap}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
                   {!flipped ? (
                     // Front: Kanji character with input
                     <div className="text-center w-full">
-                      <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8 font-bold">
+                      <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8">
                         {currentCharacter?.character}
                       </div>
                       <p className="text-gray-600 text-sm mb-4 font-medium">
                         Type the reading or meaning
-                        <span className="block text-xs text-gray-400 mt-1 md:hidden">
-                          Tap card to focus input
-                        </span>
                       </p>
-                      <div className="w-full max-w-xs flex items-center gap-2">
+                      <div className="w-full max-w-xs mx-auto flex items-center gap-2">
                         <input
                           ref={inputRef}
                           type="text"
@@ -847,45 +811,15 @@ export default function StudyPage() {
                               handleInputSubmit();
                             }
                           }}
-                          onClick={(e) => e.stopPropagation()}
-                          onFocus={(e) => e.stopPropagation()}
                           disabled={!!answerResult}
                           placeholder="Type your answer..."
-                          autoFocus
                           className="flex-1 px-4 py-3 border-2 rounded-xl text-center text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           style={{
                             borderColor: colors.primary,
-                            fontSize: '16px', // Prevents iOS zoom on focus
+                            fontSize: "16px", // Prevents iOS zoom on focus
                             ["--tw-ring-color" as string]: `${colors.primary}33`,
                           }}
                         />
-                        {!answerResult && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              inputRef.current?.focus();
-                            }}
-                            className="md:hidden p-2 rounded-lg"
-                            style={{ backgroundColor: colors.primaryLight }}
-                            aria-label="Focus input"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              style={{ color: colors.primary }}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                              />
-                            </svg>
-                          </button>
-                        )}
                       </div>
                       <p className="text-gray-500 text-xs mt-2">
                         Press Enter to check

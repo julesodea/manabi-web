@@ -86,7 +86,9 @@ export default function KanjiDetailPage() {
                 </span>
               </Link>
               <div className="hidden sm:block h-6 w-px bg-white/30" />
-              <span className="text-3xl hidden sm:block text-white">{kanji.character}</span>
+              <span className="text-3xl hidden sm:block text-white">
+                {kanji.character}
+              </span>
             </div>
 
             <button
@@ -103,7 +105,7 @@ export default function KanjiDetailPage() {
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-12">
         {/* Kanji Hero */}
         <div className="bg-white rounded-3xl p-8 mb-8 text-center shadow-xl border border-gray-100">
-          <div className="text-9xl mb-6 text-gray-900 font-bold">{kanji.character}</div>
+          <div className="text-9xl mb-6 text-gray-900">{kanji.character}</div>
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <span
               className="px-4 py-1.5 text-white rounded-full text-sm font-bold shadow-md"

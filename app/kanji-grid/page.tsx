@@ -311,18 +311,10 @@ function KanjiGridContent() {
                   <div className="group cursor-pointer">
                     <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                       {/* Card Image Area */}
-                      <div
-                        className="relative aspect-square duration-300"
-                        style={{
-                          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.primaryDark})`,
-                        }}
-                      >
+                      <div className="relative aspect-square duration-300 bg-white border-b border-gray-100">
                         {/* Selection Indicator */}
                         {selectionMode && isSelected && (
-                          <div
-                            className="absolute top-3 right-3 z-10 bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg"
-                            style={{ color: colors.primary }}
-                          >
+                          <div className="absolute top-3 right-3 z-10 bg-gray-900 rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-white">
                             <svg
                               className="w-5 h-5"
                               fill="none"
@@ -341,16 +333,13 @@ function KanjiGridContent() {
 
                         {/* Kanji Character */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-7xl sm:text-8xl text-white">
+                          <span className="text-7xl sm:text-8xl text-gray-900">
                             {k.character}
                           </span>
                         </div>
 
                         {/* Level Badge */}
-                        <div
-                          className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-md text-xs font-bold"
-                          style={{ color: colors.primary }}
-                        >
+                        <div className="absolute top-3 left-3 bg-gray-100 px-2.5 py-1 rounded-lg shadow-md text-xs font-bold text-gray-900">
                           {k.kanjiData.jlptLevel}
                         </div>
                       </div>
