@@ -128,6 +128,7 @@ export default function StudyPage() {
   }, [characterData, loading, collectionId, startSession, shuffleMode]);
 
   // Auto-focus input on iOS and other devices when card changes
+  // iOS Safari requires user interaction, so we try multiple strategies
   useEffect(() => {
     if (
       studyMode === "flashcard" &&
@@ -136,13 +137,44 @@ export default function StudyPage() {
       !sessionComplete &&
       inputRef.current
     ) {
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
+      // Try multiple times with increasing delays for iOS Safari
+      const timers = [
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 100),
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 300),
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 500),
+      ];
+      return () => timers.forEach(clearTimeout);
     }
   }, [currentIndex, answerResult, flipped, sessionComplete, studyMode]);
+
+  // Handle card tap to focus input (iOS workaround)
+  const handleCardTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // Don't focus if clicking directly on the input
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.closest('input')) {
+      return;
+    }
+    
+    if (
+      studyMode === "flashcard" &&
+      !flipped &&
+      !answerResult &&
+      inputRef.current
+    ) {
+      // Use requestAnimationFrame for better iOS compatibility
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
+      });
+    }
+  }, [studyMode, flipped, answerResult]);
 
   // Check if user input matches any reading or meaning
   const checkUserInput = useCallback(
@@ -226,6 +258,15 @@ export default function StudyPage() {
         setAnswerResult(null);
         setInputResult(null);
         setUserInput("");
+
+        // Focus input immediately - we're still in the user interaction context
+        // Multiple attempts to ensure it works on iOS
+        requestAnimationFrame(() => {
+          inputRef.current?.focus();
+          setTimeout(() => inputRef.current?.focus(), 50);
+          setTimeout(() => inputRef.current?.focus(), 150);
+          setTimeout(() => inputRef.current?.focus(), 300);
+        });
       }
     }, 2000);
   }, [
@@ -772,7 +813,10 @@ export default function StudyPage() {
                   duration-500
                   ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
                   ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
+                  ${!answerResult && !flipped ? "cursor-pointer" : ""}
                 `}
+                onClick={handleCardTap}
+                onTouchStart={handleCardTap}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
                   {!flipped ? (
@@ -783,26 +827,66 @@ export default function StudyPage() {
                       </div>
                       <p className="text-gray-600 text-sm mb-4 font-medium">
                         Type the reading or meaning
+                        <span className="block text-xs text-gray-400 mt-1 md:hidden">
+                          Tap card to focus input
+                        </span>
                       </p>
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={userInput}
-                        onChange={(e) => setUserInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && userInput.trim()) {
-                            handleInputSubmit();
-                          }
-                        }}
-                        disabled={!!answerResult}
-                        placeholder="Type your answer..."
-                        autoFocus
-                        className="w-full max-w-xs px-4 py-3 border-2 rounded-xl text-center text-base text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        style={{
-                          borderColor: colors.primary,
-                          ["--tw-ring-color" as string]: `${colors.primary}33`,
-                        }}
-                      />
+                      <div className="w-full max-w-xs flex items-center gap-2">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          inputMode="text"
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck="false"
+                          value={userInput}
+                          onChange={(e) => setUserInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && userInput.trim()) {
+                              handleInputSubmit();
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={(e) => e.stopPropagation()}
+                          disabled={!!answerResult}
+                          placeholder="Type your answer..."
+                          autoFocus
+                          className="flex-1 px-4 py-3 border-2 rounded-xl text-center text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          style={{
+                            borderColor: colors.primary,
+                            fontSize: '16px', // Prevents iOS zoom on focus
+                            ["--tw-ring-color" as string]: `${colors.primary}33`,
+                          }}
+                        />
+                        {!answerResult && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              inputRef.current?.focus();
+                            }}
+                            className="md:hidden p-2 rounded-lg"
+                            style={{ backgroundColor: colors.primaryLight }}
+                            aria-label="Focus input"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              style={{ color: colors.primary }}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                       <p className="text-gray-500 text-xs mt-2">
                         Press Enter to check
                       </p>
@@ -888,7 +972,10 @@ export default function StudyPage() {
               {!flipped && !answerResult && (
                 <div className="mt-4 md:mt-6">
                   <button
-                    onClick={handleInputSubmit}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleInputSubmit();
+                    }}
                     disabled={!userInput.trim()}
                     className="w-full py-4 md:py-6 bg-white rounded-2xl font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ color: colors.primary }}
