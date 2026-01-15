@@ -167,7 +167,7 @@ function KanjiGridContent() {
               <input
                 type="text"
                 placeholder="Search meanings, readings..."
-                className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
+                className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -260,27 +260,10 @@ function KanjiGridContent() {
                 <input
                   type="text"
                   placeholder="Search meanings, readings..."
-                  className="grow bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
+                  className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-full text-white"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <div className="pr-2 py-0.5">
-                  <div className="p-1.5 bg-white/20 rounded-full text-white">
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -327,7 +310,7 @@ function KanjiGridContent() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-56 md:pt-44 pb-20">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {[...Array(15)].map((_, i) => (
