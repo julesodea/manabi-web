@@ -6,7 +6,7 @@ import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 
-export default function Home() {
+export default function Home() {c
   const { user, loading: authLoading, signOut } = useAuth();
   const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
@@ -177,7 +177,7 @@ export default function Home() {
         <section className="pt-24 pb-12 sm:pt-32 sm:pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-3xl lg:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
                 Learn Kanji,{" "}
                 <span
                   style={{
@@ -203,7 +203,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/collections/create"
-                  className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold shadow-lg text-lg "
+                  className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold text-lg"
                 >
                   Create Collection
                 </Link>
@@ -404,7 +404,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/collections/create"
-                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold shadow-sm "
+                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
               >
                 Create Collection
               </Link>
