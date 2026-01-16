@@ -6,7 +6,7 @@ import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 
-export default function Home() {c
+export default function Home() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
