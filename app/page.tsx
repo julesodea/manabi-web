@@ -157,11 +157,9 @@ export default function Home() {
                       </Link>
                       <Link
                         href="/login"
-                        className="px-4 py-2 border border-white/30 rounded-full hover:bg-white/20 transition"
+                        className="px-4 py-2 border border-white/30 rounded-full hover:bg-white/20 transition inline-flex items-center justify-center text-sm font-medium text-white leading-none"
                       >
-                        <span className="text-sm font-medium text-white">
-                          Sign in
-                        </span>
+                        Sign in
                       </Link>
                     </>
                   )}
@@ -194,7 +192,7 @@ export default function Home() {
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/kanji-grid"
-                  className="px-8 py-4 text-white rounded-full font-semibold shadow-xl text-lg hover:shadow-2xl"
+                  className="px-6 py-3 text-white rounded-full font-semibold shadow-xl text-base hover:shadow-2xl"
                   style={{
                     backgroundColor: colors.primary,
                   }}
@@ -203,7 +201,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/collections/create"
-                  className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold text-lg"
+                  className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold text-base"
                 >
                   Create Collection
                 </Link>
