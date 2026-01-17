@@ -82,7 +82,13 @@ export default function StudyPage() {
 
   // Save session when complete (only for logged-in users who completed full collection)
   useEffect(() => {
-    if (!sessionComplete || !user || !sessionStartTime || !collection) {
+    // Only run when session becomes complete
+    if (!sessionComplete) {
+      return;
+    }
+
+    // Need user and collection data
+    if (!user || !sessionStartTime || !collection) {
       return;
     }
 
@@ -100,46 +106,37 @@ export default function StudyPage() {
     saveAttemptedRef.current = true;
     setSavingSession(true);
 
-    const saveSession = async () => {
-      try {
-        const response = await fetch("/api/learning/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            collectionId,
-            startTime: sessionStartTime,
-            endTime: Date.now(),
-            reviewedCount: sessionStats.total,
-            correctCount: sessionStats.correct,
-            incorrectCount: sessionStats.incorrect,
-            characterResults: getCharacterResults(),
-            totalCharacters: totalCharactersInCollection,
-          }),
-        });
+    // Capture values at time of save
+    const dataToSave = {
+      collectionId,
+      startTime: sessionStartTime,
+      endTime: Date.now(),
+      reviewedCount: sessionStats.total,
+      correctCount: sessionStats.correct,
+      incorrectCount: sessionStats.incorrect,
+      characterResults: getCharacterResults(),
+      totalCharacters: totalCharactersInCollection,
+    };
 
-        const data = await response.json();
+    fetch("/api/learning/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dataToSave),
+    })
+      .then((response) => response.json())
+      .then((data) => {
         if (data.saved) {
           setSessionSaved(true);
         }
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("Failed to save session:", error);
-      } finally {
+      })
+      .finally(() => {
         setSavingSession(false);
-      }
-    };
-
-    saveSession();
-  }, [
-    sessionComplete,
-    user,
-    sessionStartTime,
-    collection,
-    collectionId,
-    sessionStats.total,
-    sessionStats.correct,
-    sessionStats.incorrect,
-    getCharacterResults,
-  ]);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionComplete]);
 
   // Determine study mode from collection
   const studyMode = collection?.studyMode || "flashcard";
