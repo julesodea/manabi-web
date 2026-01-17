@@ -68,6 +68,7 @@ export default function StudyPage() {
   >(null);
   const [sessionSaved, setSessionSaved] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
+  const saveAttemptedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Handle scroll for sticky header shadow
@@ -81,26 +82,25 @@ export default function StudyPage() {
 
   // Save session when complete (only for logged-in users who completed full collection)
   useEffect(() => {
+    if (!sessionComplete || !user || !sessionStartTime || !collection) {
+      return;
+    }
+
+    // Prevent multiple save attempts
+    if (saveAttemptedRef.current) {
+      return;
+    }
+
+    // Only save if user completed the full collection
+    const totalCharactersInCollection = collection.characterIds.length;
+    if (sessionStats.total < totalCharactersInCollection) {
+      return;
+    }
+
+    saveAttemptedRef.current = true;
+    setSavingSession(true);
+
     const saveSession = async () => {
-      if (
-        !sessionComplete ||
-        !user ||
-        sessionSaved ||
-        savingSession ||
-        !sessionStartTime ||
-        !collection
-      ) {
-        return;
-      }
-
-      // Only save if user completed the full collection
-      const totalCharactersInCollection = collection.characterIds.length;
-      if (sessionStats.total < totalCharactersInCollection) {
-        return;
-      }
-
-      setSavingSession(true);
-
       try {
         const response = await fetch("/api/learning/session", {
           method: "POST",
@@ -132,12 +132,12 @@ export default function StudyPage() {
   }, [
     sessionComplete,
     user,
-    sessionSaved,
-    savingSession,
     sessionStartTime,
     collection,
     collectionId,
-    sessionStats,
+    sessionStats.total,
+    sessionStats.correct,
+    sessionStats.incorrect,
     getCharacterResults,
   ]);
 
@@ -493,6 +493,7 @@ export default function StudyPage() {
       setSelectedOptionIndex(null);
       setSessionKey((prev) => prev + 1); // Force regeneration of multiple choice options
       setSessionSaved(false);
+      saveAttemptedRef.current = false;
 
       const failedChars = getIncorrectCharacters();
 
@@ -651,6 +652,7 @@ export default function StudyPage() {
                   setSelectedOptionIndex(null);
                   setSessionKey((prev) => prev + 1);
                   setSessionSaved(false);
+                  saveAttemptedRef.current = false;
                   if (characterData) {
                     const chars = shuffleMode
                       ? [...characterData.characters].sort(
