@@ -72,6 +72,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Save session results (per-card results)
+    if (characterResults && characterResults.length > 0) {
+      const sessionResultsData = characterResults.map((result: { characterId: string; correct: boolean }) => ({
+        session_id: session.id,
+        character_id: result.characterId,
+        correct: result.correct,
+      }));
+
+      const { error: resultsError } = await supabase
+        .from('session_results')
+        .insert(sessionResultsData);
+
+      if (resultsError) {
+        console.error('[saveSessionResults] Error:', resultsError);
+      }
+    }
+
     // Get or create user stats
     let { data: stats } = await supabase
       .from('user_stats')

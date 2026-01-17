@@ -94,6 +94,15 @@ CREATE TABLE study_sessions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Session results table (tracks per-card results for each session)
+CREATE TABLE session_results (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id TEXT NOT NULL REFERENCES study_sessions(id) ON DELETE CASCADE,
+  character_id TEXT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+  correct BOOLEAN NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- User stats table (aggregated statistics)
 CREATE TABLE user_stats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -124,11 +133,13 @@ CREATE INDEX idx_learning_progress_character_id ON learning_progress(character_i
 CREATE INDEX idx_learning_progress_next_review ON learning_progress(next_review_date);
 CREATE INDEX idx_study_sessions_user_id ON study_sessions(user_id);
 CREATE INDEX idx_study_sessions_collection_id ON study_sessions(collection_id);
+CREATE INDEX idx_session_results_session_id ON session_results(session_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE collections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE learning_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE study_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_stats ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for collections
@@ -173,6 +184,23 @@ CREATE POLICY "Users can view their own sessions"
 CREATE POLICY "Users can insert their own sessions"
   ON study_sessions FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- RLS Policies for session_results
+CREATE POLICY "Users can view their own session results"
+  ON session_results FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM study_sessions
+    WHERE study_sessions.id = session_results.session_id
+    AND study_sessions.user_id = auth.uid()
+  ));
+
+CREATE POLICY "Users can insert their own session results"
+  ON session_results FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM study_sessions
+    WHERE study_sessions.id = session_results.session_id
+    AND study_sessions.user_id = auth.uid()
+  ));
 
 -- RLS Policies for user_stats
 CREATE POLICY "Users can view their own stats"

@@ -6,6 +6,13 @@ import { useTheme } from "@/lib/providers/ThemeProvider";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import { useCollections } from "@/lib/hooks/useCollections";
 
+interface SessionResultItem {
+  characterId: string;
+  character: string;
+  meaning: string;
+  correct: boolean;
+}
+
 interface StudySession {
   id: string;
   collectionId: string;
@@ -14,6 +21,7 @@ interface StudySession {
   reviewedCount: number;
   correctCount: number;
   incorrectCount: number;
+  results?: SessionResultItem[];
 }
 
 interface UserStats {
@@ -31,6 +39,19 @@ export default function StatsPage() {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
+
+  const toggleSession = (sessionId: string) => {
+    setExpandedSessions((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) {
+        next.delete(sessionId);
+      } else {
+        next.add(sessionId);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -295,42 +316,115 @@ export default function StatsPage() {
                             (session.correctCount / session.reviewedCount) * 100
                           )
                         : 0;
+                    const isExpanded = expandedSessions.has(session.id);
+                    const hasResults = session.results && session.results.length > 0;
+                    const correctResults = session.results?.filter(r => r.correct) || [];
+                    const incorrectResults = session.results?.filter(r => !r.correct) || [];
 
                     return (
                       <div
                         key={session.id}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                        className="bg-gray-50 rounded-xl overflow-hidden"
                       >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 truncate">
-                            {getCollectionName(session.collectionId)}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {formatDate(session.endTime)} •{" "}
-                            {formatDuration(session.startTime, session.endTime)}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4 ml-4">
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">
-                              {session.reviewedCount} cards
+                        <button
+                          onClick={() => toggleSession(session.id)}
+                          className="w-full flex items-center justify-between p-4 hover:bg-gray-100 transition-colors text-left"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 truncate">
+                              {getCollectionName(session.collectionId)}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {session.correctCount} correct
+                            <div className="text-sm text-gray-500">
+                              {formatDate(session.endTime)} •{" "}
+                              {formatDuration(session.startTime, session.endTime)}
                             </div>
                           </div>
-                          <div
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              accuracy >= 80
-                                ? "bg-green-100 text-green-700"
-                                : accuracy >= 60
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-red-100 text-red-700"
-                            }`}
-                          >
-                            {accuracy}%
+                          <div className="flex items-center gap-4 ml-4">
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-gray-900">
+                                {session.reviewedCount} cards
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {session.correctCount} correct
+                              </div>
+                            </div>
+                            <div
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                accuracy >= 80
+                                  ? "bg-green-100 text-green-700"
+                                  : accuracy >= 60
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {accuracy}%
+                            </div>
+                            <svg
+                              className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
                           </div>
-                        </div>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="px-4 pb-4 border-t border-gray-200">
+                            {hasResults ? (
+                              <div className="pt-4 space-y-4">
+                                {correctResults.length > 0 && (
+                                  <div>
+                                    <div className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1">
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      Correct ({correctResults.length})
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {correctResults.map((result) => (
+                                        <div
+                                          key={result.characterId}
+                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg"
+                                        >
+                                          <span className="text-lg font-medium text-gray-900">{result.character}</span>
+                                          <span className="text-sm text-gray-600">{result.meaning}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {incorrectResults.length > 0 && (
+                                  <div>
+                                    <div className="text-sm font-medium text-red-700 mb-2 flex items-center gap-1">
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                      Incorrect ({incorrectResults.length})
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {incorrectResults.map((result) => (
+                                        <div
+                                          key={result.characterId}
+                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg"
+                                        >
+                                          <span className="text-lg font-medium text-gray-900">{result.character}</span>
+                                          <span className="text-sm text-gray-600">{result.meaning}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="pt-4 text-sm text-gray-500 text-center">
+                                No detailed results available for this session.
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
