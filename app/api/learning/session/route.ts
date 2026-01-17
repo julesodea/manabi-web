@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     const { data: session, error: sessionError } = await supabase
       .from('study_sessions')
       .insert({
+        id: crypto.randomUUID(),
         user_id: user.id,
         collection_id: collectionId,
         start_time: startTime,

@@ -80,63 +80,57 @@ export default function StudyPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Save session when complete (only for logged-in users who completed full collection)
-  useEffect(() => {
-    // Only run when session becomes complete
-    if (!sessionComplete) {
-      return;
-    }
-
-    // Need user and collection data
+  // Save session function
+  const saveSessionToServer = useCallback(async () => {
     if (!user || !sessionStartTime || !collection) {
       return;
     }
 
-    // Prevent multiple save attempts
-    if (saveAttemptedRef.current) {
-      return;
-    }
+    const totalCharactersInCollection = collection.characterIds.length;
 
     // Only save if user completed the full collection
-    const totalCharactersInCollection = collection.characterIds.length;
     if (sessionStats.total < totalCharactersInCollection) {
       return;
     }
 
-    saveAttemptedRef.current = true;
     setSavingSession(true);
 
-    // Capture values at time of save
-    const dataToSave = {
-      collectionId,
-      startTime: sessionStartTime,
-      endTime: Date.now(),
-      reviewedCount: sessionStats.total,
-      correctCount: sessionStats.correct,
-      incorrectCount: sessionStats.incorrect,
-      characterResults: getCharacterResults(),
-      totalCharacters: totalCharactersInCollection,
-    };
-
-    fetch("/api/learning/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataToSave),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.saved) {
-          setSessionSaved(true);
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to save session:", error);
-      })
-      .finally(() => {
-        setSavingSession(false);
+    try {
+      const response = await fetch("/api/learning/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          collectionId,
+          startTime: sessionStartTime,
+          endTime: Date.now(),
+          reviewedCount: sessionStats.total,
+          correctCount: sessionStats.correct,
+          incorrectCount: sessionStats.incorrect,
+          characterResults: getCharacterResults(),
+          totalCharacters: totalCharactersInCollection,
+        }),
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionComplete]);
+
+      const data = await response.json();
+      if (data.saved) {
+        setSessionSaved(true);
+      }
+    } catch (error) {
+      console.error("Failed to save session:", error);
+    } finally {
+      setSavingSession(false);
+    }
+  }, [user, sessionStartTime, collection, collectionId, sessionStats, getCharacterResults]);
+
+  // Save session when complete (only for logged-in users who completed full collection)
+  useEffect(() => {
+    if (!sessionComplete || saveAttemptedRef.current) {
+      return;
+    }
+
+    saveAttemptedRef.current = true;
+    saveSessionToServer();
+  }, [sessionComplete, saveSessionToServer]);
 
   // Determine study mode from collection
   const studyMode = collection?.studyMode || "flashcard";
