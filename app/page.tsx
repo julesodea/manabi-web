@@ -226,7 +226,7 @@ export default function Home() {
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/kanji-grid"
-                  className="px-6 py-3 text-white rounded-full font-semibold shadow-xl text-base hover:shadow-2xl"
+                  className="px-5 py-2 text-white rounded-full font-semibold shadow-xl text-base hover:shadow-2xl"
                   style={{
                     backgroundColor: colors.primary,
                   }}
@@ -235,7 +235,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/collections/create"
-                  className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold text-base"
+                  className="px-5 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold text-base"
                 >
                   Create Collection
                 </Link>
@@ -427,7 +427,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/kanji-grid"
-                className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+                className="px-5 py-2 text-white rounded-full font-semibold shadow-lg"
                 style={{
                   backgroundColor: colors.primary,
                 }}
@@ -436,13 +436,13 @@ export default function Home() {
               </Link>
               <Link
                 href="/collections/create"
-                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
+                className="px-5 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
               >
                 Create Collection
               </Link>
               <Link
                 href="/stats"
-                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
+                className="px-5 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
               >
                 View Stats
               </Link>

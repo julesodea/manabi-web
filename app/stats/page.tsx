@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import { useCollections } from "@/lib/hooks/useCollections";
+import { KanjiDetailModal } from "@/components/ui/KanjiDetailModal";
 
 interface SessionResultItem {
   characterId: string;
@@ -40,6 +41,7 @@ export default function StatsPage() {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
+  const [selectedKanjiId, setSelectedKanjiId] = useState<string | null>(null);
 
   const toggleSession = (sessionId: string) => {
     setExpandedSessions((prev) => {
@@ -220,7 +222,7 @@ export default function StatsPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-24 pb-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Stats</h1>
 
         {loading ? (
@@ -384,13 +386,14 @@ export default function StatsPage() {
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                       {correctResults.map((result) => (
-                                        <div
+                                        <button
                                           key={result.characterId}
-                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg"
+                                          onClick={() => setSelectedKanjiId(result.characterId)}
+                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:border-green-300 transition-colors cursor-pointer"
                                         >
                                           <span className="text-lg font-medium text-gray-900">{result.character}</span>
                                           <span className="text-sm text-gray-600">{result.meaning}</span>
-                                        </div>
+                                        </button>
                                       ))}
                                     </div>
                                   </div>
@@ -406,13 +409,14 @@ export default function StatsPage() {
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                       {incorrectResults.map((result) => (
-                                        <div
+                                        <button
                                           key={result.characterId}
-                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg"
+                                          onClick={() => setSelectedKanjiId(result.characterId)}
+                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer"
                                         >
                                           <span className="text-lg font-medium text-gray-900">{result.character}</span>
                                           <span className="text-sm text-gray-600">{result.meaning}</span>
-                                        </div>
+                                        </button>
                                       ))}
                                     </div>
                                   </div>
@@ -483,6 +487,13 @@ export default function StatsPage() {
           </>
         )}
       </main>
+
+      {/* Kanji Detail Modal */}
+      <KanjiDetailModal
+        isOpen={selectedKanjiId !== null}
+        onClose={() => setSelectedKanjiId(null)}
+        kanjiId={selectedKanjiId || ""}
+      />
     </div>
   );
 }
