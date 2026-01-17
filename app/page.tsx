@@ -6,12 +6,21 @@ import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 
+interface UserStats {
+  study_streak: number;
+  total_reviews: number;
+  characters_learned: number;
+  total_study_time: number;
+}
+
 export default function Home() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [shouldLoadCollections, setShouldLoadCollections] = useState(false);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   // Defer loading collections until needed
   const { data: collections = [], isLoading: loading } = useCollections(
@@ -36,6 +45,31 @@ export default function Home() {
     if (user) {
       setShouldLoadCollections(true);
     }
+  }, [user]);
+
+  // Fetch user stats when logged in
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) {
+        setUserStats(null);
+        return;
+      }
+
+      setStatsLoading(true);
+      try {
+        const response = await fetch('/api/learning/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setUserStats(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user stats:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
   }, [user]);
 
   // Handle scroll for sticky header shadow
@@ -321,13 +355,13 @@ export default function Home() {
                   </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {loading || !shouldLoadCollections ? (
+                  {statsLoading ? (
                     <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
-                    0
+                    userStats?.study_streak ?? 0
                   )}
                 </div>
-                <div className="text-sm text-gray-600">Day Streak</div>
+                <div className="text-sm text-gray-600">Sessions</div>
               </div>
 
               <div className="rounded-xl p-5 border border-gray-200">
@@ -350,10 +384,10 @@ export default function Home() {
                   </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {loading || !shouldLoadCollections ? (
+                  {statsLoading ? (
                     <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
-                    0
+                    userStats?.characters_learned ?? 0
                   )}
                 </div>
                 <div className="text-sm text-gray-600">Kanji Learned</div>
@@ -379,13 +413,13 @@ export default function Home() {
                   </svg>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {loading || !shouldLoadCollections ? (
+                  {statsLoading ? (
                     <div className="h-8 w-12 bg-gray-100 animate-pulse rounded"></div>
                   ) : (
-                    0
+                    userStats?.total_reviews ?? 0
                   )}
                 </div>
-                <div className="text-sm text-gray-600">Reviews Due</div>
+                <div className="text-sm text-gray-600">Total Reviews</div>
               </div>
             </div>
 
@@ -405,6 +439,12 @@ export default function Home() {
                 className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
               >
                 Create Collection
+              </Link>
+              <Link
+                href="/stats"
+                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-semibold"
+              >
+                View Stats
               </Link>
             </div>
           </div>
@@ -680,7 +720,7 @@ export default function Home() {
           </button>
 
           <Link
-            href="/kanji-grid"
+            href="/stats"
             className="flex flex-col items-center justify-center gap-1.5 text-gray-500 transition-colors"
             style={{ ['--hover-color' as string]: colors.primary }}
             onMouseEnter={(e) => (e.currentTarget.style.color = colors.primary)}
@@ -696,10 +736,10 @@ export default function Home() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
               />
             </svg>
-            <span className="text-xs font-medium">Cards</span>
+            <span className="text-xs font-medium">Stats</span>
           </Link>
 
           <Link

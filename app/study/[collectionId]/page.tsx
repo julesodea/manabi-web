@@ -8,6 +8,7 @@ import {
   useCollectionCharacters,
 } from "@/lib/hooks/useCollections";
 import { useStudyStore } from "@/lib/stores/studyStore";
+import { useAuth } from "@/lib/providers/AuthProvider";
 import { KanjiData } from "@/types";
 import { toHiragana, toKatakana } from "wanakana";
 import { useTheme } from "@/lib/providers/ThemeProvider";
@@ -24,6 +25,7 @@ export default function StudyPage() {
   const router = useRouter();
   const collectionId = params.collectionId as string;
   const { colors } = useTheme();
+  const { user } = useAuth();
 
   // React Query
   const { data: collection } = useCollection(collectionId);
@@ -36,11 +38,13 @@ export default function StudyPage() {
     characters,
     kanjiData,
     sessionStats,
+    sessionStartTime,
     startSession,
     nextCharacter,
     recordAnswer: recordAnswerInStore,
     resetSession,
     getIncorrectCharacters,
+    getCharacterResults,
     incorrectCharacterIds,
   } = useStudyStore();
 
@@ -62,6 +66,8 @@ export default function StudyPage() {
   const [inputResult, setInputResult] = useState<
     "correct" | "incorrect" | null
   >(null);
+  const [sessionSaved, setSessionSaved] = useState(false);
+  const [savingSession, setSavingSession] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Handle scroll for sticky header shadow
@@ -72,6 +78,68 @@ export default function StudyPage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Save session when complete (only for logged-in users who completed full collection)
+  useEffect(() => {
+    const saveSession = async () => {
+      if (
+        !sessionComplete ||
+        !user ||
+        sessionSaved ||
+        savingSession ||
+        !sessionStartTime ||
+        !collection
+      ) {
+        return;
+      }
+
+      // Only save if user completed the full collection
+      const totalCharactersInCollection = collection.characterIds.length;
+      if (sessionStats.total < totalCharactersInCollection) {
+        return;
+      }
+
+      setSavingSession(true);
+
+      try {
+        const response = await fetch("/api/learning/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            collectionId,
+            startTime: sessionStartTime,
+            endTime: Date.now(),
+            reviewedCount: sessionStats.total,
+            correctCount: sessionStats.correct,
+            incorrectCount: sessionStats.incorrect,
+            characterResults: getCharacterResults(),
+            totalCharacters: totalCharactersInCollection,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.saved) {
+          setSessionSaved(true);
+        }
+      } catch (error) {
+        console.error("Failed to save session:", error);
+      } finally {
+        setSavingSession(false);
+      }
+    };
+
+    saveSession();
+  }, [
+    sessionComplete,
+    user,
+    sessionSaved,
+    savingSession,
+    sessionStartTime,
+    collection,
+    collectionId,
+    sessionStats,
+    getCharacterResults,
+  ]);
 
   // Determine study mode from collection
   const studyMode = collection?.studyMode || "flashcard";
@@ -424,6 +492,7 @@ export default function StudyPage() {
       setAnswerResult(null);
       setSelectedOptionIndex(null);
       setSessionKey((prev) => prev + 1); // Force regeneration of multiple choice options
+      setSessionSaved(false);
 
       const failedChars = getIncorrectCharacters();
 
@@ -517,6 +586,30 @@ export default function StudyPage() {
               </div>
             </div>
 
+            {/* Streak saved indicator */}
+            {user && sessionSaved && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-2xl">
+                <div className="flex items-center justify-center gap-2 text-green-700">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="font-medium">Streak +1! Progress saved.</span>
+                </div>
+              </div>
+            )}
+
+            {savingSession && (
+              <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                <div className="flex items-center justify-center gap-2 text-gray-600">
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="font-medium">Saving progress...</span>
+                </div>
+              </div>
+            )}
+
             {hasFailedCards && (
               <div className="mb-8 p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl">
                 <p className="text-sm text-orange-800 mb-3 font-medium">
@@ -557,6 +650,7 @@ export default function StudyPage() {
                   setUserInput("");
                   setSelectedOptionIndex(null);
                   setSessionKey((prev) => prev + 1);
+                  setSessionSaved(false);
                   if (characterData) {
                     const chars = shuffleMode
                       ? [...characterData.characters].sort(

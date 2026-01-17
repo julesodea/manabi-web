@@ -489,6 +489,157 @@ export class DatabaseService {
     return data;
   }
 
+  // Study session operations
+  static async saveStudySession(
+    userId: string,
+    session: {
+      id: string;
+      collectionId: string;
+      startTime: number;
+      endTime: number;
+      reviewedCount: number;
+      correctCount: number;
+      incorrectCount: number;
+    }
+  ): Promise<StudySession | null> {
+    const { data, error } = await supabase
+      .from('study_sessions')
+      .insert({
+        id: session.id,
+        user_id: userId,
+        collection_id: session.collectionId,
+        start_time: session.startTime,
+        end_time: session.endTime,
+        reviewed_count: session.reviewedCount,
+        correct_count: session.correctCount,
+        incorrect_count: session.incorrectCount,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[saveStudySession] Error:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      collectionId: data.collection_id,
+      startTime: data.start_time,
+      endTime: data.end_time,
+      reviewedCount: data.reviewed_count,
+      correctCount: data.correct_count,
+      incorrectCount: data.incorrect_count,
+    };
+  }
+
+  static async getStudySessions(userId: string, limit = 50): Promise<StudySession[]> {
+    const { data, error } = await supabase
+      .from('study_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[getStudySessions] Error:', error);
+      return [];
+    }
+
+    return data.map((item: any) => ({
+      id: item.id,
+      collectionId: item.collection_id,
+      startTime: item.start_time,
+      endTime: item.end_time,
+      reviewedCount: item.reviewed_count,
+      correctCount: item.correct_count,
+      incorrectCount: item.incorrect_count,
+    }));
+  }
+
+  static async incrementUserStreak(
+    userId: string,
+    reviewedCount: number,
+    correctCount: number,
+    studyTimeSeconds: number
+  ): Promise<void> {
+    // Get current stats
+    const stats = await this.getUserStats(userId);
+    if (!stats) return;
+
+    const { error } = await supabase
+      .from('user_stats')
+      .update({
+        study_streak: stats.study_streak + 1,
+        total_reviews: stats.total_reviews + reviewedCount,
+        reviews_completed_today: stats.reviews_completed_today + correctCount,
+        total_study_time: stats.total_study_time + studyTimeSeconds,
+        last_study_date: new Date().toISOString().split('T')[0],
+      })
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('[incrementUserStreak] Error:', error);
+    }
+  }
+
+  static async batchUpdateLearningProgress(
+    userId: string,
+    results: Array<{ characterId: string; correct: boolean }>
+  ): Promise<void> {
+    const now = Date.now();
+
+    for (const result of results) {
+      // Get existing progress or create new
+      let progress = await this.getLearningProgress(userId, result.characterId);
+
+      if (!progress) {
+        progress = {
+          userId,
+          characterId: result.characterId,
+          firstSeen: now,
+          lastReviewed: now,
+          correctCount: 0,
+          incorrectCount: 0,
+          srsLevel: 1,
+          nextReviewDate: now,
+          studyStats: {
+            writingAccuracy: 0,
+            readingAccuracy: 0,
+            meaningAccuracy: 0,
+          },
+        };
+      }
+
+      // Update counts
+      if (result.correct) {
+        progress.correctCount += 1;
+        // Increase SRS level (max 8)
+        progress.srsLevel = Math.min(progress.srsLevel + 1, 8);
+      } else {
+        progress.incorrectCount += 1;
+        // Decrease SRS level (min 1)
+        progress.srsLevel = Math.max(progress.srsLevel - 1, 1);
+      }
+
+      progress.lastReviewed = now;
+
+      // Calculate next review date based on SRS level
+      // Intervals: 1=4h, 2=8h, 3=1d, 4=2d, 5=4d, 6=1w, 7=2w, 8=1m
+      const intervals = [0, 4, 8, 24, 48, 96, 168, 336, 720]; // hours
+      const hoursUntilReview = intervals[progress.srsLevel] || 4;
+      progress.nextReviewDate = now + hoursUntilReview * 60 * 60 * 1000;
+
+      // Update accuracy
+      const totalAttempts = progress.correctCount + progress.incorrectCount;
+      progress.studyStats.meaningAccuracy = totalAttempts > 0
+        ? progress.correctCount / totalAttempts
+        : 0;
+
+      await this.updateLearningProgress(progress);
+    }
+  }
+
   // Helper mapping functions
   private static mapToCharacter(data: any): Character {
     return {
