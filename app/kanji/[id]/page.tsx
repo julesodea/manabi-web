@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useKanji } from "@/lib/hooks/useKanji";
 import { useTheme } from "@/lib/providers/ThemeProvider";
+import MinimalHeader from "@/components/MinimalHeader";
+import MenuDrawer from "@/components/MenuDrawer";
 
 export default function KanjiDetailPage() {
   const params = useParams();
@@ -13,6 +15,7 @@ export default function KanjiDetailPage() {
   const { data: kanji, isLoading, error } = useKanji(id);
   const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -25,15 +28,10 @@ export default function KanjiDetailPage() {
 
   if (isLoading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{
-          backgroundColor: colors.primary,
-        }}
-      >
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse text-white">学</div>
-          <p className="text-white">Loading...</p>
+          <div className="text-6xl mb-4 animate-pulse text-[var(--accent)]">学</div>
+          <p className="text-muted">Loading...</p>
         </div>
       </div>
     );
@@ -41,20 +39,12 @@ export default function KanjiDetailPage() {
 
   if (error || !kanji) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{
-          backgroundColor: colors.primary,
-        }}
-      >
-        <div className="text-center bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4">
-          <p className="text-gray-600 mb-4">Kanji not found</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center bg-card-bg rounded-3xl p-8 shadow-xl max-w-md mx-4 border border-border">
+          <p className="text-muted mb-4">Kanji not found</p>
           <button
             onClick={() => router.back()}
-            className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
-            style={{
-              backgroundColor: colors.primary,
-            }}
+            className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-semibold shadow-lg hover:shadow-xl transition-shadow"
           >
             Go Back
           </button>
@@ -64,76 +54,32 @@ export default function KanjiDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc]">
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
-          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
-        }`}
-        style={{
-          backgroundColor: colors.primary,
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
-                  学
-                </div>
-                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
-                  Manabi
-                </span>
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-white/30" />
-              <span className="text-3xl hidden sm:block text-white">
-                {kanji.character}
-              </span>
-            </div>
+    <div className="min-h-screen bg-background">
+      {/* Menu Drawer */}
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-            <button
-              onClick={() => router.back()}
-              className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
-            >
-              Back
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Minimal Header */}
+      <MinimalHeader
+        showMenu
+        onMenuClick={() => setMenuOpen(true)}
+      />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-12">
         {/* Kanji Hero */}
-        <div className="bg-white rounded-3xl p-8 mb-8 text-center shadow-xl border border-gray-100">
-          <div className="text-9xl mb-6 text-gray-900">{kanji.character}</div>
+        <div className="bg-card-bg rounded-3xl p-8 mb-8 text-center shadow-lg border border-border">
+          <div className="text-9xl mb-6 text-foreground">{kanji.character}</div>
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span
-              className="px-4 py-1.5 text-white rounded-full text-sm font-bold shadow-md"
-              style={{
-                backgroundColor: colors.primary,
-              }}
-            >
+            <span className="px-4 py-1.5 bg-[var(--accent)] text-[var(--accent-text)] rounded-full text-sm font-bold shadow-md">
               {kanji.kanjiData.jlptLevel}
             </span>
             {kanji.kanjiData.grade !== 0 && (
-              <span
-                className="px-4 py-1.5 rounded-full text-sm font-semibold"
-                style={{
-                  backgroundColor: colors.primaryLight,
-                  color: colors.primaryDark,
-                }}
-              >
+              <span className="px-4 py-1.5 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm font-semibold">
                 Grade {kanji.kanjiData.grade}
               </span>
             )}
             {kanji.strokeCount !== 0 && (
-              <span
-                className="px-4 py-1.5 rounded-full text-sm font-semibold"
-                style={{
-                  backgroundColor: colors.primaryLight,
-                  color: colors.primaryDark,
-                }}
-              >
+              <span className="px-4 py-1.5 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm font-semibold">
                 {kanji.strokeCount} strokes
               </span>
             )}
@@ -142,12 +88,12 @@ export default function KanjiDetailPage() {
 
         {/* Meanings */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Meanings</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4">Meanings</h2>
           <div className="flex flex-wrap gap-2">
             {kanji.kanjiData.meanings.map((meaning, i) => (
               <span
                 key={i}
-                className="px-4 py-2 bg-[#E8ECFF] text-theme-primary rounded-full font-medium"
+                className="px-4 py-2 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full font-medium"
               >
                 {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
               </span>
@@ -157,8 +103,8 @@ export default function KanjiDetailPage() {
 
         {/* Readings */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-3 text-lg">
+          <div className="bg-card-bg rounded-2xl p-6 shadow-md border border-border">
+            <h3 className="font-bold text-foreground mb-3 text-lg">
               On&apos;yomi (音読み)
             </h3>
             <div className="space-y-2">
@@ -166,23 +112,19 @@ export default function KanjiDetailPage() {
                 kanji.kanjiData.readings.onyomi.map((reading, i) => (
                   <div
                     key={i}
-                    className="text-lg px-4 py-2.5 rounded-xl font-medium"
-                    style={{
-                      backgroundColor: colors.primaryLight,
-                      color: colors.primaryDark,
-                    }}
+                    className="text-lg px-4 py-2.5 rounded-xl font-medium bg-[var(--accent)]/10 text-[var(--accent)]"
                   >
                     {reading}
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">None</p>
+                <p className="text-muted">None</p>
               )}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-3 text-lg">
+          <div className="bg-card-bg rounded-2xl p-6 shadow-md border border-border">
+            <h3 className="font-bold text-foreground mb-3 text-lg">
               Kun&apos;yomi (訓読み)
             </h3>
             <div className="space-y-2">
@@ -190,17 +132,13 @@ export default function KanjiDetailPage() {
                 kanji.kanjiData.readings.kunyomi.map((reading, i) => (
                   <div
                     key={i}
-                    className="text-lg px-4 py-2.5 rounded-xl font-medium"
-                    style={{
-                      backgroundColor: colors.primaryLight,
-                      color: colors.primaryDark,
-                    }}
+                    className="text-lg px-4 py-2.5 rounded-xl font-medium bg-[var(--accent)]/10 text-[var(--accent)]"
                   >
                     {reading}
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">None</p>
+                <p className="text-muted">None</p>
               )}
             </div>
           </div>
@@ -208,19 +146,15 @@ export default function KanjiDetailPage() {
 
         {/* Nanori */}
         {kanji.kanjiData.readings.nanori.length > 0 && (
-          <div className="mb-8 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-3 text-lg">
+          <div className="mb-8 bg-card-bg rounded-2xl p-6 shadow-md border border-border">
+            <h3 className="font-bold text-foreground mb-3 text-lg">
               Nanori (名乗り) - Name readings
             </h3>
             <div className="flex flex-wrap gap-2">
               {kanji.kanjiData.readings.nanori.map((reading, i) => (
                 <span
                   key={i}
-                  className="px-4 py-2 rounded-full font-medium"
-                  style={{
-                    backgroundColor: colors.primaryLight,
-                    color: colors.primaryDark,
-                  }}
+                  className="px-4 py-2 rounded-full font-medium bg-[var(--accent)]/10 text-[var(--accent)]"
                 >
                   {reading}
                 </span>
@@ -233,22 +167,22 @@ export default function KanjiDetailPage() {
         {kanji.kanjiData.exampleWords &&
           kanji.kanjiData.exampleWords.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-4">
                 Example Words
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {kanji.kanjiData.exampleWords.map((word, i) => (
                   <div
                     key={i}
-                    className="bg-gray-50 rounded-xl p-4 border border-gray-100"
+                    className="bg-card-bg rounded-xl p-4 border border-border shadow-sm"
                   >
-                    <div className="text-2xl font-bold mb-1 text-gray-900">
+                    <div className="text-2xl font-bold mb-1 text-foreground">
                       {word.word}
                     </div>
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-muted mb-1">
                       {word.reading}
                     </div>
-                    <div className="text-gray-700">{word.meaning}</div>
+                    <div className="text-foreground">{word.meaning}</div>
                   </div>
                 ))}
               </div>
@@ -259,22 +193,22 @@ export default function KanjiDetailPage() {
         {kanji.kanjiData.exampleSentences &&
           kanji.kanjiData.exampleSentences.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-4">
                 Example Sentences
               </h2>
               <div className="space-y-4">
                 {kanji.kanjiData.exampleSentences.map((sentence, i) => (
                   <div
                     key={i}
-                    className="bg-gray-50 rounded-xl p-4 border-l-4 border-[#5B7FFF]"
+                    className="bg-card-bg rounded-xl p-4 border-l-4 border-[var(--accent)] shadow-sm"
                   >
-                    <div className="text-lg text-gray-800 mb-1">
+                    <div className="text-lg text-foreground mb-1">
                       {sentence.japanese}
                     </div>
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-muted mb-1">
                       {sentence.reading}
                     </div>
-                    <div className="text-gray-700">{sentence.translation}</div>
+                    <div className="text-foreground">{sentence.translation}</div>
                   </div>
                 ))}
               </div>

@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useTheme } from "@/lib/providers/ThemeProvider";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import { useCollections } from "@/lib/hooks/useCollections";
 import { KanjiDetailModal } from "@/components/ui/KanjiDetailModal";
+import MinimalHeader from "@/components/MinimalHeader";
+import MenuDrawer from "@/components/MenuDrawer";
 
 interface SessionResultItem {
   characterId: string;
@@ -33,15 +34,14 @@ interface UserStats {
 }
 
 export default function StatsPage() {
-  const { colors } = useTheme();
   const { user, loading: authLoading } = useAuth();
   const { data: collections = [] } = useCollections(true);
-  const [scrolled, setScrolled] = useState(false);
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
   const [selectedKanjiId, setSelectedKanjiId] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleSession = (sessionId: string) => {
     setExpandedSessions((prev) => {
@@ -54,14 +54,6 @@ export default function StatsPage() {
       return next;
     });
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Fetch sessions and stats
   useEffect(() => {
@@ -157,32 +149,25 @@ export default function StatsPage() {
 
   if (authLoading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: colors.primary }}
-      >
-        <div className="text-6xl text-white animate-pulse">学</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-6xl text-foreground animate-pulse">学</div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: colors.primary }}
-      >
-        <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-md mx-4 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card-bg rounded-xl p-8 shadow-sm border border-border max-w-md mx-4 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-4">
             Sign in to view your stats
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted mb-6">
             Track your progress and see your study history.
           </p>
           <Link
             href="/login"
-            className="px-6 py-3 text-white rounded-full font-semibold shadow-lg inline-block"
-            style={{ backgroundColor: colors.primary }}
+            className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-semibold shadow-md inline-block hover:shadow-lg transition-shadow"
           >
             Sign In
           </Link>
@@ -192,46 +177,26 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] pb-24 sm:pb-0">
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
-          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
-        }`}
-        style={{ backgroundColor: colors.primary }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
-                  学
-                </div>
-                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
-                  Manabi
-                </span>
-              </Link>
-            </div>
-            <Link
-              href="/"
-              className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
-            >
-              Back to Home
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background pb-24 sm:pb-0">
+      {/* Menu Drawer */}
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+
+      {/* Minimal Header */}
+      <MinimalHeader
+        showMenu
+        onMenuClick={() => setMenuOpen(true)}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Stats</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">Your Stats</h1>
 
         {loading ? (
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
-              <div className="h-6 w-32 bg-gray-200 rounded mb-4"></div>
+            <div className="bg-card-bg rounded-xl p-6 shadow-sm border border-border animate-pulse">
+              <div className="h-6 w-32 bg-border rounded mb-4"></div>
               <div className="grid grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-20 bg-gray-100 rounded-xl"></div>
+                  <div key={i} className="h-20 bg-background rounded-xl"></div>
                 ))}
               </div>
             </div>
@@ -239,43 +204,31 @@ export default function StatsPage() {
         ) : (
           <>
             {/* Overview Stats */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-card-bg rounded-xl p-6 shadow-sm border border-border mb-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 Overview
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div
-                    className="text-3xl font-bold mb-1"
-                    style={{ color: colors.primary }}
-                  >
+                <div className="bg-background rounded-xl p-4 text-center">
+                  <div className="text-3xl font-bold text-[var(--accent)] mb-1">
                     {userStats?.study_streak ?? 0}
                   </div>
-                  <div className="text-sm text-gray-600">Sessions Completed</div>
+                  <div className="text-sm text-muted">Sessions Completed</div>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div
-                    className="text-3xl font-bold mb-1"
-                    style={{ color: colors.primary }}
-                  >
+                <div className="bg-background rounded-xl p-4 text-center">
+                  <div className="text-3xl font-bold text-[var(--accent)] mb-1">
                     {userStats?.total_reviews ?? 0}
                   </div>
-                  <div className="text-sm text-gray-600">Total Reviews</div>
+                  <div className="text-sm text-muted">Total Reviews</div>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div
-                    className="text-3xl font-bold mb-1"
-                    style={{ color: colors.primary }}
-                  >
+                <div className="bg-background rounded-xl p-4 text-center">
+                  <div className="text-3xl font-bold text-[var(--accent)] mb-1">
                     {userStats?.characters_learned ?? 0}
                   </div>
-                  <div className="text-sm text-gray-600">Kanji Learned</div>
+                  <div className="text-sm text-muted">Kanji Learned</div>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div
-                    className="text-3xl font-bold mb-1"
-                    style={{ color: colors.primary }}
-                  >
+                <div className="bg-background rounded-xl p-4 text-center">
+                  <div className="text-3xl font-bold text-[var(--accent)] mb-1">
                     {sessions.length > 0
                       ? Math.round(
                           (sessions.reduce((acc, s) => acc + s.correctCount, 0) /
@@ -288,23 +241,22 @@ export default function StatsPage() {
                       : 0}
                     %
                   </div>
-                  <div className="text-sm text-gray-600">Avg Accuracy</div>
+                  <div className="text-sm text-muted">Avg Accuracy</div>
                 </div>
               </div>
             </div>
 
             {/* Recent Sessions */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-card-bg rounded-xl p-6 shadow-sm border border-border mb-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 Recent Sessions
               </h2>
               {sessions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted">
                   <p>No study sessions yet.</p>
                   <Link
                     href="/"
-                    className="mt-4 inline-block px-6 py-2 text-white rounded-full font-medium"
-                    style={{ backgroundColor: colors.primary }}
+                    className="mt-4 inline-block px-6 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-medium shadow-md hover:shadow-lg transition-shadow"
                   >
                     Start Studying
                   </Link>
@@ -326,27 +278,27 @@ export default function StatsPage() {
                     return (
                       <div
                         key={session.id}
-                        className="bg-gray-50 rounded-xl overflow-hidden"
+                        className="bg-background rounded-xl overflow-hidden border border-border"
                       >
                         <button
                           onClick={() => toggleSession(session.id)}
-                          className="w-full flex items-center justify-between p-4 hover:bg-gray-100 transition-colors text-left"
+                          className="w-full flex items-center justify-between p-4 hover:bg-card-bg transition-colors text-left"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 truncate">
+                            <div className="font-medium text-foreground truncate">
                               {getCollectionName(session.collectionId)}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-muted">
                               {formatDate(session.endTime)} •{" "}
                               {formatDuration(session.startTime, session.endTime)}
                             </div>
                           </div>
                           <div className="flex items-center gap-4 ml-4">
                             <div className="text-right">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-foreground">
                                 {session.reviewedCount} cards
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted">
                                 {session.correctCount} correct
                               </div>
                             </div>
@@ -362,7 +314,7 @@ export default function StatsPage() {
                               {accuracy}%
                             </div>
                             <svg
-                              className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                              className={`w-5 h-5 text-muted transition-transform ${isExpanded ? "rotate-180" : ""}`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -373,7 +325,7 @@ export default function StatsPage() {
                         </button>
 
                         {isExpanded && (
-                          <div className="px-4 pb-4 border-t border-gray-200">
+                          <div className="px-4 pb-4 border-t border-border">
                             {hasResults ? (
                               <div className="pt-4 space-y-4">
                                 {correctResults.length > 0 && (
@@ -391,8 +343,8 @@ export default function StatsPage() {
                                           onClick={() => setSelectedKanjiId(result.characterId)}
                                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:border-green-300 transition-colors cursor-pointer"
                                         >
-                                          <span className="text-lg font-medium text-gray-900">{result.character}</span>
-                                          <span className="text-sm text-gray-600">{result.meaning}</span>
+                                          <span className="text-lg font-medium text-foreground">{result.character}</span>
+                                          <span className="text-sm text-muted">{result.meaning}</span>
                                         </button>
                                       ))}
                                     </div>
@@ -414,8 +366,8 @@ export default function StatsPage() {
                                           onClick={() => setSelectedKanjiId(result.characterId)}
                                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer"
                                         >
-                                          <span className="text-lg font-medium text-gray-900">{result.character}</span>
-                                          <span className="text-sm text-gray-600">{result.meaning}</span>
+                                          <span className="text-lg font-medium text-foreground">{result.character}</span>
+                                          <span className="text-sm text-muted">{result.meaning}</span>
                                         </button>
                                       ))}
                                     </div>
@@ -423,7 +375,7 @@ export default function StatsPage() {
                                 )}
                               </div>
                             ) : (
-                              <div className="pt-4 text-sm text-gray-500 text-center">
+                              <div className="pt-4 text-sm text-muted text-center">
                                 No detailed results available for this session.
                               </div>
                             )}
@@ -437,8 +389,8 @@ export default function StatsPage() {
             </div>
 
             {/* Calendar Heatmap */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-card-bg rounded-xl p-6 shadow-sm border border-border">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 Activity
               </h2>
               <div className="flex gap-1">
@@ -454,7 +406,7 @@ export default function StatsPage() {
                           ? 0
                           : Math.min(4, Math.ceil((day.count / maxCount) * 4));
                       const bgColors = [
-                        "bg-gray-100",
+                        "bg-border",
                         "bg-green-200",
                         "bg-green-300",
                         "bg-green-400",
@@ -472,10 +424,10 @@ export default function StatsPage() {
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-end gap-2 mt-4 text-xs text-gray-500">
+              <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted">
                 <span>Less</span>
                 <div className="flex gap-1">
-                  <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
+                  <div className="w-3 h-3 bg-border rounded-sm"></div>
                   <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
                   <div className="w-3 h-3 bg-green-300 rounded-sm"></div>
                   <div className="w-3 h-3 bg-green-400 rounded-sm"></div>

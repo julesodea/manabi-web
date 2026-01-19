@@ -12,6 +12,8 @@ import { useAuth } from "@/lib/providers/AuthProvider";
 import { KanjiData } from "@/types";
 import { toHiragana, toKatakana } from "wanakana";
 import { useTheme } from "@/lib/providers/ThemeProvider";
+import MinimalHeader from "@/components/MinimalHeader";
+import MenuDrawer from "@/components/MenuDrawer";
 
 type AnswerResult = "correct" | "incorrect" | null;
 
@@ -70,6 +72,7 @@ export default function StudyPage() {
   const [savingSession, setSavingSession] = useState(false);
   const saveAttemptedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Handle scroll for sticky header shadow
   useEffect(() => {
@@ -432,10 +435,8 @@ export default function StudyPage() {
   if (loading) {
     return (
       <div
-        className="font-medium min-h-screen flex items-center justify-center"
-        style={{
-          backgroundColor: colors.primary,
-        }}
+        className="font-medium min-h-screen flex items-center justify-center bg-background"
+        
       >
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse text-white">学</div>
@@ -501,18 +502,16 @@ export default function StudyPage() {
 
     return (
       <div
-        className="min-h-screen"
-        style={{
-          backgroundColor: colors.primary,
-        }}
+                 
+                 
+        className="min-h-screen bg-background"
+       
       >
         <header
-          className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
+          className={`bg-background fixed top-0 left-0 right-0 z-50 duration-300 ${
             scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
           }`}
-          style={{
-            backgroundColor: colors.primary,
-          }}
+          
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
@@ -530,8 +529,6 @@ export default function StudyPage() {
 
         <main className="max-w-2xl mx-auto px-4 pt-24 pb-12">
           <div className="bg-white rounded-3xl p-8 text-center shadow-2xl">
-            <div className="text-6xl mb-6">🎉</div>
-
             <h2 className="text-2xl font-bold mb-6 text-gray-900">
               Great job studying {collection.name}!
             </h2>
@@ -569,11 +566,7 @@ export default function StudyPage() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="h-3 rounded-full duration-500"
-                  style={{
-                    width: `${accuracy}%`,
-                    backgroundColor: colors.primary,
-                  }}
+                  className="bg-background h-3 rounded-full duration-500"
                 />
               </div>
             </div>
@@ -669,118 +662,22 @@ export default function StudyPage() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        backgroundColor: colors.primary,
-      }}
-    >
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
-          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
-        }`}
-        style={{
-          backgroundColor: colors.primary,
+    <div className="min-h-screen bg-background">
+      {/* Menu Drawer */}
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+
+      {/* Minimal Header */}
+      <MinimalHeader
+        showMenu
+        onMenuClick={() => setMenuOpen(true)}
+        progress={{
+          current: currentIndex + 1,
+          total: characters.length,
         }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
-                  学
-                </div>
-                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
-                  Manabi
-                </span>
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-white/30" />
-              <h1 className="text-lg font-semibold text-white hidden sm:block">
-                {collection.name}
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-sm text-white/80">Progress</div>
-                <div className="text-lg font-semibold text-white">
-                  {currentIndex + 1} / {characters.length}
-                </div>
-              </div>
-              {studyMode === "multiple_choice" && (
-                <button
-                  onClick={() => setShuffleMode(!shuffleMode)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium duration-200 border ${
-                    shuffleMode
-                      ? "bg-white/20 text-white border-white/30"
-                      : "bg-white/10 text-white border-white/30 hover:bg-white/20"
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    {shuffleMode ? (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2}
-                          stroke="currentColor"
-                          className="w-4 h-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-                          />
-                        </svg>
-                        Shuffled
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2}
-                          stroke="currentColor"
-                          className="w-4 h-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                          />
-                        </svg>
-                        In Order
-                      </>
-                    )}
-                  </span>
-                </button>
-              )}
-              <Link
-                href="/"
-                className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
-              >
-                End
-              </Link>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-4 w-full bg-white/20 rounded-full h-2">
-            <div
-              className="bg-white h-2 rounded-full duration-300"
-              style={{
-                width: `${((currentIndex + 1) / characters.length) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-      </header>
+      />
 
       {/* Study Content */}
-      <main className="max-w-2xl mx-auto px-4 pt-32 pb-8">
+      <main className="max-w-2xl mx-auto px-4 pt-24 pb-8">
         <div className="h-[calc(100vh-200px)] flex flex-col">
           {studyMode === "multiple_choice" ? (
             // Multiple Choice Mode
@@ -788,17 +685,17 @@ export default function StudyPage() {
               {/* Kanji Card */}
               <div
                 className={`
-                  relative bg-white rounded-3xl flex-1 max-h-[300px] shadow-2xl
-                  duration-500
-                  ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
-                  ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
+                  relative bg-card-bg rounded-xl flex-1 max-h-[300px]
+                  duration-500 border border-border
+                  ${answerResult === "correct" ? "ring-2 ring-green-500" : ""}
+                  ${answerResult === "incorrect" ? "ring-2 ring-red-500" : ""}
                 `}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
-                  <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
+                  <div className="text-foreground text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
                     {currentCharacter?.character}
                   </div>
-                  <p className="text-gray-600 text-sm mt-4 font-medium">
+                  <p className="text-muted text-sm mt-4 font-medium">
                     What does this Kanji mean?
                   </p>
                 </div>
@@ -812,15 +709,15 @@ export default function StudyPage() {
                   const showIncorrect =
                     isSelected && answerResult === "incorrect";
 
-                  let buttonClass = "bg-white shadow-lg text-gray-900";
+                  let buttonClass = "bg-card-bg border border-border text-foreground";
                   if (showCorrect) {
                     buttonClass =
-                      "bg-green-50 border-2 border-green-500 text-green-900 shadow-lg";
+                      "bg-green-50 border-2 border-green-500 text-green-900";
                   } else if (showIncorrect) {
                     buttonClass =
-                      "bg-red-50 border-2 border-red-500 text-red-900 shadow-lg";
+                      "bg-red-50 border-2 border-red-500 text-red-900";
                   } else if (isSelected) {
-                    buttonClass = "bg-white border-2 text-gray-900 shadow-xl";
+                    buttonClass = "bg-card-bg border-2 text-foreground";
                   }
 
                   return (
@@ -855,7 +752,7 @@ export default function StudyPage() {
 
               {/* Hint for keyboard shortcuts */}
               {!answerResult && (
-                <p className="text-center text-sm text-white/80 mt-4">
+                <p className="text-center text-sm text-muted mt-4">
                   Press 1-4 to select an answer
                 </p>
               )}
@@ -866,20 +763,20 @@ export default function StudyPage() {
               {/* Card */}
               <div
                 className={`
-                  relative bg-white rounded-3xl flex-1 max-h-[500px] shadow-2xl
-                  duration-500
-                  ${answerResult === "correct" ? "ring-4 ring-green-500" : ""}
-                  ${answerResult === "incorrect" ? "ring-4 ring-red-500" : ""}
+                  relative bg-card-bg rounded-xl flex-1 max-h-[500px]
+                  duration-500 border border-border
+                  ${answerResult === "correct" ? "ring-2 ring-green-500" : ""}
+                  ${answerResult === "incorrect" ? "ring-2 ring-red-500" : ""}
                 `}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
                   {!flipped ? (
                     // Front: Kanji character with input
                     <div className="text-center w-full">
-                      <div className="text-gray-900 text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8">
+                      <div className="text-foreground text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 md:mb-8">
                         {currentCharacter?.character}
                       </div>
-                      <p className="text-gray-600 text-sm mb-4 font-medium">
+                      <p className="text-muted text-sm mb-4 font-medium">
                         Type the reading or meaning
                       </p>
                       <div className="w-full px-4 flex justify-center">
@@ -900,28 +797,28 @@ export default function StudyPage() {
                           }}
                           disabled={!!answerResult}
                           placeholder="Type your answer..."
-                          className="w-full max-w-xs px-4 py-3 border-2 rounded-xl text-center text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="w-full max-w-xs px-4 py-3 border-2 rounded-xl text-center text-foreground placeholder:text-muted outline-none focus:ring-2 disabled:bg-border disabled:cursor-not-allowed bg-background"
                           style={{
-                            borderColor: colors.primary,
+                            borderColor: "var(--accent)",
                             fontSize: "16px", // Prevents iOS zoom on focus
-                            ["--tw-ring-color" as string]: `${colors.primary}33`,
+                            ["--tw-ring-color" as string]: "var(--accent)",
                           }}
                         />
                       </div>
-                      <p className="text-gray-500 text-xs mt-2">
+                      <p className="text-muted text-xs mt-2">
                         Press Enter to check
                       </p>
                     </div>
                   ) : (
                     // Back: Meanings and readings with result
                     <div className="text-center w-full overflow-y-auto">
-                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 text-gray-800">
+                      <div className="text-4xl sm:text-5xl md:text-6xl mb-4 md:mb-6 text-foreground">
                         {currentCharacter?.character}
                       </div>
 
                       {/* User's answer */}
                       <div className="mb-4">
-                        <p className="text-sm text-gray-500 mb-1">
+                        <p className="text-sm text-muted mb-1">
                           You answered:
                         </p>
                         <p
@@ -937,18 +834,14 @@ export default function StudyPage() {
 
                       {/* Meanings */}
                       <div className="mb-4 md:mb-6">
-                        <h3 className="text-sm font-semibold text-gray-500 mb-2">
+                        <h3 className="text-sm font-semibold text-muted mb-2">
                           Meanings
                         </h3>
                         <div className="flex flex-wrap gap-2 justify-center">
                           {currentKanjiData?.meanings.map((meaning, i) => (
                             <span
                               key={i}
-                              className="px-3 py-1.5 md:px-4 md:py-2 rounded-full text-base md:text-lg font-medium"
-                              style={{
-                                backgroundColor: colors.primaryLight,
-                                color: colors.primaryDark,
-                              }}
+                              className="px-3 py-1.5 md:px-4 md:py-2 rounded-full text-base md:text-lg font-medium bg-card-bg text-foreground border border-border"
                             >
                               {meaning.charAt(0).toUpperCase() +
                                 meaning.slice(1)}
@@ -960,19 +853,19 @@ export default function StudyPage() {
                       {/* Readings */}
                       <div className="grid grid-cols-2 gap-4 mb-4 md:mb-6">
                         <div>
-                          <h4 className="text-xs font-semibold text-gray-500 mb-1">
+                          <h4 className="text-xs font-semibold text-muted mb-1">
                             On'yomi
                           </h4>
-                          <div className="text-sm text-gray-700">
+                          <div className="text-sm text-foreground">
                             {currentKanjiData?.readings.onyomi.join(", ") ||
                               "None"}
                           </div>
                         </div>
                         <div>
-                          <h4 className="text-xs font-semibold text-gray-500 mb-1">
+                          <h4 className="text-xs font-semibold text-muted mb-1">
                             Kun'yomi
                           </h4>
-                          <div className="text-sm text-gray-700">
+                          <div className="text-sm text-foreground">
                             {currentKanjiData?.readings.kunyomi.join(", ") ||
                               "None"}
                           </div>
@@ -980,7 +873,7 @@ export default function StudyPage() {
                       </div>
 
                       {/* JLPT Level */}
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-muted">
                         {currentKanjiData?.jlptLevel} • Grade{" "}
                         {currentKanjiData?.grade}
                       </div>
@@ -998,8 +891,7 @@ export default function StudyPage() {
                       handleInputSubmit();
                     }}
                     disabled={!userInput.trim()}
-                    className="w-full py-4 md:py-6 bg-white rounded-2xl font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ color: colors.primary }}
+                    className="w-full py-4 md:py-6 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Check Answer
                   </button>
@@ -1009,15 +901,15 @@ export default function StudyPage() {
           )}
 
           {/* Session stats */}
-          <div className="mt-8 flex justify-center gap-8 text-sm text-white/90">
+          <div className="mt-8 flex justify-center gap-8 text-sm text-muted">
             <div className="capitalize">
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-foreground">
                 {sessionStats.correct}
               </span>{" "}
               correct
             </div>
             <div className="capitalize">
-              <span className="capitalize font-semibold text-white">
+              <span className="capitalize font-semibold text-foreground">
                 {sessionStats.incorrect}
               </span>{" "}
               incorrect

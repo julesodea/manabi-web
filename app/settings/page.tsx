@@ -8,34 +8,40 @@ import { useAuth } from "@/lib/providers/AuthProvider";
 const themeOptions: { color: ThemeColor; name: string; description: string }[] =
   [
     {
+      color: "white",
+      name: "White",
+      description: "Clean and minimalist (Light mode)",
+    },
+    {
       color: "blue",
       name: "Ocean Blue",
-      description: "Calm and professional",
+      description: "Calm and professional (Dark mode)",
     },
     {
       color: "red",
       name: "Sunset Red",
-      description: "Warm and energetic",
+      description: "Warm and energetic (Dark mode)",
     },
     {
       color: "green",
       name: "Forest Green",
-      description: "Fresh and natural",
+      description: "Fresh and natural (Dark mode)",
     },
     {
       color: "black",
       name: "Midnight Black",
-      description: "Sleek and modern",
+      description: "Sleek and modern (Dark mode)",
     },
   ];
 
 // Helper to get theme colors for preview
 const getThemeColors = (color: ThemeColor) => {
   const colorMap: Record<ThemeColor, { primary: string; primaryDark: string }> = {
+    white: { primary: "#FF6B35", primaryDark: "#E55A2B" }, // Orange accent
     blue: { primary: "#3B82F6", primaryDark: "#2563EB" }, // blue-500, blue-600
     red: { primary: "#EF4444", primaryDark: "#DC2626" }, // red-500, red-600
     green: { primary: "#22C55E", primaryDark: "#16A34A" }, // green-500, green-600
-    black: { primary: "#1E293B", primaryDark: "#0F172A" }, // slate-800, slate-900
+    black: { primary: "#FF6B35", primaryDark: "#E55A2B" }, // Orange accent
   };
   return colorMap[color];
 };
@@ -61,34 +67,34 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"}`}
+        className={`fixed top-0 left-0 right-0 z-50 duration-300 border-b border-border ${scrolled ? "py-3" : "py-4"}`}
         style={{
-          backgroundColor: colors.primary,
+          backgroundColor: colors.background,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 bg-card-bg rounded-lg flex items-center justify-center text-foreground font-bold">
                   学
                 </div>
-                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
+                <span className="text-foreground text-xl font-bold tracking-tight hidden sm:block">
                   Manabi
                 </span>
               </Link>
-              <div className="hidden sm:block h-6 w-px bg-white/30" />
-              <h1 className="text-lg font-semibold text-white hidden sm:block">
+              <div className="hidden sm:block h-6 w-px bg-border" />
+              <h1 className="text-lg font-semibold text-foreground hidden sm:block">
                 Settings
               </h1>
             </div>
 
             <Link
               href="/"
-              className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
+              className="px-4 py-2 text-foreground border border-border rounded-full text-sm font-medium hover:bg-card-bg transition"
             >
               Back
             </Link>
@@ -122,8 +128,8 @@ export default function SettingsPage() {
 
         {/* Account Section */}
         {user && (
-          <div className="mb-8 bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Account</h2>
+          <div className="mb-8 bg-card-bg rounded-xl p-6 border border-border">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Account</h2>
             <div className="flex items-center gap-4">
               {user.user_metadata?.avatar_url ? (
                 <img
@@ -143,22 +149,22 @@ export default function SettingsPage() {
                 </div>
               )}
               <div>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-lg font-semibold text-foreground">
                   {user.user_metadata?.name ||
                     user.user_metadata?.full_name ||
                     user.user_metadata?.preferred_username ||
                     "User"}
                 </p>
-                <p className="text-gray-600">{user.email}</p>
+                <p className="text-muted">{user.email}</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Theme Customization */}
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Theme Color</h2>
-          <p className="text-gray-600 mb-6">
+        <div className="bg-card-bg rounded-xl p-6 border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Theme Color</h2>
+          <p className="text-muted mb-6">
             Customize your app&apos;s appearance with different color themes
           </p>
 
@@ -167,10 +173,10 @@ export default function SettingsPage() {
               <button
                 key={option.color}
                 onClick={() => handleThemeChange(option.color)}
-                className={`relative p-6 rounded-2xl border-2 transition-all text-left ${
+                className={`relative p-6 rounded-xl border-2 transition-all text-left bg-background ${
                   themeColor === option.color
-                    ? "border-gray-900 shadow-lg"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-accent"
+                    : "border-border hover:border-muted"
                 }`}
               >
                 {/* Color Preview */}
@@ -188,18 +194,18 @@ export default function SettingsPage() {
                 {/* Theme Info */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">
+                    <h3 className="font-bold text-foreground mb-1">
                       {option.name}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted">
                       {option.description}
                     </p>
                   </div>
 
                   {/* Selected Indicator */}
                   {themeColor === option.color && (
-                    <div className="flex-shrink-0 ml-3">
-                      <div className="w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center">
+                    <div className="shrink-0 ml-3">
+                      <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
                         <svg
                           className="w-4 h-4 text-white"
                           fill="none"
@@ -221,8 +227,8 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-            <p className="text-sm text-gray-600">
+          <div className="mt-6 p-4 bg-background rounded-xl border border-border">
+            <p className="text-sm text-muted">
               <span className="font-semibold">Note:</span> Your theme preference
               is saved locally and will persist across sessions.
             </p>

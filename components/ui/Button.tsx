@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger" | "ghost";
+  variant?: "primary" | "secondary" | "danger" | "ghost" | "accent";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
 }
@@ -15,13 +15,14 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "font-medium rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md";
+    "font-medium rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantStyles = {
-    primary: "bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white",
-    secondary: "bg-white text-gray-900 border-2 border-gray-200",
+    primary: "bg-[var(--foreground)] text-[var(--background)]",
+    secondary: "bg-transparent border border-[var(--border)] text-[var(--foreground)]",
     danger: "bg-red-600 text-white",
-    ghost: "bg-transparent text-gray-700 shadow-none",
+    ghost: "bg-transparent text-[var(--muted)] hover:text-[var(--foreground)]",
+    accent: "bg-[var(--accent)] text-white",
   };
 
   const sizeStyles = {

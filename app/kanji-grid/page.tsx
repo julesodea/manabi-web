@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
 import { useTheme } from "@/lib/providers/ThemeProvider";
+import MinimalHeader from "@/components/MinimalHeader";
+import MenuDrawer from "@/components/MenuDrawer";
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -31,6 +33,7 @@ function KanjiGridContent() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] =
     useState(urlSearchQuery);
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // Sync URL params with local state on mount/change
@@ -139,73 +142,92 @@ function KanjiGridContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
-          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
-        }`}
-        style={{
-          backgroundColor: colors.primary,
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Desktop Layout */}
-          <div className="hidden md:flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
-                学
-              </div>
-              <span className="text-white text-xl font-bold tracking-tight">
-                Manabi
-              </span>
-            </Link>
+    <div className="min-h-screen bg-background">
+      {/* Menu Drawer */}
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-            {/* Search Bar */}
-            <div className="flex items-center bg-white/10 backdrop-blur-sm border border-white/30 rounded-full w-full max-w-md mx-4">
+      {/* Minimal Header */}
+      <MinimalHeader
+        showMenu
+        onMenuClick={() => setMenuOpen(true)}
+      />
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        {/* Search and Filter Section */}
+        <div className="mb-8">
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="flex items-center bg-card-bg border border-border rounded-xl shadow-sm">
               <input
                 type="text"
                 placeholder="Search meanings, readings..."
-                className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-l-full text-white"
+                className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-3 text-sm font-medium placeholder:text-muted text-foreground"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <div className="pr-1.5 py-0.5">
-                <div className="p-1.5 bg-white/20 rounded-full text-white">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
+              <div className="pr-3 text-muted">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
               </div>
             </div>
+          </div>
 
-            {/* Right Menu */}
+          {/* JLPT Level Filter and Actions */}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              {JLPT_LEVELS.map((level) => (
+                <button
+                  key={level.value}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (level.value === "All") {
+                      params.delete("level");
+                    } else {
+                      params.set("level", level.value);
+                    }
+                    const newUrl = params.toString()
+                      ? `?${params.toString()}`
+                      : "/kanji-grid";
+                    router.replace(newUrl, { scroll: false });
+                  }}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    urlLevel === level.value
+                      ? "bg-[var(--accent)] text-[var(--accent-text)]"
+                      : "bg-card-bg text-foreground border border-border hover:bg-[var(--accent)]/10"
+                  }`}
+                >
+                  {level.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Selection Mode Actions */}
             <div className="flex items-center gap-2">
               {selectionMode ? (
                 <>
                   {selectedKanji.size > 0 && (
                     <button
                       onClick={createCollection}
-                      className="px-4 py-2 bg-white rounded-full text-sm font-semibold shadow-lg"
-                      style={{ color: colors.primary }}
+                      className="px-4 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full text-sm font-semibold shadow-md"
                     >
-                      Create Collection ({selectedKanji.size})
+                      Create ({selectedKanji.size})
                     </button>
                   )}
                   <button
                     onClick={() => setSelectionMode(false)}
-                    className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
+                    className="px-4 py-2 text-foreground border border-border rounded-full text-sm font-medium hover:bg-card-bg transition"
                   >
                     Cancel
                   </button>
@@ -213,7 +235,7 @@ function KanjiGridContent() {
               ) : (
                 <button
                   onClick={() => setSelectionMode(true)}
-                  className="px-4 py-2 text-white border border-white/30 rounded-full text-sm font-medium hover:bg-white/20 transition"
+                  className="px-4 py-2 text-foreground border border-border rounded-full text-sm font-medium hover:bg-card-bg transition"
                 >
                   Select
                 </button>
@@ -221,111 +243,32 @@ function KanjiGridContent() {
             </div>
           </div>
 
-          {/* Mobile Layout */}
-          <div className="md:hidden">
-            {/* Top Row: Logo and Select Button */}
-            <div className="flex items-center justify-between mb-3">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
-                  学
-                </div>
-                <span className="text-white text-xl font-bold tracking-tight">
-                  Manabi
-                </span>
-              </Link>
-
-              {/* Right Menu */}
-              <div className="flex items-center gap-2">
-                {selectionMode ? (
-                  <button
-                    onClick={() => setSelectionMode(false)}
-                    className="px-3 py-1.5 text-white border border-white/30 rounded-full text-xs font-medium hover:bg-white/20 transition"
-                  >
-                    Cancel
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setSelectionMode(true)}
-                    className="px-3 py-1.5 text-white border border-white/30 rounded-full text-xs font-medium hover:bg-white/20 transition"
-                  >
-                    Select
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Bottom Row: Search Bar */}
-            <div className="w-full">
-              <div className="flex items-center bg-white/10 backdrop-blur-sm border border-white/30 rounded-full">
-                <input
-                  type="text"
-                  placeholder="Search meanings, readings..."
-                  className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2 text-sm font-medium placeholder-white/60 rounded-full text-white"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Categories Bar */}
-          <div className="mt-4 flex items-center gap-6 overflow-x-auto no-scrollbar pb-2">
-            {JLPT_LEVELS.map((level) => (
-              <button
-                key={level.value}
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  if (level.value === "All") {
-                    params.delete("level");
-                  } else {
-                    params.set("level", level.value);
-                  }
-                  const newUrl = params.toString()
-                    ? `?${params.toString()}`
-                    : "/kanji-grid";
-                  router.replace(newUrl, { scroll: false });
-                }}
-                className={`flex flex-col items-center gap-1 min-w-[48px] cursor-pointer group duration-200 pb-2 border-b-2 ${
-                  urlLevel === level.value
-                    ? "opacity-100 text-white border-white"
-                    : "opacity-70 text-white/70 hover:opacity-100 border-transparent"
-                }`}
-              >
-                <span className="text-xs font-medium whitespace-nowrap">
-                  {level.label}
-                </span>
-              </button>
-            ))}
-            <div className="ml-auto text-sm text-white/90">
-              {isLoading
-                ? "Loading..."
-                : searchQuery
-                ? `${displayedKanji.length} found`
-                : totalCount
-                ? `${totalCount} Kanji`
-                : ""}
-            </div>
+          {/* Results count */}
+          <div className="mt-4 text-sm text-muted">
+            {isLoading
+              ? "Loading..."
+              : searchQuery
+              ? `${displayedKanji.length} kanji found`
+              : totalCount
+              ? `${totalCount} kanji`
+              : ""}
           </div>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-56 md:pt-44 pb-20">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {[...Array(15)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-square bg-gray-100 rounded-xl mb-3"></div>
-                <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                <div className="aspect-square bg-card-bg border border-border rounded-xl mb-3"></div>
+                <div className="h-4 bg-card-bg rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-card-bg rounded w-1/2"></div>
               </div>
             ))}
           </div>
         ) : displayedKanji.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-bold text-gray-900">No Kanji found</h3>
-            <p className="text-gray-500 mt-2">
+            <h3 className="text-xl font-bold text-foreground">No Kanji found</h3>
+            <p className="text-muted mt-2">
               Try changing your filters or search terms.
             </p>
             <button
@@ -333,7 +276,7 @@ function KanjiGridContent() {
                 setSearchQuery("");
                 router.replace("/kanji-grid", { scroll: false });
               }}
-              className="mt-6 px-6 py-2 border border-gray-900 text-gray-900 rounded-lg hover:bg-gray-100 transition font-medium"
+              className="mt-6 px-6 py-2 border border-border text-foreground rounded-xl hover:bg-card-bg transition font-medium"
             >
               Clear all filters
             </button>
@@ -346,12 +289,12 @@ function KanjiGridContent() {
 
                 const cardContent = (
                   <div className="group cursor-pointer">
-                    <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                    <div className="bg-card-bg rounded-2xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all duration-200">
                       {/* Card Image Area */}
-                      <div className="relative aspect-square duration-300 bg-white border-b border-gray-100">
+                      <div className="relative aspect-square duration-300 bg-card-bg border-b border-border">
                         {/* Selection Indicator */}
                         {selectionMode && isSelected && (
-                          <div className="absolute top-3 right-3 z-10 bg-gray-900 rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-white">
+                          <div className="absolute top-3 right-3 z-10 bg-[var(--accent)] rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-[var(--accent-text)]">
                             <svg
                               className="w-5 h-5"
                               fill="none"
@@ -370,20 +313,20 @@ function KanjiGridContent() {
 
                         {/* Kanji Character */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-7xl sm:text-8xl text-gray-900">
+                          <span className="text-7xl sm:text-8xl text-foreground">
                             {k.character}
                           </span>
                         </div>
 
                         {/* Level Badge */}
-                        <div className="absolute top-3 left-3 bg-gray-100 px-2.5 py-1 rounded-lg shadow-md text-xs font-bold text-gray-900">
+                        <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
                           {k.kanjiData.jlptLevel}
                         </div>
                       </div>
 
                       {/* Card Details */}
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 truncate text-base">
+                        <h3 className="font-semibold text-foreground truncate text-base">
                           {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
                             <span key={i}>
                               {i > 0 && ", "}
@@ -391,7 +334,7 @@ function KanjiGridContent() {
                             </span>
                           ))}
                         </h3>
-                        <p className="text-gray-600 text-sm mt-1 truncate">
+                        <p className="text-muted text-sm mt-1 truncate">
                           {[
                             k.kanjiData.readings.onyomi[0],
                             k.kanjiData.readings.kunyomi[0],
@@ -424,11 +367,11 @@ function KanjiGridContent() {
             {/* Loading indicator and scroll trigger */}
             <div ref={observerTarget} className="py-8 text-center">
               {isFetchingNextPage && (
-                <div className="text-gray-500">Loading more...</div>
+                <div className="text-muted">Loading more...</div>
               )}
               {!hasNextPage && totalCount && totalCount > 0 && (
-                <div className="text-gray-400 text-sm">
-                  All {totalCount} Kanji loaded
+                <div className="text-muted text-sm">
+                  All {totalCount} kanji loaded
                 </div>
               )}
             </div>
@@ -441,7 +384,7 @@ function KanjiGridContent() {
         <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40">
           <button
             onClick={createCollection}
-            className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2"
+            className="bg-[var(--accent)] text-[var(--accent-text)] px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2 hover:shadow-2xl transition-shadow"
           >
             Create Collection ({selectedKanji.size})
           </button>

@@ -5,7 +5,8 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useCollection, useUpdateCollection } from "@/lib/hooks/useCollections";
 import { StudyMode } from "@/types";
-import { useTheme } from "@/lib/providers/ThemeProvider";
+import MinimalHeader from "@/components/MinimalHeader";
+import MenuDrawer from "@/components/MenuDrawer";
 
 interface KanjiWithData {
   id: string;
@@ -27,7 +28,6 @@ function EditCollectionForm() {
   const router = useRouter();
   const params = useParams();
   const collectionId = params.id as string;
-  const { colors } = useTheme();
 
   const { data: collection, isLoading: loadingCollection } =
     useCollection(collectionId);
@@ -37,7 +37,7 @@ function EditCollectionForm() {
   const [description, setDescription] = useState("");
   const [studyMode, setStudyMode] = useState<StudyMode>("flashcard");
   const [error, setError] = useState("");
-  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Kanji grid state
   const [displayedKanji, setDisplayedKanji] = useState<KanjiWithData[]>([]);
@@ -49,15 +49,6 @@ function EditCollectionForm() {
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
-
-  // Handle scroll for sticky header shadow
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Pre-fill form with existing collection data
   useEffect(() => {
@@ -210,10 +201,10 @@ function EditCollectionForm() {
 
   if (loadingCollection) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse">学</div>
-          <p className="text-gray-600">Loading collection...</p>
+          <div className="text-6xl mb-4 animate-pulse text-foreground">学</div>
+          <p className="text-muted">Loading collection...</p>
         </div>
       </div>
     );
@@ -221,15 +212,12 @@ function EditCollectionForm() {
 
   if (!collection) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Collection not found</p>
+          <p className="text-muted mb-4">Collection not found</p>
           <Link
             href="/collections/manage"
-            className="px-6 py-3 text-white rounded-full font-medium shadow-lg"
-            style={{
-              backgroundColor: colors.primary,
-            }}
+            className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-medium shadow-md hover:shadow-lg transition-shadow"
           >
             Back to Manage
           </Link>
@@ -239,47 +227,27 @@ function EditCollectionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc]">
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 ${
-          scrolled ? "shadow-xl py-3" : "py-4 shadow-lg"
-        }`}
-        style={{
-          backgroundColor: colors.primary,
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold">
-                  学
-                </div>
-                <span className="text-white text-xl font-bold tracking-tight hidden sm:block">
-                  Manabi
-                </span>
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-white/30" />
-              <h1 className="text-lg font-semibold text-white hidden sm:block">
-                Edit Collection
-              </h1>
-            </div>
+    <div className="min-h-screen bg-background">
+      {/* Menu Drawer */}
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm text-white/80">Selected</div>
-                <div className="text-xl font-bold text-white">
-                  {selectedKanji.size}
-                </div>
-              </div>
+      {/* Minimal Header */}
+      <MinimalHeader
+        showMenu
+        onMenuClick={() => setMenuOpen(true)}
+        title="Edit Collection"
+        rightContent={
+          <div className="text-right">
+            <div className="text-sm text-muted">Selected</div>
+            <div className="text-xl font-bold text-foreground">
+              {selectedKanji.size}
             </div>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Form Section */}
-      <div className="pt-20 border-b border-gray-100 bg-gray-50">
+      <div className="pt-20 border-b border-border bg-card-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
@@ -293,7 +261,7 @@ function EditCollectionForm() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B7FFF] focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:border-transparent text-foreground placeholder:text-muted bg-background"
                 placeholder="Collection Name *"
                 required
               />
@@ -301,7 +269,7 @@ function EditCollectionForm() {
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B7FFF] focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:border-transparent text-foreground placeholder:text-muted bg-background"
                 placeholder="Description (optional)"
               />
             </div>
@@ -312,8 +280,8 @@ function EditCollectionForm() {
                 onClick={() => setStudyMode("flashcard")}
                 className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "flashcard"
-                    ? "border-[#5B7FFF] bg-[#E8ECFF] text-rose-900"
-                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-foreground"
+                    : "border-border text-foreground hover:bg-background"
                 }`}
               >
                 Flashcard
@@ -323,8 +291,8 @@ function EditCollectionForm() {
                 onClick={() => setStudyMode("multiple_choice")}
                 className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
                   studyMode === "multiple_choice"
-                    ? "border-[#5B7FFF] bg-[#E8ECFF] text-rose-900"
-                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-foreground"
+                    : "border-border text-foreground hover:bg-background"
                 }`}
               >
                 Multiple Choice
@@ -335,7 +303,7 @@ function EditCollectionForm() {
               <button
                 type="button"
                 onClick={() => router.push("/collections/manage")}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-100 transition"
+                className="flex-1 px-4 py-3 border border-border text-foreground rounded-full font-medium hover:bg-background transition"
               >
                 Cancel
               </button>
@@ -344,7 +312,7 @@ function EditCollectionForm() {
                 disabled={
                   updateCollection.isPending || selectedKanji.size === 0
                 }
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full font-medium  transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-shadow"
               >
                 {updateCollection.isPending
                   ? "Updating..."
@@ -356,33 +324,31 @@ function EditCollectionForm() {
       </div>
 
       {/* Filters & Search */}
-      <div className="sticky top-[72px] z-40 bg-white border-b border-gray-100">
+      <div className="sticky top-[72px] z-40 bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center bg-white border border-gray-200 rounded-full duration-200 flex-1">
+            <div className="flex items-center bg-card-bg border border-border rounded-xl shadow-sm flex-1">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Kanji by character, meaning..."
-                className="grow bg-transparent border-none outline-none px-4 py-2.5 text-sm placeholder-gray-400 rounded-l-full text-gray-900"
+                placeholder="Search meanings, readings..."
+                className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-3 text-sm font-medium placeholder:text-muted text-foreground"
               />
-              <div className="pr-2 py-1">
-                <div className="p-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] rounded-full text-white">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
+              <div className="pr-3 text-muted">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
               </div>
             </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -391,10 +357,10 @@ function EditCollectionForm() {
                   key={level}
                   type="button"
                   onClick={() => setSelectedLevel(level)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                     selectedLevel === level
-                      ? "bg-gray-900 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-[var(--accent)] text-[var(--accent-text)]"
+                      : "bg-card-bg text-foreground border border-border hover:bg-[var(--accent)]/10"
                   }`}
                 >
                   {level}
@@ -409,22 +375,22 @@ function EditCollectionForm() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4 animate-pulse">学</div>
-            <p className="text-gray-600">Loading Kanji...</p>
+            <div className="text-6xl mb-4 animate-pulse text-foreground">学</div>
+            <p className="text-muted">Loading Kanji...</p>
           </div>
         ) : filteredKanji.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-2xl">
-            <p className="text-gray-600 mb-2">No Kanji found</p>
-            <p className="text-sm text-gray-500">
+          <div className="text-center py-12 bg-card-bg border border-border rounded-xl">
+            <p className="text-foreground mb-2">No Kanji found</p>
+            <p className="text-sm text-muted">
               Try a different search or filter
             </p>
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-500">
+            <div className="mb-4 text-sm text-muted">
               Showing {filteredKanji.length} of {totalCount} Kanji
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {filteredKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
                 return (
@@ -432,74 +398,62 @@ function EditCollectionForm() {
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className={`bg-gray-50 border rounded-xl duration-200 flex flex-col p-3 group relative  ${
-                      isSelected
-                        ? "border-[#5B7FFF] bg-[#E8ECFF] ring-2 ring-[#5B7FFF]"
-                        : "border-gray-100"
-                    }`}
+                    className="group cursor-pointer"
                   >
-                    {isSelected && (
-                      <div className="absolute top-2 right-2 bg-gradient-to-r from-[#5B7FFF] to-[#4A6FEE] text-white rounded-full w-5 h-5 flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={3}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </div>
-                    )}
+                    <div className="bg-card-bg rounded-2xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all duration-200">
+                      {/* Card Image Area */}
+                      <div className="relative aspect-square duration-300 bg-card-bg border-b border-border">
+                        {/* Selection Indicator */}
+                        {isSelected && (
+                          <div className="absolute top-3 right-3 z-10 bg-[var(--accent)] rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-[var(--accent-text)]">
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        )}
 
-                    {/* Kanji Character */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div
-                        className={`text-6xl ${
-                          isSelected ? "text-rose-900" : "text-gray-800"
-                        }`}
-                      >
-                        {k.character}
-                      </div>
-                    </div>
-
-                    {/* JLPT Level Badge */}
-                    <div className="mb-2">
-                      <span className="inline-block px-2 py-0.5 bg-white/90 rounded text-xs font-semibold text-gray-700 border border-gray-200">
-                        {k.kanjiData.jlptLevel}
-                      </span>
-                    </div>
-
-                    {/* Meanings */}
-                    <div className="mb-2">
-                      <p className="text-xs font-semibold text-gray-900 truncate">
-                        {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
-                          <span key={i}>
-                            {i > 0 && ", "}
-                            {m.charAt(0).toUpperCase() + m.slice(1)}
+                        {/* Kanji Character */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-7xl sm:text-8xl text-foreground">
+                            {k.character}
                           </span>
-                        ))}
-                      </p>
-                    </div>
+                        </div>
 
-                    {/* Readings */}
-                    <div className="text-xs text-gray-600 space-y-0.5">
-                      {k.kanjiData.readings.onyomi.length > 0 && (
-                        <p className="truncate">
-                          <span className="font-medium">On: </span>
-                          {k.kanjiData.readings.onyomi.slice(0, 2).join("、")}
+                        {/* Level Badge */}
+                        <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
+                          {k.kanjiData.jlptLevel}
+                        </div>
+                      </div>
+
+                      {/* Card Details */}
+                      <div className="p-4">
+                        <h3 className="font-semibold text-foreground truncate text-base">
+                          {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                            <span key={i}>
+                              {i > 0 && ", "}
+                              {m.charAt(0).toUpperCase() + m.slice(1)}
+                            </span>
+                          ))}
+                        </h3>
+                        <p className="text-muted text-sm mt-1 truncate">
+                          {[
+                            k.kanjiData.readings.onyomi[0],
+                            k.kanjiData.readings.kunyomi[0],
+                          ]
+                            .filter(Boolean)
+                            .join("、")}
                         </p>
-                      )}
-                      {k.kanjiData.readings.kunyomi.length > 0 && (
-                        <p className="truncate">
-                          <span className="font-medium">Kun: </span>
-                          {k.kanjiData.readings.kunyomi.slice(0, 2).join("、")}
-                        </p>
-                      )}
+                      </div>
                     </div>
                   </button>
                 );
@@ -508,10 +462,10 @@ function EditCollectionForm() {
 
             <div ref={observerTarget} className="py-6 text-center">
               {loadingMore && (
-                <div className="text-gray-500 text-sm">Loading more...</div>
+                <div className="text-muted text-sm">Loading more...</div>
               )}
               {!hasMore && totalCount > 0 && (
-                <div className="text-gray-400 text-sm">All kanji loaded</div>
+                <div className="text-muted text-sm">All kanji loaded</div>
               )}
             </div>
           </>
@@ -525,8 +479,8 @@ export default function EditCollectionPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-white flex items-center justify-center">
-          <div className="text-6xl animate-pulse">学</div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-6xl text-foreground animate-pulse">学</div>
         </div>
       }
     >

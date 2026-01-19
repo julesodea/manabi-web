@@ -22,57 +22,52 @@ html.theme-loaded body {
 }
 
 :root {
-  --background: #f8f9fc;
-  --foreground: #1a1a2e;
-  /* Default theme - will be overridden by data-theme attribute */
-  --theme-primary: #3B82F6;
-  --theme-primary-dark: #2563EB;
-  --theme-primary-light: #DBEAFE;
-  --gray-900: #111827;
-  --white: #ffffff;
+  /* Light mode defaults (white theme) */
+  --background: #FFFFFF;
+  --foreground: #1a1a1a;
+  --card-bg: #F5F5F5;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --accent: #FF6B35;
+  --color-white: #000000; /* Black text on white theme */
 }
 
-/* Theme overrides based on data-theme attribute */
-[data-theme="red"] {
-  --theme-primary: #EF4444;
-  --theme-primary-dark: #DC2626;
-  --theme-primary-light: #FEE2E2;
-}
-
-[data-theme="green"] {
-  --theme-primary: #22C55E;
-  --theme-primary-dark: #16A34A;
-  --theme-primary-light: #DCFCE7;
+/* Dark theme overrides for colored themes */
+[data-theme="blue"],
+[data-theme="red"],
+[data-theme="green"],
+[data-theme="black"] {
+  --background: #1a1a1a;
+  --foreground: #FFFFFF;
+  --card-bg: #2a2a2a;
+  --muted: #9CA3AF;
+  --border: #374151;
+  --color-white: #FFFFFF; /* White text on dark themes */
 }
 
 [data-theme="black"] {
-  --theme-primary: #1E293B;
-  --theme-primary-dark: #0F172A;
-  --theme-primary-light: #E2E8F0;
+  --background: #0a0a0a;
+  --card-bg: #1a1a1a;
+  --border: #2a2a2a;
 }
 
-[data-theme="blue"] {
-  --theme-primary: #3B82F6;
-  --theme-primary-dark: #2563EB;
-  --theme-primary-light: #DBEAFE;
-}
+/* Accent colors per theme */
+[data-theme="white"] { --accent: #FF6B35; --accent-text: #FFFFFF; }
+[data-theme="blue"] { --accent: #3B82F6; --accent-text: #FFFFFF; }
+[data-theme="red"] { --accent: #EF4444; --accent-text: #FFFFFF; }
+[data-theme="green"] { --accent: #22C55E; --accent-text: #FFFFFF; }
+[data-theme="black"] { --accent: #FFFFFF; --accent-text: #000000; }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-theme-primary: var(--theme-primary);
-  --color-theme-primary-dark: var(--theme-primary-dark);
-  --color-theme-primary-light: var(--theme-primary-light);
-  --color-gray-900: var(--gray-900);
-  --color-white: var(--white);
+  --color-card-bg: var(--card-bg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-white: var(--color-white);
   --font-sans: var(--font-noto-sans-jp);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a2e;
-    --foreground: #ededed;
-  }
 }
 
 html {

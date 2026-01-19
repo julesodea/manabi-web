@@ -2,39 +2,63 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type ThemeColor = "blue" | "red" | "green" | "black";
+export type ThemeColor = "white" | "blue" | "red" | "green" | "black";
 
 interface ThemeColors {
-  primary: string;
-  primaryDark: string;
-  primaryLight: string;
-  gradient: string;
+  primary: string;      // Accent color
+  background: string;   // Page background
+  foreground: string;   // Main text
+  cardBg: string;       // Card/content areas
+  muted: string;        // Secondary text
+  border: string;       // Subtle borders
+  isDark: boolean;      // Dark mode flag
 }
 
 const themeColorMap: Record<ThemeColor, ThemeColors> = {
+  white: {
+    primary: "#FF6B35",
+    background: "#FFFFFF",
+    foreground: "#1a1a1a",
+    cardBg: "#F5F5F5",
+    muted: "#6B7280",
+    border: "#E5E7EB",
+    isDark: false,
+  },
   blue: {
-    primary: "#3B82F6", // blue-500
-    primaryDark: "#2563EB", // blue-600
-    primaryLight: "#DBEAFE", // blue-100
-    gradient: "from-[#3B82F6] to-[#2563EB]",
+    primary: "#3B82F6",
+    background: "#1a1a1a",
+    foreground: "#FFFFFF",
+    cardBg: "#2a2a2a",
+    muted: "#9CA3AF",
+    border: "#374151",
+    isDark: true,
   },
   red: {
-    primary: "#EF4444", // red-500
-    primaryDark: "#DC2626", // red-600
-    primaryLight: "#FEE2E2", // red-100
-    gradient: "from-[#EF4444] to-[#DC2626]",
+    primary: "#EF4444",
+    background: "#1a1a1a",
+    foreground: "#FFFFFF",
+    cardBg: "#2a2a2a",
+    muted: "#9CA3AF",
+    border: "#374151",
+    isDark: true,
   },
   green: {
-    primary: "#22C55E", // green-500
-    primaryDark: "#16A34A", // green-600
-    primaryLight: "#DCFCE7", // green-100
-    gradient: "from-[#22C55E] to-[#16A34A]",
+    primary: "#22C55E",
+    background: "#1a1a1a",
+    foreground: "#FFFFFF",
+    cardBg: "#2a2a2a",
+    muted: "#9CA3AF",
+    border: "#374151",
+    isDark: true,
   },
   black: {
-    primary: "#1E293B", // slate-800
-    primaryDark: "#0F172A", // slate-900
-    primaryLight: "#E2E8F0", // slate-200
-    gradient: "from-[#1E293B] to-[#0F172A]",
+    primary: "#FF6B35",
+    background: "#0a0a0a",
+    foreground: "#FFFFFF",
+    cardBg: "#1a1a1a",
+    muted: "#9CA3AF",
+    border: "#2a2a2a",
+    isDark: true,
   },
 };
 
@@ -47,7 +71,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [themeColor, setThemeColorState] = useState<ThemeColor>("blue");
+  const [themeColor, setThemeColorState] = useState<ThemeColor>("white");
   const [mounted, setMounted] = useState(false);
 
   // Load theme from localStorage on mount
