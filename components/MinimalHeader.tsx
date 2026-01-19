@@ -75,8 +75,8 @@ export default function MinimalHeader({
 
           {/* Logo and App Name */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-[var(--accent)] rounded-full flex items-center justify-center text-[var(--accent-text)] font-bold text-base">
-              学
+            <div className="w-8 h-8 bg-[var(--accent)] rounded-full flex items-center justify-center font-bold text-base relative overflow-hidden">
+              <span className="text-[var(--accent-text)] relative z-10">学</span>
             </div>
             <span className="text-lg font-bold text-[var(--foreground)] tracking-tight">
               Manabi

@@ -5,49 +5,42 @@ import Link from "next/link";
 import { useTheme, ThemeColor } from "@/lib/providers/ThemeProvider";
 import { useAuth } from "@/lib/providers/AuthProvider";
 
-const themeOptions: { color: ThemeColor; name: string; description: string }[] =
+const colorOptions: { color: ThemeColor; name: string; description: string; colorValue: string }[] =
   [
     {
-      color: "white",
-      name: "White",
-      description: "Clean and minimalist (Light mode)",
+      color: "neutral",
+      name: "Neutral",
+      description: "Classic black and white",
+      colorValue: "#1a1a1a",
     },
     {
       color: "blue",
       name: "Ocean Blue",
-      description: "Calm and professional (Dark mode)",
+      description: "Calm and professional",
+      colorValue: "#3B82F6",
     },
     {
       color: "red",
       name: "Sunset Red",
-      description: "Warm and energetic (Dark mode)",
+      description: "Warm and energetic",
+      colorValue: "#EF4444",
     },
     {
       color: "green",
       name: "Forest Green",
-      description: "Fresh and natural (Dark mode)",
+      description: "Fresh and natural",
+      colorValue: "#22C55E",
     },
     {
-      color: "black",
-      name: "Midnight Black",
-      description: "Sleek and modern (Dark mode)",
+      color: "orange",
+      name: "Vibrant Orange",
+      description: "Bold and creative",
+      colorValue: "#FF6B35",
     },
   ];
 
-// Helper to get theme colors for preview
-const getThemeColors = (color: ThemeColor) => {
-  const colorMap: Record<ThemeColor, { primary: string; primaryDark: string }> = {
-    white: { primary: "#FF6B35", primaryDark: "#E55A2B" }, // Orange accent
-    blue: { primary: "#3B82F6", primaryDark: "#2563EB" }, // blue-500, blue-600
-    red: { primary: "#EF4444", primaryDark: "#DC2626" }, // red-500, red-600
-    green: { primary: "#22C55E", primaryDark: "#16A34A" }, // green-500, green-600
-    black: { primary: "#FF6B35", primaryDark: "#E55A2B" }, // Orange accent
-  };
-  return colorMap[color];
-};
-
 export default function SettingsPage() {
-  const { themeColor, setThemeColor, colors } = useTheme();
+  const { themeColor, themeMode, setThemeColor, setThemeMode, colors } = useTheme();
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -60,8 +53,14 @@ export default function SettingsPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleThemeChange = (color: ThemeColor) => {
+  const handleColorChange = (color: ThemeColor) => {
     setThemeColor(color);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
+  };
+
+  const handleModeChange = (mode: "light" | "dark") => {
+    setThemeMode(mode);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
   };
@@ -163,68 +162,88 @@ export default function SettingsPage() {
 
         {/* Theme Customization */}
         <div className="bg-card-bg rounded-xl p-6 border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Theme Color</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Theme</h2>
           <p className="text-muted mb-6">
-            Customize your app&apos;s appearance with different color themes
+            Customize your app&apos;s appearance
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            {themeOptions.map((option) => (
+          {/* Light/Dark Mode Toggle */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Appearance</h3>
+            <div className="flex gap-3">
               <button
-                key={option.color}
-                onClick={() => handleThemeChange(option.color)}
-                className={`relative p-6 rounded-xl border-2 transition-all text-left bg-background ${
-                  themeColor === option.color
-                    ? "border-accent"
-                    : "border-border hover:border-muted"
+                onClick={() => handleModeChange("light")}
+                className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all font-medium ${
+                  themeMode === "light"
+                    ? "border-accent bg-accent/10 text-foreground"
+                    : "border-border text-foreground hover:bg-background"
                 }`}
               >
-                {/* Color Preview */}
-                <div
-                  className="w-full h-24 rounded-xl mb-4 shadow-md flex items-center justify-center"
-                  style={{
-                    backgroundColor: getThemeColors(option.color).primary,
-                  }}
-                >
-                  <span className="text-4xl text-white font-bold drop-shadow-lg">
-                    学
-                  </span>
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  Light
                 </div>
+              </button>
+              <button
+                onClick={() => handleModeChange("dark")}
+                className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all font-medium ${
+                  themeMode === "dark"
+                    ? "border-accent bg-accent/10 text-foreground"
+                    : "border-border text-foreground hover:bg-background"
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                  Dark
+                </div>
+              </button>
+            </div>
+          </div>
 
-                {/* Theme Info */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-foreground mb-1">
-                      {option.name}
-                    </h3>
-                    <p className="text-sm text-muted">
-                      {option.description}
-                    </p>
-                  </div>
-
-                  {/* Selected Indicator */}
-                  {themeColor === option.color && (
-                    <div className="shrink-0 ml-3">
-                      <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+          {/* Color Selection */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Accent Color</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {colorOptions.map((option) => (
+                <button
+                  key={option.color}
+                  onClick={() => handleColorChange(option.color)}
+                  className={`relative p-4 rounded-xl border-2 transition-all text-left ${
+                    themeColor === option.color
+                      ? "border-accent bg-accent/5"
+                      : "border-border hover:border-muted bg-background"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div
+                      className="w-8 h-8 rounded-full shadow-md flex items-center justify-center"
+                      style={{ backgroundColor: option.colorValue }}
+                    >
+                      <span className="text-lg font-bold" style={{ color: "#FFFFFF" }}>学</span>
+                    </div>
+                    {themeColor === option.color && (
+                      <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
                         <svg
-                          className="w-4 h-4 text-white"
+                          className="w-3 h-3 text-white"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth={3}
                           viewBox="0 0 24 24"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
+                    )}
+                  </div>
+                  <h4 className="font-semibold text-foreground text-sm mb-0.5">{option.name}</h4>
+                  <p className="text-xs text-muted">{option.description}</p>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="mt-6 p-4 bg-background rounded-xl border border-border">

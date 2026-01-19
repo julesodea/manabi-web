@@ -62,158 +62,127 @@ export default function KanjiDetailPage() {
       <MinimalHeader
         showMenu
         onMenuClick={() => setMenuOpen(true)}
+        rightContent={
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-[var(--accent)]">
+              •
+            </span>
+            <span className="text-lg font-bold text-foreground">
+              {kanji.strokeCount !== 0 ? `${kanji.strokeCount}` : "?"}
+            </span>
+            <span className="text-xs text-muted">/500</span>
+          </div>
+        }
       />
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 pt-24 pb-12">
-        {/* Kanji Hero */}
-        <div className="bg-card-bg rounded-3xl p-8 mb-8 text-center shadow-lg border border-border">
-          <div className="text-9xl mb-6 text-foreground">{kanji.character}</div>
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span className="px-4 py-1.5 bg-[var(--accent)] text-[var(--accent-text)] rounded-full text-sm font-bold shadow-md">
-              {kanji.kanjiData.jlptLevel}
-            </span>
-            {kanji.kanjiData.grade !== 0 && (
-              <span className="px-4 py-1.5 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm font-semibold">
-                Grade {kanji.kanjiData.grade}
-              </span>
-            )}
-            {kanji.strokeCount !== 0 && (
-              <span className="px-4 py-1.5 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm font-semibold">
-                {kanji.strokeCount} strokes
-              </span>
-            )}
+      {/* Main Content - Single Card */}
+      <main className="max-w-2xl mx-auto px-4 pt-24 pb-12">
+        <div className="bg-card-bg rounded-3xl p-8 shadow-xl border border-border">
+          {/* Large Kanji Character */}
+          <div className="text-center mb-8">
+            <div className="text-[12rem] leading-none font-medium text-foreground mb-6">
+              {kanji.character}
+            </div>
           </div>
-        </div>
 
-        {/* Meanings */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-4">Meanings</h2>
-          <div className="flex flex-wrap gap-2">
-            {kanji.kanjiData.meanings.map((meaning, i) => (
-              <span
-                key={i}
-                className="px-4 py-2 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full font-medium"
-              >
-                {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
+          {/* Main Meaning and Info */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              {kanji.kanjiData.meanings[0]?.charAt(0).toUpperCase() + kanji.kanjiData.meanings[0]?.slice(1)}
+            </h1>
+            <div className="flex items-center gap-2 mb-6">
+              <span className="px-3 py-1 bg-[var(--accent)] text-[var(--accent-text)] rounded-full text-xs font-bold">
+                {kanji.kanjiData.jlptLevel}
               </span>
+              {kanji.kanjiData.meanings.length > 1 && (
+                <span className="text-sm text-muted">
+                  +{kanji.kanjiData.meanings.length - 1} more meanings
+                </span>
+              )}
+            </div>
+
+            {/* Readings */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {/* On'yomi */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                  On&apos;yomi
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {kanji.kanjiData.readings.onyomi.length > 0 ? (
+                    kanji.kanjiData.readings.onyomi.map((reading, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium bg-card-bg text-foreground border border-border"
+                      >
+                        {reading}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted">None</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Kun'yomi */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                  Kun&apos;yomi
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {kanji.kanjiData.readings.kunyomi.length > 0 ? (
+                    kanji.kanjiData.readings.kunyomi.map((reading, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium bg-card-bg text-foreground border border-border"
+                      >
+                        {reading}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted">None</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Example Sentences */}
+          <div className="space-y-4">
+            {kanji.kanjiData.exampleWords && kanji.kanjiData.exampleWords.slice(0, 2).map((word, i) => (
+              <div key={i} className="border-l-4 border-[var(--accent)] pl-4">
+                <p className="text-foreground font-medium mb-1">
+                  {word.word}
+                </p>
+                <p className="text-sm text-muted">
+                  {word.meaning.charAt(0).toUpperCase() + word.meaning.slice(1)}
+                </p>
+              </div>
+            ))}
+            {kanji.kanjiData.exampleSentences && kanji.kanjiData.exampleSentences.slice(0, 1).map((sentence, i) => (
+              <div key={i} className="border-l-4 border-[var(--accent)] pl-4">
+                <p className="text-foreground font-medium mb-1">
+                  {sentence.japanese}
+                </p>
+                <p className="text-sm text-muted">
+                  {sentence.translation.charAt(0).toUpperCase() + sentence.translation.slice(1)}
+                </p>
+              </div>
             ))}
           </div>
-        </div>
 
-        {/* Readings */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-card-bg rounded-2xl p-6 shadow-md border border-border">
-            <h3 className="font-bold text-foreground mb-3 text-lg">
-              On&apos;yomi (音読み)
-            </h3>
-            <div className="space-y-2">
-              {kanji.kanjiData.readings.onyomi.length > 0 ? (
-                kanji.kanjiData.readings.onyomi.map((reading, i) => (
-                  <div
-                    key={i}
-                    className="text-lg px-4 py-2.5 rounded-xl font-medium bg-[var(--accent)]/10 text-[var(--accent)]"
-                  >
-                    {reading}
-                  </div>
-                ))
-              ) : (
-                <p className="text-muted">None</p>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-card-bg rounded-2xl p-6 shadow-md border border-border">
-            <h3 className="font-bold text-foreground mb-3 text-lg">
-              Kun&apos;yomi (訓読み)
-            </h3>
-            <div className="space-y-2">
-              {kanji.kanjiData.readings.kunyomi.length > 0 ? (
-                kanji.kanjiData.readings.kunyomi.map((reading, i) => (
-                  <div
-                    key={i}
-                    className="text-lg px-4 py-2.5 rounded-xl font-medium bg-[var(--accent)]/10 text-[var(--accent)]"
-                  >
-                    {reading}
-                  </div>
-                ))
-              ) : (
-                <p className="text-muted">None</p>
-              )}
-            </div>
+          {/* Action Button */}
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={() => router.back()}
+              className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <svg className="w-5 h-5 text-[var(--accent-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
-
-        {/* Nanori */}
-        {kanji.kanjiData.readings.nanori.length > 0 && (
-          <div className="mb-8 bg-card-bg rounded-2xl p-6 shadow-md border border-border">
-            <h3 className="font-bold text-foreground mb-3 text-lg">
-              Nanori (名乗り) - Name readings
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {kanji.kanjiData.readings.nanori.map((reading, i) => (
-                <span
-                  key={i}
-                  className="px-4 py-2 rounded-full font-medium bg-[var(--accent)]/10 text-[var(--accent)]"
-                >
-                  {reading}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Example Words */}
-        {kanji.kanjiData.exampleWords &&
-          kanji.kanjiData.exampleWords.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-foreground mb-4">
-                Example Words
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                {kanji.kanjiData.exampleWords.map((word, i) => (
-                  <div
-                    key={i}
-                    className="bg-card-bg rounded-xl p-4 border border-border shadow-sm"
-                  >
-                    <div className="text-2xl font-bold mb-1 text-foreground">
-                      {word.word}
-                    </div>
-                    <div className="text-sm text-muted mb-1">
-                      {word.reading}
-                    </div>
-                    <div className="text-foreground">{word.meaning}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-        {/* Example Sentences */}
-        {kanji.kanjiData.exampleSentences &&
-          kanji.kanjiData.exampleSentences.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold text-foreground mb-4">
-                Example Sentences
-              </h2>
-              <div className="space-y-4">
-                {kanji.kanjiData.exampleSentences.map((sentence, i) => (
-                  <div
-                    key={i}
-                    className="bg-card-bg rounded-xl p-4 border-l-4 border-[var(--accent)] shadow-sm"
-                  >
-                    <div className="text-lg text-foreground mb-1">
-                      {sentence.japanese}
-                    </div>
-                    <div className="text-sm text-muted mb-1">
-                      {sentence.reading}
-                    </div>
-                    <div className="text-foreground">{sentence.translation}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
       </main>
     </div>
   );

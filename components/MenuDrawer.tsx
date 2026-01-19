@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/providers/AuthProvider";
-import { useTheme, ThemeColor } from "@/lib/providers/ThemeProvider";
+import { useTheme, ThemeColor, ThemeMode } from "@/lib/providers/ThemeProvider";
 
 interface MenuDrawerProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface MenuDrawerProps {
 
 export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
   const { user, signOut } = useAuth();
-  const { themeColor, setThemeColor } = useTheme();
+  const { themeColor, themeMode, setThemeColor, toggleThemeMode } = useTheme();
 
   // Close on escape key
   useEffect(() => {
@@ -34,12 +34,12 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
     };
   }, [isOpen, onClose]);
 
-  const themes: { value: ThemeColor; label: string }[] = [
-    { value: "white", label: "White" },
-    { value: "blue", label: "Ocean Blue" },
-    { value: "red", label: "Sunset Red" },
-    { value: "green", label: "Forest Green" },
-    { value: "black", label: "Midnight Black" },
+  const colors: { value: ThemeColor; label: string; colorValue: string }[] = [
+    { value: "neutral", label: "Neutral", colorValue: themeMode === "light" ? "#1a1a1a" : "#FFFFFF" },
+    { value: "blue", label: "Ocean Blue", colorValue: "#3B82F6" },
+    { value: "red", label: "Sunset Red", colorValue: "#EF4444" },
+    { value: "green", label: "Forest Green", colorValue: "#22C55E" },
+    { value: "orange", label: "Vibrant Orange", colorValue: "#FF6B35" },
   ];
 
   return (
@@ -130,29 +130,46 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               <h3 className="text-xs uppercase font-semibold text-muted mb-3 px-4">
                 Theme
               </h3>
+
+              {/* Light/Dark Toggle */}
+              <div className="mb-3">
+                <button
+                  onClick={toggleThemeMode}
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-card-bg hover:bg-card-bg/80 transition-colors"
+                >
+                  <span className="text-sm font-medium text-foreground">
+                    {themeMode === "light" ? "Light Mode" : "Dark Mode"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {themeMode === "light" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      )}
+                    </svg>
+                  </div>
+                </button>
+              </div>
+
+              {/* Color Options */}
               <div className="space-y-1">
-                {themes.map((theme) => (
+                {colors.map((color) => (
                   <button
-                    key={theme.value}
-                    onClick={() => setThemeColor(theme.value)}
+                    key={color.value}
+                    onClick={() => setThemeColor(color.value)}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                      themeColor === theme.value
+                      themeColor === color.value
                         ? "bg-card-bg text-foreground"
                         : "text-muted hover:bg-card-bg hover:text-foreground"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-4 h-4 rounded-full"
-                        style={{
-                          backgroundColor:
-                            theme.value === "white" ? "#FF6B35" :
-                            theme.value === "blue" ? "#3B82F6" :
-                            theme.value === "red" ? "#EF4444" :
-                            theme.value === "green" ? "#22C55E" : "#FF6B35"
-                        }}
+                        className="w-5 h-5 rounded-full border border-gray-300"
+                        style={{ backgroundColor: color.colorValue }}
                       />
-                      <span>{theme.label}</span>
+                      <span>{color.label}</span>
                     </div>
                   </button>
                 ))}

@@ -28,7 +28,8 @@ html.theme-loaded body {
   --card-bg: #F5F5F5;
   --muted: #6B7280;
   --border: #E5E7EB;
-  --accent: #FF6B35;
+  --accent: #1a1a1a;
+  --accent-text: #FFFFFF;
   --color-white: #000000; /* Black text on white theme */
 }
 
@@ -36,6 +37,7 @@ html.theme-loaded body {
 [data-theme="blue"],
 [data-theme="red"],
 [data-theme="green"],
+[data-theme="orange"],
 [data-theme="black"] {
   --background: #1a1a1a;
   --foreground: #FFFFFF;
@@ -52,10 +54,15 @@ html.theme-loaded body {
 }
 
 /* Accent colors per theme */
-[data-theme="white"] { --accent: #FF6B35; --accent-text: #FFFFFF; }
+[data-theme="white"] { --accent: #1a1a1a; --accent-text: #FFFFFF; }
+[data-theme="blue-light"] { --accent: #3B82F6; --accent-text: #FFFFFF; }
 [data-theme="blue"] { --accent: #3B82F6; --accent-text: #FFFFFF; }
+[data-theme="red-light"] { --accent: #EF4444; --accent-text: #FFFFFF; }
 [data-theme="red"] { --accent: #EF4444; --accent-text: #FFFFFF; }
+[data-theme="green-light"] { --accent: #22C55E; --accent-text: #FFFFFF; }
 [data-theme="green"] { --accent: #22C55E; --accent-text: #FFFFFF; }
+[data-theme="orange-light"] { --accent: #FF6B35; --accent-text: #FFFFFF; }
+[data-theme="orange"] { --accent: #FF6B35; --accent-text: #FFFFFF; }
 [data-theme="black"] { --accent: #FFFFFF; --accent-text: #000000; }
 
 @theme inline {

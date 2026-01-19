@@ -343,8 +343,8 @@ export default function StatsPage() {
                                           onClick={() => setSelectedKanjiId(result.characterId)}
                                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:border-green-300 transition-colors cursor-pointer"
                                         >
-                                          <span className="text-lg font-medium text-foreground">{result.character}</span>
-                                          <span className="text-sm text-muted">{result.meaning}</span>
+                                          <span className="text-lg font-medium text-gray-900">{result.character}</span>
+                                          <span className="text-sm text-gray-600">{result.meaning}</span>
                                         </button>
                                       ))}
                                     </div>
@@ -366,8 +366,8 @@ export default function StatsPage() {
                                           onClick={() => setSelectedKanjiId(result.characterId)}
                                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer"
                                         >
-                                          <span className="text-lg font-medium text-foreground">{result.character}</span>
-                                          <span className="text-sm text-muted">{result.meaning}</span>
+                                          <span className="text-lg font-medium text-gray-900">{result.character}</span>
+                                          <span className="text-sm text-gray-600">{result.meaning}</span>
                                         </button>
                                       ))}
                                     </div>

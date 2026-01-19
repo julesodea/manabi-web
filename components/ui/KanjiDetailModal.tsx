@@ -46,59 +46,50 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto"
+          className="relative bg-background rounded-2xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto border border-border"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition z-10"
+            className="absolute top-4 right-4 p-2 rounded-full hover:bg-card-bg transition z-10"
           >
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="text-6xl mb-4 animate-pulse">学</div>
-              <p className="text-gray-500">Loading...</p>
+              <div className="text-6xl mb-4 animate-pulse text-foreground">学</div>
+              <p className="text-muted">Loading...</p>
             </div>
           ) : !kanji ? (
             <div className="p-8 text-center">
-              <p className="text-gray-500">Kanji not found</p>
+              <p className="text-muted">Kanji not found</p>
             </div>
           ) : (
             <div className="p-6">
               {/* Kanji Hero */}
               <div className="text-center mb-6">
-                <div className="text-8xl mb-4 text-gray-900">{kanji.character}</div>
+                <div className="text-8xl mb-4 text-foreground">{kanji.character}</div>
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   <span
-                    className="px-3 py-1 text-white rounded-full text-sm font-bold"
-                    style={{ backgroundColor: colors.primary }}
+                    className="px-3 py-1 rounded-full text-sm font-bold"
+                    style={{
+                      backgroundColor: colors.primary,
+                      color: colors.isDark ? '#FFFFFF' : '#FFFFFF'
+                    }}
                   >
                     {kanji.kanjiData.jlptLevel}
                   </span>
                   {kanji.kanjiData.grade !== 0 && (
-                    <span
-                      className="px-3 py-1 rounded-full text-sm font-semibold"
-                      style={{
-                        backgroundColor: colors.primaryLight,
-                        color: colors.primaryDark,
-                      }}
-                    >
+                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-card-bg text-foreground border border-border">
                       Grade {kanji.kanjiData.grade}
                     </span>
                   )}
                   {kanji.strokeCount !== 0 && (
-                    <span
-                      className="px-3 py-1 rounded-full text-sm font-semibold"
-                      style={{
-                        backgroundColor: colors.primaryLight,
-                        color: colors.primaryDark,
-                      }}
-                    >
+                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-card-bg text-foreground border border-border">
                       {kanji.strokeCount} strokes
                     </span>
                   )}
@@ -107,18 +98,14 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
 
               {/* Meanings */}
               <div className="mb-5">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
                   Meanings
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {kanji.kanjiData.meanings.map((meaning, i) => (
                     <span
                       key={i}
-                      className="px-3 py-1.5 rounded-full font-medium text-sm"
-                      style={{
-                        backgroundColor: colors.primaryLight,
-                        color: colors.primaryDark,
-                      }}
+                      className="px-3 py-1.5 rounded-full font-medium text-sm bg-card-bg text-foreground border border-border"
                     >
                       {meaning.charAt(0).toUpperCase() + meaning.slice(1)}
                     </span>
@@ -129,7 +116,7 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
               {/* Readings */}
               <div className="grid grid-cols-2 gap-4 mb-5">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
                     On&apos;yomi
                   </h3>
                   <div className="space-y-1">
@@ -137,19 +124,19 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
                       kanji.kanjiData.readings.onyomi.map((reading, i) => (
                         <div
                           key={i}
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700"
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-card-bg text-foreground border border-border"
                         >
                           {reading}
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">None</p>
+                      <p className="text-sm text-muted">None</p>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
                     Kun&apos;yomi
                   </h3>
                   <div className="space-y-1">
@@ -157,13 +144,13 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
                       kanji.kanjiData.readings.kunyomi.map((reading, i) => (
                         <div
                           key={i}
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700"
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-card-bg text-foreground border border-border"
                         >
                           {reading}
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400">None</p>
+                      <p className="text-sm text-muted">None</p>
                     )}
                   </div>
                 </div>
@@ -172,15 +159,15 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
               {/* Example Words (first 4) */}
               {kanji.kanjiData.exampleWords && kanji.kanjiData.exampleWords.length > 0 && (
                 <div className="mb-5">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
                     Example Words
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
                     {kanji.kanjiData.exampleWords.slice(0, 4).map((word, i) => (
-                      <div key={i} className="bg-gray-50 rounded-lg p-3">
-                        <div className="text-lg font-bold text-gray-900">{word.word}</div>
-                        <div className="text-xs text-gray-500">{word.reading}</div>
-                        <div className="text-sm text-gray-700">{word.meaning}</div>
+                      <div key={i} className="bg-card-bg rounded-lg p-3 border border-border">
+                        <div className="text-lg font-bold text-foreground">{word.word}</div>
+                        <div className="text-xs text-muted">{word.reading}</div>
+                        <div className="text-sm text-foreground">{word.meaning}</div>
                       </div>
                     ))}
                   </div>
@@ -188,11 +175,14 @@ export function KanjiDetailModal({ isOpen, onClose, kanjiId }: KanjiDetailModalP
               )}
 
               {/* View Full Details Link */}
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-border">
                 <Link
                   href={`/kanji/${kanjiId}`}
-                  className="block w-full text-center px-4 py-3 rounded-xl font-semibold text-white transition hover:opacity-90"
-                  style={{ backgroundColor: colors.primary }}
+                  className="block w-full text-center px-4 py-3 rounded-xl font-semibold transition hover:opacity-90"
+                  style={{
+                    backgroundColor: colors.primary,
+                    color: colors.isDark ? '#FFFFFF' : '#FFFFFF'
+                  }}
                   onClick={onClose}
                 >
                   View Full Details
