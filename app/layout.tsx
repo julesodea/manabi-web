@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#EF4444",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -73,7 +73,7 @@ export default function RootLayout({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#EF4444',
+          backgroundColor: '#ffffff',
           zIndex: 9999,
           display: 'flex',
           alignItems: 'center',
@@ -86,13 +86,12 @@ export default function RootLayout({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '16px'
+            gap: '20px'
           }}>
             <div style={{
               width: '80px',
               height: '80px',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
+              backgroundColor: '#000000',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -104,29 +103,44 @@ export default function RootLayout({
               学
             </div>
             <div style={{
-              color: 'white',
-              fontSize: '32px',
-              fontWeight: 'bold',
-              letterSpacing: '-0.025em'
+              color: '#000000',
+              fontSize: '24px',
+              fontWeight: '600',
+              letterSpacing: '-0.025em',
+              textAlign: 'center'
             }}>
-              Manabi
+              Manabi Learning
             </div>
           </div>
         </div>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.addEventListener('load', function() {
-                setTimeout(function() {
-                  var splash = document.getElementById('splash-screen');
-                  if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(function() {
-                      splash.style.display = 'none';
-                    }, 300);
-                  }
-                }, 100);
-              });
+              (function() {
+                var splash = document.getElementById('splash-screen');
+                if (splash) {
+                  splash.style.display = 'flex';
+                  splash.style.opacity = '1';
+                }
+                
+                function hideSplash() {
+                  setTimeout(function() {
+                    var splash = document.getElementById('splash-screen');
+                    if (splash) {
+                      splash.style.opacity = '0';
+                      setTimeout(function() {
+                        splash.style.display = 'none';
+                      }, 300);
+                    }
+                  }, 100);
+                }
+                
+                if (document.readyState === 'complete') {
+                  hideSplash();
+                } else {
+                  window.addEventListener('load', hideSplash);
+                }
+              })();
             `,
           }}
         />
