@@ -113,24 +113,6 @@ The database uses Supabase (PostgreSQL) with Row Level Security enabled. See `li
 - **study_sessions**: Session history
 - **user_stats**: Aggregated statistics
 
-## SRS Algorithm
-
-Uses a modified SM2 algorithm with 10 levels:
-
-1. Novice (1 minute)
-2-5. Apprentice I-IV (10 min → 6 hours)
-6-7. Guru I-II (3 days → 1 week)
-8. Master (2 weeks)
-9. Enlightened (1 month)
-10. Burned (3 months)
-
-## Development Status
-
-This is a migration in progress from a React Native app. See `MIGRATION_STATUS.md` for:
-- ✅ Completed components
-- 🚧 Work in progress
-- 📋 Next steps
-
 ## API Routes
 
 All API routes follow RESTful conventions. See the `app/api` directory for implementations.
