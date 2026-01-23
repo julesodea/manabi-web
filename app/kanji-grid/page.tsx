@@ -36,12 +36,6 @@ function KanjiGridContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Sync URL params with local state on mount/change
-  useEffect(() => {
-    setSearchQuery(urlSearchQuery);
-    setDebouncedSearchQuery(urlSearchQuery);
-  }, [urlSearchQuery]);
-
   // Update URL when search query changes
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -326,8 +320,8 @@ function KanjiGridContent() {
 
                       {/* Card Details */}
                       <div className="p-4">
-                        <h3 className="font-semibold text-foreground truncate text-base">
-                          {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                        <h3 className="font-semibold text-foreground line-clamp-2 text-base">
+                          {k.kanjiData.meanings.map((m, i) => (
                             <span key={i}>
                               {i > 0 && ", "}
                               {m.charAt(0).toUpperCase() + m.slice(1)}
