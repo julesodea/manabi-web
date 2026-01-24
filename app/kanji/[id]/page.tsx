@@ -62,21 +62,10 @@ export default function KanjiDetailPage() {
       <MinimalHeader
         showMenu
         onMenuClick={() => setMenuOpen(true)}
-        rightContent={
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-[var(--accent)]">
-              •
-            </span>
-            <span className="text-lg font-bold text-foreground">
-              {kanji.strokeCount !== 0 ? `${kanji.strokeCount}` : "?"}
-            </span>
-            <span className="text-xs text-muted">/500</span>
-          </div>
-        }
       />
 
       {/* Main Content - Single Card */}
-      <main className="flex items-center justify-center px-4 py-4" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      <main className="flex items-center justify-center px-4 pt-20 pb-4" style={{ minHeight: '100vh' }}>
         <div className="bg-card-bg rounded-3xl p-6 shadow-xl border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Large Kanji Character */}
           <div className="text-center mb-3">
@@ -87,10 +76,10 @@ export default function KanjiDetailPage() {
 
           {/* Main Meaning and Info */}
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-foreground mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2 flex flex-wrap gap-x-1 gap-y-2 sm:gap-0">
               {kanji.kanjiData.meanings.map((m, i) => (
                 <span key={i}>
-                  {i > 0 && ", "}
+                  {i > 0 && <span className="hidden sm:inline">, </span>}
                   {m.charAt(0).toUpperCase() + m.slice(1)}
                 </span>
               ))}
