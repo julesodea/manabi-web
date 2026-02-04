@@ -1,6 +1,6 @@
 # Manabi Learning - Web Version
 
-[manabi-web.vercel.app](manabi-web.vercel.app)
+[manabi-web.vercel.app](https://manabi-web.vercel.app)
 
 A Next.js web application for learning Japanese Kanji using spaced repetition system (SRS). Migrated from React Native to provide a full-featured web experience.
 
