@@ -139,26 +139,26 @@ export default function KanjiDetailPage() {
           {/* Example Sentences and Close Button */}
           <div className="flex gap-4 lg:gap-6">
             {/* Examples */}
-            <div className="flex-1 space-y-2 lg:space-y-3">
+            <div className="flex-1 space-y-2 lg:space-y-4">
               {kanji.kanjiData.exampleWords && kanji.kanjiData.exampleWords.map((word, i) => (
-                <div key={i} className="border-l-4 border-[var(--accent)] pl-3 lg:pl-4 py-1 lg:py-2">
-                  <p className="text-foreground font-medium text-sm lg:text-base mb-0.5">
+                <div key={i} className="border-l-4 border-[var(--accent)] pl-3 lg:pl-5 py-1 lg:py-2">
+                  <p className="text-foreground font-medium text-sm lg:text-lg mb-0.5">
                     {word.word}
                     {word.reading && (
                       <span className="text-muted font-normal ml-2">- {word.reading}</span>
                     )}
                   </p>
-                  <p className="text-xs lg:text-sm text-muted">
+                  <p className="text-xs lg:text-base text-muted">
                     {word.meaning.charAt(0).toUpperCase() + word.meaning.slice(1)}
                   </p>
                 </div>
               ))}
               {kanji.kanjiData.exampleSentences && kanji.kanjiData.exampleSentences.map((sentence, i) => (
-                <div key={i} className="border-l-4 border-[var(--accent)] pl-3 lg:pl-4 py-1 lg:py-2">
-                  <p className="text-foreground font-medium text-sm lg:text-base mb-0.5">
+                <div key={i} className="border-l-4 border-[var(--accent)] pl-3 lg:pl-5 py-1 lg:py-2">
+                  <p className="text-foreground font-medium text-sm lg:text-lg mb-0.5">
                     {sentence.japanese}
                   </p>
-                  <p className="text-xs lg:text-sm text-muted">
+                  <p className="text-xs lg:text-base text-muted">
                     {sentence.translation.charAt(0).toUpperCase() + sentence.translation.slice(1)}
                   </p>
                 </div>
