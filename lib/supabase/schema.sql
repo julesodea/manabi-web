@@ -233,3 +233,123 @@ CREATE TRIGGER update_learning_progress_updated_at BEFORE UPDATE ON learning_pro
 
 CREATE TRIGGER update_user_stats_updated_at BEFORE UPDATE ON user_stats
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- GIN indexes on array columns for faster search
+CREATE INDEX idx_kanji_data_meanings_gin ON kanji_data USING GIN (meanings);
+CREATE INDEX idx_kanji_data_onyomi_gin ON kanji_data USING GIN (onyomi);
+CREATE INDEX idx_kanji_data_kunyomi_gin ON kanji_data USING GIN (kunyomi);
+
+-- Search RPC function: performs filtering and relevance scoring in PostgreSQL
+-- instead of fetching all rows and scoring client-side
+CREATE OR REPLACE FUNCTION search_kanji(
+  search_query TEXT,
+  search_hiragana TEXT DEFAULT NULL,
+  search_katakana TEXT DEFAULT NULL,
+  jlpt_filter TEXT DEFAULT NULL,
+  result_limit INTEGER DEFAULT 50,
+  result_offset INTEGER DEFAULT 0
+)
+RETURNS TABLE (
+  "character_id" TEXT,
+  "character" TEXT,
+  "type" TEXT,
+  "stroke_count" INTEGER,
+  "stroke_order" TEXT[],
+  "frequency" INTEGER,
+  "tags" TEXT[],
+  "created_at" BIGINT,
+  "updated_at" BIGINT,
+  "meanings" TEXT[],
+  "grade" INTEGER,
+  "jlpt_level" TEXT,
+  "onyomi" TEXT[],
+  "kunyomi" TEXT[],
+  "nanori" TEXT[],
+  "radicals" TEXT[],
+  "components" TEXT[],
+  "example_words" JSONB,
+  "example_sentences" JSONB,
+  "relevance_score" INTEGER
+) LANGUAGE plpgsql AS $$
+DECLARE
+  query_lower TEXT := lower(search_query);
+BEGIN
+  RETURN QUERY
+  SELECT
+    c.id AS character_id,
+    c.character,
+    c.type,
+    c.stroke_count,
+    c.stroke_order,
+    c.frequency,
+    c.tags,
+    c.created_at,
+    c.updated_at,
+    kd.meanings,
+    kd.grade,
+    kd.jlpt_level,
+    kd.onyomi,
+    kd.kunyomi,
+    kd.nanori,
+    kd.radicals,
+    kd.components,
+    kd.example_words,
+    kd.example_sentences,
+    GREATEST(
+      -- Character exact match: 100
+      CASE WHEN c.character = search_query THEN 100 ELSE 0 END,
+      -- Meaning exact match: 90
+      CASE WHEN query_lower = ANY(SELECT lower(m) FROM unnest(kd.meanings) m) THEN 90 ELSE 0 END,
+      -- Meaning whole word match: 80
+      CASE WHEN EXISTS(
+        SELECT 1 FROM unnest(kd.meanings) m WHERE lower(m) ~ ('(^|\s)' || query_lower || '(\s|$)')
+      ) THEN 80 ELSE 0 END,
+      -- Meaning starts with: 70
+      CASE WHEN EXISTS(
+        SELECT 1 FROM unnest(kd.meanings) m WHERE lower(m) LIKE query_lower || '%'
+      ) THEN 70 ELSE 0 END,
+      -- Meaning contains: 50
+      CASE WHEN EXISTS(
+        SELECT 1 FROM unnest(kd.meanings) m WHERE lower(m) LIKE '%' || query_lower || '%'
+      ) THEN 50 ELSE 0 END,
+      -- Reading exact match (original query): 85
+      CASE WHEN search_query = ANY(kd.onyomi || kd.kunyomi || kd.nanori) THEN 85 ELSE 0 END,
+      -- Reading contains (original query): 65
+      CASE WHEN EXISTS(
+        SELECT 1 FROM unnest(kd.onyomi || kd.kunyomi || kd.nanori) r WHERE r LIKE '%' || search_query || '%'
+      ) THEN 65 ELSE 0 END,
+      -- Reading exact match (hiragana): 85
+      CASE WHEN search_hiragana IS NOT NULL
+        AND search_hiragana = ANY(kd.onyomi || kd.kunyomi || kd.nanori) THEN 85 ELSE 0 END,
+      -- Reading contains (hiragana): 65
+      CASE WHEN search_hiragana IS NOT NULL AND EXISTS(
+        SELECT 1 FROM unnest(kd.onyomi || kd.kunyomi || kd.nanori) r WHERE r LIKE '%' || search_hiragana || '%'
+      ) THEN 65 ELSE 0 END,
+      -- Reading exact match (katakana): 85
+      CASE WHEN search_katakana IS NOT NULL
+        AND search_katakana = ANY(kd.onyomi || kd.kunyomi || kd.nanori) THEN 85 ELSE 0 END,
+      -- Reading contains (katakana): 65
+      CASE WHEN search_katakana IS NOT NULL AND EXISTS(
+        SELECT 1 FROM unnest(kd.onyomi || kd.kunyomi || kd.nanori) r WHERE r LIKE '%' || search_katakana || '%'
+      ) THEN 65 ELSE 0 END
+    )::INTEGER AS relevance_score
+  FROM kanji_data kd
+  JOIN characters c ON c.id = kd.character_id
+  WHERE
+    (jlpt_filter IS NULL OR kd.jlpt_level = jlpt_filter)
+    AND (
+      c.character = search_query
+      OR EXISTS(SELECT 1 FROM unnest(kd.meanings) m WHERE lower(m) LIKE '%' || query_lower || '%')
+      OR EXISTS(SELECT 1 FROM unnest(kd.onyomi || kd.kunyomi || kd.nanori) r WHERE r LIKE '%' || search_query || '%')
+      OR (search_hiragana IS NOT NULL AND EXISTS(
+        SELECT 1 FROM unnest(kd.onyomi || kd.kunyomi || kd.nanori) r WHERE r LIKE '%' || search_hiragana || '%'
+      ))
+      OR (search_katakana IS NOT NULL AND EXISTS(
+        SELECT 1 FROM unnest(kd.onyomi || kd.kunyomi || kd.nanori) r WHERE r LIKE '%' || search_katakana || '%'
+      ))
+    )
+  ORDER BY relevance_score DESC, c.id ASC
+  LIMIT result_limit
+  OFFSET result_offset;
+END;
+$$;

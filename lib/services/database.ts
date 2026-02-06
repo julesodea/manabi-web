@@ -75,142 +75,52 @@ export class DatabaseService {
   }
 
   static async searchKanji(query: string, jlptLevel?: string, limit?: number, offset?: number): Promise<Array<Character & { kanjiData: KanjiData }>> {
-    const queryLower = query.toLowerCase();
-
     // Convert romaji to hiragana and katakana for reading search
     const searchHiragana = isRomaji(query) ? toHiragana(query) : null;
     const searchKatakana = isRomaji(query) ? toKatakana(query) : null;
 
-    // For meaning/reading search on arrays, PostgREST array operators require exact matches
-    // We'll fetch data and filter client-side for flexible matching
-    // The ORDER BY clause ensures consistent results from Supabase
+    // Use PostgreSQL RPC function for server-side filtering and scoring
+    // This replaces fetching all rows + client-side scoring with a single query
+    const { data, error } = await supabase.rpc('search_kanji', {
+      search_query: query,
+      search_hiragana: searchHiragana,
+      search_katakana: searchKatakana,
+      jlpt_filter: (jlptLevel && jlptLevel !== 'All') ? jlptLevel : null,
+      result_limit: limit || 50,
+      result_offset: offset || 0,
+    });
 
-    let baseQuery = supabase
-      .from('kanji_data')
-      .select(`
-        *,
-        characters!kanji_data_character_id_fkey (*)
-      `)
-      .order('character_id');
-
-    // Apply JLPT filter at database level BEFORE limiting
-    if (jlptLevel && jlptLevel !== 'All') {
-      baseQuery = baseQuery.eq('jlpt_level', jlptLevel);
+    if (error || !data) {
+      console.error('[searchKanji] RPC error:', error);
+      return [];
     }
 
-    // Fetch all matching kanji for search
-    // Note: Supabase has a hard limit of 1000 rows per request
-    // We need to paginate to get all kanji when no JLPT filter is applied
-    let allKanji: any[] = [];
-    let fetchMore = true;
-    let currentOffset = 0;
-    const BATCH_SIZE = 1000;
-
-    while (fetchMore) {
-      const { data: batch, error } = await baseQuery
-        .range(currentOffset, currentOffset + BATCH_SIZE - 1);
-
-      if (error) {
-        console.error('[searchKanji] Error fetching batch:', error);
-        return [];
-      }
-
-      if (!batch || batch.length === 0) {
-        fetchMore = false;
-      } else {
-        allKanji = allKanji.concat(batch);
-        currentOffset += BATCH_SIZE;
-
-        // Stop if we got less than a full batch (means we're at the end)
-        if (batch.length < BATCH_SIZE) {
-          fetchMore = false;
-        }
-      }
-    }
-
-    // Filter results client-side for flexible matching and calculate relevance score
-    const scoredResults = allKanji
-      .map((item: any) => {
-        let score = 0;
-        let matched = false;
-
-        // Check if query matches the character directly (highest priority)
-        if (item.characters?.character === query) {
-          score = 100;
-          matched = true;
-        }
-
-        // Check meanings
-        if (item.meanings) {
-          for (const meaning of item.meanings) {
-            const meaningLower = meaning.toLowerCase();
-            if (meaningLower === queryLower) {
-              // Exact match (e.g., "cat" matches "cat")
-              score = Math.max(score, 90);
-              matched = true;
-            } else if (meaningLower.split(/[\s,;]+/).includes(queryLower)) {
-              // Whole word match (e.g., "cat" matches "big cat" but not "category")
-              score = Math.max(score, 80);
-              matched = true;
-            } else if (meaningLower.startsWith(queryLower)) {
-              // Starts with query (e.g., "cat" matches "cattle")
-              score = Math.max(score, 70);
-              matched = true;
-            } else if (meaningLower.includes(queryLower)) {
-              // Contains query (e.g., "cat" matches "category")
-              score = Math.max(score, 50);
-              matched = true;
-            }
-          }
-        }
-
-        // Check readings - original query
-        const checkReadings = (readings: string[] | undefined, searchTerm: string, baseScore: number) => {
-          if (!readings) return;
-          for (const reading of readings) {
-            if (reading === searchTerm) {
-              score = Math.max(score, baseScore);
-              matched = true;
-            } else if (reading.includes(searchTerm)) {
-              score = Math.max(score, baseScore - 20);
-              matched = true;
-            }
-          }
-        };
-
-        checkReadings(item.onyomi, query, 85);
-        checkReadings(item.kunyomi, query, 85);
-        checkReadings(item.nanori, query, 85);
-
-        // Check readings - converted romaji to hiragana/katakana
-        if (searchHiragana) {
-          checkReadings(item.onyomi, searchHiragana, 85);
-          checkReadings(item.kunyomi, searchHiragana, 85);
-          checkReadings(item.nanori, searchHiragana, 85);
-        }
-        if (searchKatakana) {
-          checkReadings(item.onyomi, searchKatakana, 85);
-          checkReadings(item.kunyomi, searchKatakana, 85);
-          checkReadings(item.nanori, searchKatakana, 85);
-        }
-
-        return { item, score, matched };
-      })
-      .filter(({ matched }) => matched)
-      .sort((a, b) => b.score - a.score);
-
-    // Apply pagination
-    const start = offset || 0;
-    const end = limit ? start + limit : scoredResults.length;
-    const paginatedResults = scoredResults.slice(start, end).map(({ item }) => item);
-
-    // Map the joined data
-    return paginatedResults
-      .filter((item: any) => item.characters)
-      .map((item: any) => ({
-        ...this.mapToCharacter(item.characters),
-        kanjiData: this.mapToKanjiData(item)
-      }));
+    return data.map((row: any) => ({
+      ...this.mapToCharacter({
+        id: row.character_id,
+        character: row.character,
+        type: row.type,
+        stroke_count: row.stroke_count,
+        stroke_order: row.stroke_order,
+        frequency: row.frequency,
+        tags: row.tags,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      }),
+      kanjiData: this.mapToKanjiData({
+        character_id: row.character_id,
+        meanings: row.meanings,
+        grade: row.grade,
+        jlpt_level: row.jlpt_level,
+        onyomi: row.onyomi,
+        kunyomi: row.kunyomi,
+        nanori: row.nanori,
+        radicals: row.radicals,
+        components: row.components,
+        example_words: row.example_words,
+        example_sentences: row.example_sentences,
+      }),
+    }));
   }
 
   // Collection operations

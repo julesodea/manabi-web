@@ -39,6 +39,13 @@ function KanjiGridContent() {
   // Update URL when search query changes
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Require minimum 2 chars for Latin input to avoid wasteful searches
+      // Single Japanese characters (kanji/kana) are allowed
+      const isJapanese = /[\u3000-\u9FFF\uF900-\uFAFF]/.test(searchQuery);
+      const shouldSearch = searchQuery.length === 0 || isJapanese || searchQuery.length >= 2;
+
+      if (!shouldSearch) return;
+
       const params = new URLSearchParams(searchParams.toString());
 
       if (searchQuery) {
