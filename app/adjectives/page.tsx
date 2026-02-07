@@ -324,7 +324,7 @@ function AdjectivesGridContent() {
 
                         {/* Adjective Word */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-6xl sm:text-7xl text-foreground font-medium">
+                          <span className="text-3xl sm:text-4xl text-foreground font-medium">
                             {n.word}
                           </span>
                         </div>
