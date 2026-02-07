@@ -115,7 +115,31 @@ export default function Home() {
                   href="/kanji-grid"
                   className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-semibold text-base shadow-md hover:shadow-lg transition-shadow"
                 >
-                  Start Browsing
+                  Browse Kanji
+                </Link>
+                <Link
+                  href="/verbs"
+                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
+                >
+                  Browse Verbs
+                </Link>
+                <Link
+                  href="/nouns"
+                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
+                >
+                  Browse Nouns
+                </Link>
+                <Link
+                  href="/adjectives"
+                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
+                >
+                  Browse Adjectives
+                </Link>
+                <Link
+                  href="/adverbs"
+                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
+                >
+                  Browse Adverbs
                 </Link>
                 <Link
                   href="/collections/create"
@@ -302,6 +326,30 @@ export default function Home() {
                 className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-semibold shadow-md hover:shadow-lg transition-shadow"
               >
                 Browse Kanji
+              </Link>
+              <Link
+                href="/verbs"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+              >
+                Browse Verbs
+              </Link>
+              <Link
+                href="/nouns"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+              >
+                Browse Nouns
+              </Link>
+              <Link
+                href="/adjectives"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+              >
+                Browse Adjectives
+              </Link>
+              <Link
+                href="/adverbs"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+              >
+                Browse Adverbs
               </Link>
               <Link
                 href="/collections/create"

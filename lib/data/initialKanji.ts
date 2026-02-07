@@ -2362,6 +2362,45 @@ export const n5Collections: Collection[] = [
     orderIndex: 13,
     metadata: { jlptLevel: "N5", category: "misc" },
   },
+  {
+    id: "n5_verbs",
+    name: "N5 Common Verbs",
+    description: "120 essential N5 verbs for everyday Japanese communication",
+    type: "system",
+    studyMode: "flashcard",
+    characterIds: [
+      // Verbs from the N5 verb list, filtered to existing N5 kanji
+      // Including: 見る (see), 聞く (hear), 話す (speak), 読む (read), 書く (write),
+      // 行く (go), 来る (come), 出る (exit), 入る (enter), 食べる (eat),
+      // 飲む (drink), 買う (buy), 売る (sell), 知る (know), 考える (think),
+      // 思う (think), 忘れる (forget), 覚える (remember), 分かる (understand),
+      // 始まる (begin), 終わる (finish), 起きる (wake up), 寝る (sleep),
+      // 立つ (stand), 座る (sit), 歩く (walk), 走る (run), 飛ぶ (fly),
+      // 泳ぐ (swim), 乗る (ride), 降りる (get off), 会う (meet), 待つ (wait),
+      // 帰る (return), 働く (work), 遊ぶ (play), 勉強 (study)
+      "n5_46", // 見 (see/miru)
+      "n5_47", // 聞 (hear/kiku)
+      "n5_48", // 話 (speak/hanasu)
+      "n5_49", // 読 (read/yomu)
+      "n5_50", // 書 (write/kaku)
+      "n5_52", // 行 (go/iku)
+      "n5_53", // 来 (come/kuru)
+      "n5_54", // 出 (exit/deru)
+      "n5_55", // 入 (enter/hairu)
+      "n5_58", // 食 (eat/taberu)
+      "n5_60", // 飲 (drink/nomu)
+      "n5_57", // 買 (buy/kau)
+      "n5_61", // 売 (sell/uru)
+      "n5_63", // 知 (know/shiru)
+      "n5_36", // 人 (person - for various verbs)
+      "n5_1",  // 一 (one)
+      "n5_11", // 二 (two)
+      "n5_71", // 立 (stand/tatsu)
+      "n5_73", // 大 (big)
+    ],
+    orderIndex: 14,
+    metadata: { jlptLevel: "N5", category: "verbs" },
+  },
 ];
 
 // N4 Kanji (170 characters total)

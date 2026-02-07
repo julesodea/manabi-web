@@ -107,6 +107,34 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               >
                 Browse Kanji
               </Link>
+              <Link
+                href="/verbs"
+                onClick={onClose}
+                className="block px-4 py-3 rounded-lg text-foreground hover:bg-card-bg transition-colors"
+              >
+                Browse Verbs
+              </Link>
+              <Link
+                href="/nouns"
+                onClick={onClose}
+                className="block px-4 py-3 rounded-lg text-foreground hover:bg-card-bg transition-colors"
+              >
+                Browse Nouns
+              </Link>
+              <Link
+                href="/adjectives"
+                onClick={onClose}
+                className="block px-4 py-3 rounded-lg text-foreground hover:bg-card-bg transition-colors"
+              >
+                Browse Adjectives
+              </Link>
+              <Link
+                href="/adverbs"
+                onClick={onClose}
+                className="block px-4 py-3 rounded-lg text-foreground hover:bg-card-bg transition-colors"
+              >
+                Browse Adverbs
+              </Link>
               {user && (
                 <Link
                   href="/stats"
