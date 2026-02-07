@@ -75,7 +75,7 @@ export default function KanjiDetailPage() {
           </div>
 
           {/* Main Meaning and Info */}
-          <div className="mb-4 lg:mb-8 flex-1">
+          <div className="mb-4 lg:mb-8 flex-1 flex flex-col justify-center">
             <h1 className="text-2xl lg:text-4xl font-bold text-foreground mb-2 lg:mb-4 flex flex-wrap gap-x-1 gap-y-2 sm:gap-0">
               {kanji.kanjiData.meanings.map((m, i) => (
                 <span key={i}>
