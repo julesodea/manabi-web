@@ -7,6 +7,7 @@ import { useNounsInfinite, useNounsCount } from "@/lib/hooks/useNouns";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { saveNavigationList } from "@/lib/navigationList";
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -92,6 +93,13 @@ function NounsGridContent() {
   const displayedNouns = useMemo(() => {
     return data?.pages.flatMap((page) => page.items) ?? [];
   }, [data]);
+
+  // Save navigation list for detail page prev/next
+  useEffect(() => {
+    if (displayedNouns.length > 0) {
+      saveNavigationList("nouns", displayedNouns.map(n => n.id), "/nouns");
+    }
+  }, [displayedNouns]);
 
   // Toggle noun selection
   const toggleNoun = (id: string) => {

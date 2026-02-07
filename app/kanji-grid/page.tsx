@@ -7,6 +7,7 @@ import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { saveNavigationList } from "@/lib/navigationList";
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -92,6 +93,13 @@ function KanjiGridContent() {
   const displayedKanji = useMemo(() => {
     return data?.pages.flatMap((page) => page.items) ?? [];
   }, [data]);
+
+  // Save navigation list for detail page prev/next
+  useEffect(() => {
+    if (displayedKanji.length > 0) {
+      saveNavigationList("kanji", displayedKanji.map(k => k.id), "/kanji");
+    }
+  }, [displayedKanji]);
 
   // Toggle kanji selection
   const toggleKanji = (id: string) => {

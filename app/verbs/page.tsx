@@ -7,6 +7,7 @@ import { useVerbsInfinite, useVerbsCount } from "@/lib/hooks/useVerbs";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { saveNavigationList } from "@/lib/navigationList";
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -92,6 +93,13 @@ function VerbsGridContent() {
   const displayedVerbs = useMemo(() => {
     return data?.pages.flatMap((page) => page.items) ?? [];
   }, [data]);
+
+  // Save navigation list for detail page prev/next
+  useEffect(() => {
+    if (displayedVerbs.length > 0) {
+      saveNavigationList("verbs", displayedVerbs.map(v => v.id), "/verbs");
+    }
+  }, [displayedVerbs]);
 
   // Toggle verb selection
   const toggleVerb = (id: string) => {

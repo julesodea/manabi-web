@@ -7,12 +7,15 @@ import { useKanji } from "@/lib/hooks/useKanji";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { useNavigationList } from "@/lib/hooks/useNavigationList";
+import DetailNavigationArrows from "@/components/DetailNavigationArrows";
 
 export default function KanjiDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
   const { data: kanji, isLoading, error } = useKanji(id);
+  const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("kanji", id);
   const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -179,6 +182,13 @@ export default function KanjiDetailPage() {
           </div>
         </div>
       </main>
+
+      <DetailNavigationArrows
+        hasPrev={hasPrev}
+        hasNext={hasNext}
+        onPrev={goToPrev}
+        onNext={goToNext}
+      />
     </div>
   );
 }

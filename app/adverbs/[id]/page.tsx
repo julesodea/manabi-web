@@ -7,12 +7,15 @@ import { useAdverb } from "@/lib/hooks/useAdverbs";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { useNavigationList } from "@/lib/hooks/useNavigationList";
+import DetailNavigationArrows from "@/components/DetailNavigationArrows";
 
 export default function AdverbDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
   const { data: adverb, isLoading, error } = useAdverb(id);
+  const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("adverbs", id);
   const { colors } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,6 +162,13 @@ export default function AdverbDetailPage() {
           </div>
         </div>
       </main>
+
+      <DetailNavigationArrows
+        hasPrev={hasPrev}
+        hasNext={hasNext}
+        onPrev={goToPrev}
+        onNext={goToNext}
+      />
     </div>
   );
 }

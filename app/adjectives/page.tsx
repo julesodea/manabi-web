@@ -7,6 +7,7 @@ import { useAdjectivesInfinite, useAdjectivesCount } from "@/lib/hooks/useAdject
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { saveNavigationList } from "@/lib/navigationList";
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -92,6 +93,13 @@ function AdjectivesGridContent() {
   const displayedAdjectives = useMemo(() => {
     return data?.pages.flatMap((page) => page.items) ?? [];
   }, [data]);
+
+  // Save navigation list for detail page prev/next
+  useEffect(() => {
+    if (displayedAdjectives.length > 0) {
+      saveNavigationList("adjectives", displayedAdjectives.map(a => a.id), "/adjectives");
+    }
+  }, [displayedAdjectives]);
 
   // Toggle adjective selection
   const toggleAdjective = (id: string) => {
