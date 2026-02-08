@@ -2,6 +2,36 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Redirect old vocab routes to new unified vocab page
+  const vocabRedirects: Record<string, string> = {
+    '/verbs': 'verbs',
+    '/nouns': 'nouns',
+    '/adjectives': 'adjectives',
+    '/adverbs': 'adverbs',
+  };
+
+  // Check if the pathname matches any of the old vocab routes
+  for (const [oldPath, type] of Object.entries(vocabRedirects)) {
+    if (pathname === oldPath || pathname === `${oldPath}/`) {
+      const url = new URL('/vocab', request.url);
+
+      // Set the type parameter
+      url.searchParams.set('type', type);
+
+      // Preserve existing query parameters
+      searchParams.forEach((value, key) => {
+        if (key !== 'type') { // Don't duplicate type if it somehow exists
+          url.searchParams.set(key, value);
+        }
+      });
+
+      // Use 307 temporary redirect (not 301 permanent) since this isn't live yet
+      return NextResponse.redirect(url, 307);
+    }
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });

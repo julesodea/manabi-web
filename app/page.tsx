@@ -118,28 +118,10 @@ export default function Home() {
                   Browse Kanji
                 </Link>
                 <Link
-                  href="/verbs"
+                  href="/vocab"
                   className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
                 >
-                  Browse Verbs
-                </Link>
-                <Link
-                  href="/nouns"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
-                >
-                  Browse Nouns
-                </Link>
-                <Link
-                  href="/adjectives"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
-                >
-                  Browse Adjectives
-                </Link>
-                <Link
-                  href="/adverbs"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
-                >
-                  Browse Adverbs
+                  Browse Vocab
                 </Link>
                 <Link
                   href="/collections/create"
@@ -328,28 +310,10 @@ export default function Home() {
                 Browse Kanji
               </Link>
               <Link
-                href="/verbs"
+                href="/vocab"
                 className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
               >
-                Browse Verbs
-              </Link>
-              <Link
-                href="/nouns"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
-              >
-                Browse Nouns
-              </Link>
-              <Link
-                href="/adjectives"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
-              >
-                Browse Adjectives
-              </Link>
-              <Link
-                href="/adverbs"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
-              >
-                Browse Adverbs
+                Browse Vocab
               </Link>
               <Link
                 href="/collections/create"

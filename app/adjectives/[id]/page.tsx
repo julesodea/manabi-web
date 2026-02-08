@@ -113,7 +113,7 @@ export default function AdjectiveDetailPage() {
                   </h3>
                   <div className="flex flex-wrap gap-2 lg:gap-3">
                     <span className="px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-sm lg:text-base font-medium bg-card-bg text-foreground border border-border">
-                      {adjective.romaji}
+                      {adjective.romaji.charAt(0).toUpperCase() + adjective.romaji.slice(1)}
                     </span>
                   </div>
                 </div>

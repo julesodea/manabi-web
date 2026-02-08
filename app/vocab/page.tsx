@@ -4,6 +4,10 @@ import { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useVerbsInfinite, useVerbsCount } from "@/lib/hooks/useVerbs";
+import { useNounsInfinite, useNounsCount } from "@/lib/hooks/useNouns";
+import { useAdjectivesInfinite, useAdjectivesCount } from "@/lib/hooks/useAdjectives";
+import { useAdverbsInfinite, useAdverbsCount } from "@/lib/hooks/useAdverbs";
+import { useVocabInfinite, useVocabCount } from "@/lib/hooks/useVocab";
 import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
@@ -18,17 +22,33 @@ const JLPT_LEVELS = [
   { label: "N1", value: "N1" },
 ];
 
-function VerbsGridContent() {
+const VOCAB_TYPES = [
+  { label: "All", value: "all" },
+  { label: "Verbs", value: "verbs" },
+  { label: "Nouns", value: "nouns" },
+  { label: "Adjectives", value: "adjectives" },
+  { label: "Adverbs", value: "adverbs" },
+];
+
+const TYPE_LABELS: Record<string, string> = {
+  verb: "V",
+  noun: "N",
+  adjective: "Adj",
+  adverb: "Adv",
+};
+
+function VocabGridContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectionModeParam = searchParams.get("select") === "true";
   const { colors } = useTheme();
 
-  // Get search and level from URL params
+  // Get search, level, and type from URL params
   const urlSearchQuery = searchParams.get("q") || "";
   const urlLevel = searchParams.get("level") || "All";
+  const urlType = searchParams.get("type") || "all";
 
-  const [selectedVerbs, setSelectedVerbs] = useState<Set<string>>(new Set());
+  const [selectedVocab, setSelectedVocab] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
   const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
   const [debouncedSearchQuery, setDebouncedSearchQuery] =
@@ -57,10 +77,10 @@ function VerbsGridContent() {
 
       const newUrl = params.toString()
         ? `?${params.toString()}`
-        : "/verbs";
+        : "/vocab";
       const currentUrl = searchParams.toString()
         ? `?${searchParams.toString()}`
-        : "/verbs";
+        : "/vocab";
 
       // Only update URL if it's actually different
       if (newUrl !== currentUrl) {
@@ -81,29 +101,60 @@ function VerbsGridContent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // TanStack Query hooks
-  const { data: totalCount } = useVerbsCount(urlLevel);
+  // TanStack Query hooks - conditionally use based on active tab
+  const vocabHooks = {
+    all: useVocabInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
+    verbs: useVerbsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
+    nouns: useNounsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
+    adjectives: useAdjectivesInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
+    adverbs: useAdverbsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
+  };
+
+  const countHooks = {
+    all: useVocabCount(urlLevel),
+    verbs: useVerbsCount(urlLevel),
+    nouns: useNounsCount(urlLevel),
+    adjectives: useAdjectivesCount(urlLevel),
+    adverbs: useAdverbsCount(urlLevel),
+  };
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useVerbsInfinite({
-      query: debouncedSearchQuery || undefined,
-      jlptLevel: urlLevel,
-    });
+    vocabHooks[urlType as keyof typeof vocabHooks];
+  const { data: totalCount } = countHooks[urlType as keyof typeof countHooks];
 
   // Flatten paginated data
-  const displayedVerbs = useMemo(() => {
+  const displayedVocab = useMemo(() => {
     return data?.pages.flatMap((page) => page.items) ?? [];
   }, [data]);
 
   // Save navigation list for detail page prev/next
   useEffect(() => {
-    if (displayedVerbs.length > 0) {
-      saveNavigationList("verbs", displayedVerbs.map(v => v.id), "/verbs");
-    }
-  }, [displayedVerbs]);
+    if (displayedVocab.length > 0) {
+      if (urlType === "all") {
+        // For "all" tab, save separately by type
+        const vocabByType = displayedVocab.reduce((acc, v) => {
+          const type = v.part_of_speech;
+          if (!acc[type]) acc[type] = [];
+          acc[type].push(v.id);
+          return acc;
+        }, {} as Record<string, string[]>);
 
-  // Toggle verb selection
-  const toggleVerb = (id: string) => {
-    setSelectedVerbs((prev) => {
+        Object.entries(vocabByType).forEach(([type, ids]) => {
+          const basePath = type === "verb" ? "/verbs" :
+                          type === "noun" ? "/nouns" :
+                          type === "adjective" ? "/adjectives" : "/adverbs";
+          saveNavigationList(`${type}s`, ids, basePath);
+        });
+      } else {
+        // For specific tabs, save as usual
+        saveNavigationList(urlType, displayedVocab.map(v => v.id), `/${urlType}`);
+      }
+    }
+  }, [displayedVocab, urlType]);
+
+  // Toggle vocab selection
+  const toggleVocab = (id: string) => {
+    setSelectedVocab((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -114,9 +165,9 @@ function VerbsGridContent() {
     });
   };
 
-  // Create collection with selected verbs
+  // Create collection with selected vocab
   const createCollection = () => {
-    const ids = Array.from(selectedVerbs).join(",");
+    const ids = Array.from(selectedVocab).join(",");
     router.push(`/collections/create?characterIds=${encodeURIComponent(ids)}`);
   };
 
@@ -150,6 +201,22 @@ function VerbsGridContent() {
     }
   }, []);
 
+  // Get detail page path based on part of speech
+  const getDetailPath = (partOfSpeech: string, id: string) => {
+    const paths: Record<string, string> = {
+      verb: `/verbs/${id}`,
+      noun: `/nouns/${id}`,
+      adjective: `/adjectives/${id}`,
+      adverb: `/adverbs/${id}`,
+    };
+    return paths[partOfSpeech] || `/verbs/${id}`;
+  };
+
+  // Get type label for display
+  const getTypeLabel = () => {
+    return VOCAB_TYPES.find(t => t.value === urlType)?.label || "Vocabulary";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Menu Drawer */}
@@ -166,11 +233,41 @@ function VerbsGridContent() {
         {/* Page Title */}
         <div className="mb-6">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-            N5 Verbs
+            Browse Vocabulary
           </h1>
           <p className="text-muted mt-2">
-            Essential verbs for everyday Japanese communication
+            Essential vocabulary for Japanese communication
           </p>
+        </div>
+
+        {/* Vocab Type Tabs */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-border">
+            {VOCAB_TYPES.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  if (type.value === "all") {
+                    params.delete("type");
+                  } else {
+                    params.set("type", type.value);
+                  }
+                  const newUrl = params.toString()
+                    ? `?${params.toString()}`
+                    : "/vocab";
+                  router.replace(newUrl, { scroll: false });
+                }}
+                className={`px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 ${
+                  urlType === type.value
+                    ? "border-[var(--accent)] text-[var(--accent)]"
+                    : "border-transparent text-muted hover:text-foreground"
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Search and Filter Section */}
@@ -218,7 +315,7 @@ function VerbsGridContent() {
                     }
                     const newUrl = params.toString()
                       ? `?${params.toString()}`
-                      : "/verbs";
+                      : "/vocab";
                     router.replace(newUrl, { scroll: false });
                   }}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
@@ -236,12 +333,12 @@ function VerbsGridContent() {
             <div className="flex items-center gap-2">
               {selectionMode ? (
                 <>
-                  {selectedVerbs.size > 0 && (
+                  {selectedVocab.size > 0 && (
                     <button
                       onClick={createCollection}
                       className="px-4 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full text-sm font-semibold shadow-md"
                     >
-                      Create ({selectedVerbs.size})
+                      Create ({selectedVocab.size})
                     </button>
                   )}
                   <button
@@ -267,12 +364,13 @@ function VerbsGridContent() {
             {isLoading
               ? "Loading..."
               : searchQuery
-              ? `${displayedVerbs.length} verbs found`
+              ? `${displayedVocab.length} items found`
               : totalCount
-              ? `${totalCount} verbs`
+              ? `${totalCount} items`
               : ""}
           </div>
         </div>
+
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {[...Array(15)].map((_, i) => (
@@ -283,17 +381,17 @@ function VerbsGridContent() {
               </div>
             ))}
           </div>
-        ) : displayedVerbs.length === 0 ? (
+        ) : displayedVocab.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-bold text-foreground">No Verbs found</h3>
+            <h3 className="text-xl font-bold text-foreground">No vocabulary found</h3>
             <p className="text-muted mt-2">
               Try changing your filters or search terms.
             </p>
             <button
               onClick={() => {
                 setSearchQuery("");
-                router.replace("/verbs", { scroll: false });
+                router.replace("/vocab", { scroll: false });
               }}
               className="mt-6 px-6 py-2 border border-border text-foreground rounded-xl hover:bg-card-bg transition font-medium"
             >
@@ -303,8 +401,8 @@ function VerbsGridContent() {
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {displayedVerbs.map((v) => {
-                const isSelected = selectedVerbs.has(v.id);
+              {displayedVocab.map((v) => {
+                const isSelected = selectedVocab.has(v.id);
 
                 const cardContent = (
                   <div className="group cursor-pointer h-full">
@@ -330,7 +428,7 @@ function VerbsGridContent() {
                           </div>
                         )}
 
-                        {/* Verb Word */}
+                        {/* Vocab Word */}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-3xl sm:text-4xl text-foreground font-medium">
                             {v.word}
@@ -341,6 +439,13 @@ function VerbsGridContent() {
                         <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
                           {v.jlpt_level || 'N5'}
                         </div>
+
+                        {/* Type Badge (only show in "All" tab) */}
+                        {urlType === "all" && (
+                          <div className="absolute bottom-3 right-3 bg-muted/80 px-2 py-0.5 rounded text-xs font-semibold text-foreground">
+                            {TYPE_LABELS[v.part_of_speech] || v.part_of_speech}
+                          </div>
+                        )}
                       </div>
 
                       {/* Card Details */}
@@ -360,13 +465,13 @@ function VerbsGridContent() {
                   <button
                     key={v.id}
                     type="button"
-                    onClick={() => toggleVerb(v.id)}
+                    onClick={() => toggleVocab(v.id)}
                     className="text-left"
                   >
                     {cardContent}
                   </button>
                 ) : (
-                  <Link key={v.id} href={`/verbs/${v.id}`}>
+                  <Link key={v.id} href={getDetailPath(v.part_of_speech, v.id)}>
                     {cardContent}
                   </Link>
                 );
@@ -380,7 +485,7 @@ function VerbsGridContent() {
               )}
               {!hasNextPage && totalCount && totalCount > 0 && (
                 <div className="text-muted text-sm">
-                  All {totalCount} verbs loaded
+                  All {totalCount} items loaded
                 </div>
               )}
             </div>
@@ -389,13 +494,13 @@ function VerbsGridContent() {
       </main>
 
       {/* Floating Action Button */}
-      {selectionMode && selectedVerbs.size > 0 && (
+      {selectionMode && selectedVocab.size > 0 && (
         <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40">
           <button
             onClick={createCollection}
             className="bg-[var(--accent)] text-[var(--accent-text)] px-6 py-3 rounded-full shadow-xl font-medium flex items-center gap-2 hover:shadow-2xl transition-shadow"
           >
-            Create Collection ({selectedVerbs.size})
+            Create Collection ({selectedVocab.size})
           </button>
         </div>
       )}
@@ -403,7 +508,7 @@ function VerbsGridContent() {
   );
 }
 
-export default function VerbsGridPage() {
+export default function VocabGridPage() {
   return (
     <Suspense
       fallback={
@@ -413,11 +518,11 @@ export default function VerbsGridPage() {
             backgroundColor: 'var(--theme-primary)'
           }}
         >
-          <div className="text-6xl text-white animate-pulse">動</div>
+          <div className="text-6xl text-white animate-pulse">語</div>
         </div>
       }
     >
-      <VerbsGridContent />
+      <VocabGridContent />
     </Suspense>
   );
 }

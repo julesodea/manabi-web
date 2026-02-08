@@ -307,8 +307,8 @@ function NounsGridContent() {
                 const isSelected = selectedNouns.has(n.id);
 
                 const cardContent = (
-                  <div className="group cursor-pointer">
-                    <div className="bg-card-bg rounded-2xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all duration-200">
+                  <div className="group cursor-pointer h-full">
+                    <div className="h-full flex flex-col bg-card-bg rounded-2xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all duration-200">
                       {/* Card Image Area */}
                       <div className="relative aspect-square duration-300 bg-card-bg border-b border-border">
                         {/* Selection Indicator */}
@@ -344,12 +344,12 @@ function NounsGridContent() {
                       </div>
 
                       {/* Card Details */}
-                      <div className="p-4">
+                      <div className="p-4 flex-1 flex flex-col justify-between min-h-[88px]">
                         <h3 className="font-semibold text-foreground line-clamp-2 text-base">
                           {n.meaning.charAt(0).toUpperCase() + n.meaning.slice(1)}
                         </h3>
                         <p className="text-muted text-sm mt-1 truncate">
-                          {n.reading}
+                          {n.romaji ? n.romaji.charAt(0).toUpperCase() + n.romaji.slice(1) : n.reading}
                         </p>
                       </div>
                     </div>
