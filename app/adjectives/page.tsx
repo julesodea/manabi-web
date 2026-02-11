@@ -331,7 +331,7 @@ function AdjectivesGridContent() {
 
                         {/* Adjective Word */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-3xl sm:text-4xl text-foreground font-medium px-4">
+                          <span className="text-2xl text-foreground font-medium px-4">
                             {n.word}
                           </span>
                         </div>
@@ -347,7 +347,7 @@ function AdjectivesGridContent() {
                         <h3 className="font-semibold text-foreground line-clamp-2 text-base">
                           {n.meaning.charAt(0).toUpperCase() + n.meaning.slice(1)}
                         </h3>
-                        <p className="text-muted text-sm mt-1 truncate">
+                        <p className="text-muted text-base mt-1 truncate">
                           {n.romaji ? n.romaji.charAt(0).toUpperCase() + n.romaji.slice(1) : n.reading}
                         </p>
                       </div>
