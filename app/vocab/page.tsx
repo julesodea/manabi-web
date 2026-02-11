@@ -447,11 +447,11 @@ function VocabGridContent() {
                       </div>
 
                       {/* Card Details */}
-                      <div className="p-4 flex-1 flex flex-col justify-between min-h-[88px]">
-                        <h3 className="font-semibold text-foreground line-clamp-2 text-base">
+                      <div className="p-4 flex-1 flex flex-col justify-center items-center min-h-[88px]">
+                        <h3 className="font-semibold text-foreground line-clamp-2 text-base text-center">
                           {v.meaning.charAt(0).toUpperCase() + v.meaning.slice(1)}
                         </h3>
-                        <p className="text-muted text-base mt-1 truncate">
+                        <p className="text-muted text-base mt-1 text-center">
                           {v.romaji ? v.romaji.charAt(0).toUpperCase() + v.romaji.slice(1) : v.reading}
                         </p>
                       </div>
