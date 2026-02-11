@@ -141,8 +141,8 @@ function VocabGridContent() {
 
         Object.entries(vocabByType).forEach(([type, ids]) => {
           const basePath = type === "verb" ? "/verbs" :
-                          type === "noun" ? "/nouns" :
-                          type === "adjective" ? "/adjectives" : "/adverbs";
+            type === "noun" ? "/nouns" :
+              type === "adjective" ? "/adjectives" : "/adverbs";
           saveNavigationList(`${type}s`, ids, basePath);
         });
       } else {
@@ -258,11 +258,10 @@ function VocabGridContent() {
                     : "/vocab";
                   router.replace(newUrl, { scroll: false });
                 }}
-                className={`px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 ${
-                  urlType === type.value
+                className={`px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 ${urlType === type.value
                     ? "border-[var(--accent)] text-[var(--accent)]"
                     : "border-transparent text-muted hover:text-foreground"
-                }`}
+                  }`}
               >
                 {type.label}
               </button>
@@ -318,11 +317,10 @@ function VocabGridContent() {
                       : "/vocab";
                     router.replace(newUrl, { scroll: false });
                   }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    urlLevel === level.value
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${urlLevel === level.value
                       ? "bg-[var(--accent)] text-[var(--accent-text)]"
                       : "bg-card-bg text-foreground border border-border hover:bg-[var(--accent)]/10"
-                  }`}
+                    }`}
                 >
                   {level.label}
                 </button>
@@ -364,10 +362,10 @@ function VocabGridContent() {
             {isLoading
               ? "Loading..."
               : searchQuery
-              ? `${displayedVocab.length} items found`
-              : totalCount
-              ? `${totalCount} items`
-              : ""}
+                ? `${displayedVocab.length} items found`
+                : totalCount
+                  ? `${totalCount} items`
+                  : ""}
           </div>
         </div>
 
@@ -430,7 +428,7 @@ function VocabGridContent() {
 
                         {/* Vocab Word */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-3xl sm:text-4xl text-foreground font-medium">
+                          <span className="text-3xl sm:text-4xl text-foreground font-medium px-4">
                             {v.word}
                           </span>
                         </div>
