@@ -347,7 +347,7 @@ function AdverbsGridContent() {
                         <h3 className="font-semibold text-foreground line-clamp-2 text-base text-center">
                           {n.meaning.charAt(0).toUpperCase() + n.meaning.slice(1)}
                         </h3>
-                        <p className="text-muted text-base mt-1 text-center">
+                        <p className="text-muted text-base mt-1 text-center wrap-break-word w-full">
                           {n.romaji ? n.romaji.charAt(0).toUpperCase() + n.romaji.slice(1) : n.reading}
                         </p>
                       </div>

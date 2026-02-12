@@ -451,7 +451,7 @@ function VocabGridContent() {
                         <h3 className="font-semibold text-foreground line-clamp-2 text-base text-center">
                           {v.meaning.charAt(0).toUpperCase() + v.meaning.slice(1)}
                         </h3>
-                        <p className="text-muted text-base mt-1 text-center">
+                        <p className="text-muted text-base mt-1 text-center wrap-break-word w-full">
                           {v.romaji ? v.romaji.charAt(0).toUpperCase() + v.romaji.slice(1) : v.reading}
                         </p>
                       </div>
