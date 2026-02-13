@@ -434,13 +434,23 @@ function VocabGridContent() {
                         </div>
 
                         {/* Level Badge */}
-                        <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
+                        <div
+                          className="absolute top-3 left-3 px-2.5 py-1 rounded-lg border border-border text-xs font-bold text-accent"
+                          style={{
+                            backgroundColor: colors.isDark ? colors.cardBg : 'white'
+                          }}
+                        >
                           {v.jlpt_level || 'N5'}
                         </div>
 
                         {/* Type Badge (only show in "All" tab) */}
                         {urlType === "all" && (
-                          <div className="absolute bottom-3 right-3 bg-muted/80 px-2 py-0.5 rounded text-xs font-semibold text-foreground">
+                          <div
+                            className="absolute bottom-3 right-3 px-2 py-0.5 rounded border border-border text-xs font-semibold text-foreground"
+                            style={{
+                              backgroundColor: colors.isDark ? colors.cardBg : 'white'
+                            }}
+                          >
                             {TYPE_LABELS[v.part_of_speech] || v.part_of_speech}
                           </div>
                         )}
