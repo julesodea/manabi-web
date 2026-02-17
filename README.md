@@ -1,4 +1,4 @@
-# Manabi Learning - Web Version
+# Manabi Learning
 
 [manabi-web.vercel.app](https://manabi-web.vercel.app)
 
