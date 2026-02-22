@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "@/lib/providers/AuthProvider";
 
 interface MinimalHeaderProps {
   onMenuClick?: () => void;
@@ -24,6 +25,8 @@ export default function MinimalHeader({
   progress,
   rightContent,
 }: MinimalHeaderProps) {
+  const { user } = useAuth();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)] border-b border-[var(--border)]">
       <div className="flex items-center justify-between px-4 py-4">
@@ -92,7 +95,7 @@ export default function MinimalHeader({
         )}
         {!title && !rightContent && <div className="flex-1" />}
 
-        {/* Right side - Custom content, Progress counter, or spacer */}
+        {/* Right side - Custom content, Progress counter, Login, or spacer */}
         {rightContent ? (
           <div>{rightContent}</div>
         ) : progress ? (
@@ -105,6 +108,13 @@ export default function MinimalHeader({
               style={{ backgroundColor: "var(--accent)" }}
             />
           </div>
+        ) : !user ? (
+          <Link
+            href="/login"
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-accent-text hover:opacity-90 transition-opacity"
+          >
+            Sign in
+          </Link>
         ) : (
           <div className="w-10" />
         )}

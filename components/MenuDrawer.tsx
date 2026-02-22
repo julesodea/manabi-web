@@ -185,7 +185,7 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
           </nav>
 
           {/* User Section */}
-          {user && (
+          {user ? (
             <div className="px-6 py-4 border-t border-border">
               <div className="flex items-center gap-3 mb-3">
                 {user.user_metadata?.avatar_url && (
@@ -213,6 +213,16 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               >
                 Sign out
               </button>
+            </div>
+          ) : (
+            <div className="px-6 py-4 border-t border-border">
+              <Link
+                href="/login"
+                onClick={onClose}
+                className="block w-full px-4 py-2.5 text-sm font-medium text-center rounded-lg bg-[var(--accent)] text-[var(--accent-text)] hover:opacity-90 transition-opacity"
+              >
+                Sign in
+              </Link>
             </div>
           )}
         </div>

@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useVerb } from "@/lib/hooks/useVerbs";
-import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 import { useNavigationList } from "@/lib/hooks/useNavigationList";
@@ -16,18 +14,7 @@ export default function VerbDetailPage() {
   const id = typeof params.id === "string" ? params.id : "";
   const { data: verb, isLoading, error } = useVerb(id);
   const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("verbs", id);
-  const { colors } = useTheme();
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // Handle scroll for sticky header shadow
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   if (isLoading) {
     return (
@@ -68,8 +55,8 @@ export default function VerbDetailPage() {
       />
 
       {/* Main Content - Single Card */}
-      <main className="flex items-center justify-center px-4 pt-20 pb-4" style={{ minHeight: '100vh' }}>
-        <div className="bg-card-bg rounded-3xl p-6 lg:p-10 shadow-xl border border-border max-w-4xl w-full min-h-[80vh] max-h-[90vh] overflow-y-auto flex flex-col justify-evenly relative">
+      <main className="flex items-center justify-center px-4 pt-20 pb-4 h-screen overflow-hidden">
+        <div className="bg-card-bg rounded-3xl p-6 lg:p-8 shadow-xl border border-border max-w-4xl w-full max-h-full overflow-y-auto flex flex-col justify-evenly relative">
           {/* Large Verb Word */}
           <div className="text-center mb-3 lg:mb-6">
             <div className="text-[6rem] lg:text-[10rem] leading-none font-medium text-foreground mb-2">
