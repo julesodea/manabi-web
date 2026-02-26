@@ -14,6 +14,7 @@ export interface Vocabulary {
   part_of_speech: string;
   meaning: string;
   jlpt_level: string | null;
+  genki_chapter: number | null;
   example_sentences: ExampleSentence[];
   tags: string[];
   created_at: string;
@@ -23,18 +24,22 @@ export interface Vocabulary {
 interface VerbSearchParams {
   query?: string;
   jlptLevel?: string;
+  genkiChapter?: string;
   limit?: number;
 }
 
 const PAGE_SIZE = 50;
 
 // Fetch verb count
-export function useVerbsCount(jlptLevel?: string) {
+export function useVerbsCount(jlptLevel?: string, genkiChapter?: string) {
   return useQuery({
-    queryKey: ['verbs', 'count', jlptLevel],
+    queryKey: ['verbs', 'count', jlptLevel, genkiChapter],
     queryFn: async () => {
-      const params = jlptLevel && jlptLevel !== 'All' ? `?jlptLevel=${jlptLevel}` : '';
-      const response = await fetch(`/api/verbs/count${params}`);
+      const params = new URLSearchParams();
+      if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const response = await fetch(`/api/verbs/count${qs}`);
       if (!response.ok) throw new Error('Failed to fetch verbs count');
       const data = await response.json();
       return data.count as number;
@@ -44,14 +49,15 @@ export function useVerbsCount(jlptLevel?: string) {
 }
 
 // Infinite scroll verbs list with search
-export function useVerbsInfinite({ query, jlptLevel }: VerbSearchParams) {
+export function useVerbsInfinite({ query, jlptLevel, genkiChapter }: VerbSearchParams) {
   return useInfiniteQuery({
-    queryKey: ['verbs', 'list', query, jlptLevel],
+    queryKey: ['verbs', 'list', query, jlptLevel, genkiChapter],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
 
       if (query) params.set('q', query);
       if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
       params.set('limit', PAGE_SIZE.toString());
       params.set('offset', pageParam.toString());
 

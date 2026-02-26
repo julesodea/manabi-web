@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const jlptLevel = searchParams.get('jlptLevel');
+    const genkiChapter = searchParams.get('genkiChapter');
 
     // Build the query for vocabulary table
     let query = supabase
@@ -15,6 +16,11 @@ export async function GET(request: NextRequest) {
     // Add JLPT level filter if specified
     if (jlptLevel && jlptLevel !== 'All') {
       query = query.eq('jlpt_level', jlptLevel);
+    }
+
+    // Add Genki chapter filter if specified
+    if (genkiChapter && genkiChapter !== 'All') {
+      query = query.eq('genki_chapter', parseInt(genkiChapter));
     }
 
     const { count, error } = await query;

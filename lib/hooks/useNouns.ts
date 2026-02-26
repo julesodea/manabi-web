@@ -4,18 +4,22 @@ import { Vocabulary } from './useVerbs';
 interface NounSearchParams {
   query?: string;
   jlptLevel?: string;
+  genkiChapter?: string;
   limit?: number;
 }
 
 const PAGE_SIZE = 50;
 
 // Fetch noun count
-export function useNounsCount(jlptLevel?: string) {
+export function useNounsCount(jlptLevel?: string, genkiChapter?: string) {
   return useQuery({
-    queryKey: ['nouns', 'count', jlptLevel],
+    queryKey: ['nouns', 'count', jlptLevel, genkiChapter],
     queryFn: async () => {
-      const params = jlptLevel && jlptLevel !== 'All' ? `?jlptLevel=${jlptLevel}` : '';
-      const response = await fetch(`/api/nouns/count${params}`);
+      const params = new URLSearchParams();
+      if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const response = await fetch(`/api/nouns/count${qs}`);
       if (!response.ok) throw new Error('Failed to fetch nouns count');
       const data = await response.json();
       return data.count as number;
@@ -25,14 +29,15 @@ export function useNounsCount(jlptLevel?: string) {
 }
 
 // Infinite scroll nouns list with search
-export function useNounsInfinite({ query, jlptLevel }: NounSearchParams) {
+export function useNounsInfinite({ query, jlptLevel, genkiChapter }: NounSearchParams) {
   return useInfiniteQuery({
-    queryKey: ['nouns', 'list', query, jlptLevel],
+    queryKey: ['nouns', 'list', query, jlptLevel, genkiChapter],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
 
       if (query) params.set('q', query);
       if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
       params.set('limit', PAGE_SIZE.toString());
       params.set('offset', pageParam.toString());
 

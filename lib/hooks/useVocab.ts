@@ -4,18 +4,22 @@ import { Vocabulary } from './useVerbs';
 interface VocabSearchParams {
   query?: string;
   jlptLevel?: string;
+  genkiChapter?: string;
   limit?: number;
 }
 
 const PAGE_SIZE = 50;
 
 // Fetch vocabulary count across all types
-export function useVocabCount(jlptLevel?: string) {
+export function useVocabCount(jlptLevel?: string, genkiChapter?: string) {
   return useQuery({
-    queryKey: ['vocab', 'count', jlptLevel],
+    queryKey: ['vocab', 'count', jlptLevel, genkiChapter],
     queryFn: async () => {
-      const params = jlptLevel && jlptLevel !== 'All' ? `?jlptLevel=${jlptLevel}` : '';
-      const response = await fetch(`/api/vocab/count${params}`);
+      const params = new URLSearchParams();
+      if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const response = await fetch(`/api/vocab/count${qs}`);
       if (!response.ok) throw new Error('Failed to fetch vocabulary count');
       const data = await response.json();
       return data.count as number;
@@ -25,14 +29,15 @@ export function useVocabCount(jlptLevel?: string) {
 }
 
 // Infinite scroll vocabulary list with search (all types)
-export function useVocabInfinite({ query, jlptLevel }: VocabSearchParams) {
+export function useVocabInfinite({ query, jlptLevel, genkiChapter }: VocabSearchParams) {
   return useInfiniteQuery({
-    queryKey: ['vocab', 'list', query, jlptLevel],
+    queryKey: ['vocab', 'list', query, jlptLevel, genkiChapter],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
 
       if (query) params.set('q', query);
       if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
       params.set('limit', PAGE_SIZE.toString());
       params.set('offset', pageParam.toString());
 

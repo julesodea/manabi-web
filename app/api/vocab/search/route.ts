@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const jlptLevel = searchParams.get('jlptLevel');
+    const genkiChapter = searchParams.get('genkiChapter');
 
     if (!query) {
       return NextResponse.json([]);
@@ -21,6 +22,11 @@ export async function GET(request: NextRequest) {
     // Add JLPT level filter if specified
     if (jlptLevel && jlptLevel !== 'All') {
       dbQuery = dbQuery.eq('jlpt_level', jlptLevel);
+    }
+
+    // Add Genki chapter filter if specified
+    if (genkiChapter && genkiChapter !== 'All') {
+      dbQuery = dbQuery.eq('genki_chapter', parseInt(genkiChapter));
     }
 
     // Search in word, reading, romaji, or meaning

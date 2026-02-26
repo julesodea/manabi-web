@@ -22,12 +22,19 @@ const JLPT_LEVELS = [
   { label: "N1", value: "N1" },
 ];
 
+const GENKI_CHAPTERS = [
+  { label: "Ch. 1", value: "1" },
+  { label: "Ch. 2", value: "2" },
+  { label: "Ch. 3", value: "3" },
+];
+
 const VOCAB_TYPES = [
   { label: "All", value: "all" },
   { label: "Verbs", value: "verbs" },
   { label: "Nouns", value: "nouns" },
   { label: "Adjectives", value: "adjectives" },
   { label: "Adverbs", value: "adverbs" },
+  { label: "Genki", value: "genki" },
 ];
 
 const TYPE_LABELS: Record<string, string> = {
@@ -43,10 +50,13 @@ function VocabGridContent() {
   const selectionModeParam = searchParams.get("select") === "true";
   const { colors } = useTheme();
 
-  // Get search, level, and type from URL params
+  // Get search, level, type, and genki chapter from URL params
   const urlSearchQuery = searchParams.get("q") || "";
   const urlLevel = searchParams.get("level") || "All";
   const urlType = searchParams.get("type") || "all";
+  const urlGenki = searchParams.get("genki") || "1";
+
+  const isGenkiTab = urlType === "genki";
 
   const [selectedVocab, setSelectedVocab] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
@@ -60,8 +70,6 @@ function VocabGridContent() {
   // Update URL when search query changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Require minimum 2 chars for Latin input to avoid wasteful searches
-      // Single Japanese characters (kanji/kana) are allowed
       const isJapanese = /[\u3000-\u9FFF\uF900-\uFAFF]/.test(searchQuery);
       const shouldSearch = searchQuery.length === 0 || isJapanese || searchQuery.length >= 2;
 
@@ -82,7 +90,6 @@ function VocabGridContent() {
         ? `?${searchParams.toString()}`
         : "/vocab";
 
-      // Only update URL if it's actually different
       if (newUrl !== currentUrl) {
         router.replace(newUrl, { scroll: false });
       }
@@ -101,26 +108,37 @@ function VocabGridContent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // TanStack Query hooks - conditionally use based on active tab
-  const vocabHooks = {
-    all: useVocabInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
-    verbs: useVerbsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
-    nouns: useNounsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
-    adjectives: useAdjectivesInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
-    adverbs: useAdverbsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel }),
-  };
+  // TanStack Query hooks — all called unconditionally (React rules)
+  const allHook = useVocabInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel });
+  const verbsHook = useVerbsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel });
+  const nounsHook = useNounsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel });
+  const adjectivesHook = useAdjectivesInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel });
+  const adverbsHook = useAdverbsInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel });
+  const genkiHook = useVocabInfinite({ query: debouncedSearchQuery || undefined, jlptLevel: urlLevel, genkiChapter: urlGenki });
 
-  const countHooks = {
-    all: useVocabCount(urlLevel),
-    verbs: useVerbsCount(urlLevel),
-    nouns: useNounsCount(urlLevel),
-    adjectives: useAdjectivesCount(urlLevel),
-    adverbs: useAdverbsCount(urlLevel),
-  };
+  const allCount = useVocabCount(urlLevel);
+  const verbsCount = useVerbsCount(urlLevel);
+  const nounsCount = useNounsCount(urlLevel);
+  const adjectivesCount = useAdjectivesCount(urlLevel);
+  const adverbsCount = useAdverbsCount(urlLevel);
+  const genkiCount = useVocabCount(urlLevel, urlGenki);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    vocabHooks[urlType as keyof typeof vocabHooks];
-  const { data: totalCount } = countHooks[urlType as keyof typeof countHooks];
+  const activeHook = isGenkiTab ? genkiHook
+    : urlType === "verbs" ? verbsHook
+    : urlType === "nouns" ? nounsHook
+    : urlType === "adjectives" ? adjectivesHook
+    : urlType === "adverbs" ? adverbsHook
+    : allHook;
+
+  const activeCount = isGenkiTab ? genkiCount
+    : urlType === "verbs" ? verbsCount
+    : urlType === "nouns" ? nounsCount
+    : urlType === "adjectives" ? adjectivesCount
+    : urlType === "adverbs" ? adverbsCount
+    : allCount;
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = activeHook;
+  const { data: totalCount } = activeCount;
 
   // Flatten paginated data
   const displayedVocab = useMemo(() => {
@@ -130,8 +148,7 @@ function VocabGridContent() {
   // Save navigation list for detail page prev/next
   useEffect(() => {
     if (displayedVocab.length > 0) {
-      if (urlType === "all") {
-        // For "all" tab, save separately by type
+      if (urlType === "all" || urlType === "genki") {
         const vocabByType = displayedVocab.reduce((acc, v) => {
           const type = v.part_of_speech;
           if (!acc[type]) acc[type] = [];
@@ -146,7 +163,6 @@ function VocabGridContent() {
           saveNavigationList(`${type}s`, ids, basePath);
         });
       } else {
-        // For specific tabs, save as usual
         saveNavigationList(urlType, displayedVocab.map(v => v.id), `/${urlType}`);
       }
     }
@@ -212,9 +228,21 @@ function VocabGridContent() {
     return paths[partOfSpeech] || `/verbs/${id}`;
   };
 
-  // Get type label for display
-  const getTypeLabel = () => {
-    return VOCAB_TYPES.find(t => t.value === urlType)?.label || "Vocabulary";
+  const handleTabClick = (typeValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (typeValue === "all") {
+      params.delete("type");
+      params.delete("genki");
+    } else if (typeValue === "genki") {
+      params.set("type", "genki");
+      // Default to Ch. 1 if no chapter already selected
+      if (!params.get("genki")) params.set("genki", "1");
+    } else {
+      params.set("type", typeValue);
+      params.delete("genki");
+    }
+    const newUrl = params.toString() ? `?${params.toString()}` : "/vocab";
+    router.replace(newUrl, { scroll: false });
   };
 
   return (
@@ -241,23 +269,12 @@ function VocabGridContent() {
         </div>
 
         {/* Vocab Type Tabs */}
-        <div className="mb-6">
+        <div className={isGenkiTab ? "mb-0" : "mb-6"}>
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-border">
             {VOCAB_TYPES.map((type) => (
               <button
                 key={type.value}
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  if (type.value === "all") {
-                    params.delete("type");
-                  } else {
-                    params.set("type", type.value);
-                  }
-                  const newUrl = params.toString()
-                    ? `?${params.toString()}`
-                    : "/vocab";
-                  router.replace(newUrl, { scroll: false });
-                }}
+                onClick={() => handleTabClick(type.value)}
                 className={`px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 ${urlType === type.value
                     ? "border-[var(--accent)] text-[var(--accent)]"
                     : "border-transparent text-muted hover:text-foreground"
@@ -268,6 +285,28 @@ function VocabGridContent() {
             ))}
           </div>
         </div>
+
+        {/* Genki Chapter Sub-tabs — only visible when Genki tab is active */}
+        {isGenkiTab && (
+          <div className="mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-border px-1">
+            {GENKI_CHAPTERS.map((ch) => (
+              <button
+                key={ch.value}
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set("genki", ch.value);
+                  router.replace(`?${params.toString()}`, { scroll: false });
+                }}
+                className={`px-5 py-2.5 text-sm font-medium whitespace-nowrap transition-all duration-200 border-b-2 ${urlGenki === ch.value
+                    ? "border-[var(--accent)] text-[var(--accent)]"
+                    : "border-transparent text-muted hover:text-foreground"
+                  }`}
+              >
+                {ch.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Search and Filter Section */}
         <div className="mb-8">
@@ -302,7 +341,7 @@ function VocabGridContent() {
           {/* JLPT Level Filter and Actions */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {JLPT_LEVELS.map((level) => (
+              {!isGenkiTab && JLPT_LEVELS.map((level) => (
                 <button
                   key={level.value}
                   onClick={() => {
@@ -443,8 +482,8 @@ function VocabGridContent() {
                           {v.jlpt_level || 'N5'}
                         </div>
 
-                        {/* Type Badge (only show in "All" tab) */}
-                        {urlType === "all" && (
+                        {/* Type Badge (show in All and Genki tabs since both mix types) */}
+                        {(urlType === "all" || urlType === "genki") && (
                           <div
                             className="absolute bottom-3 right-3 px-2 py-0.5 rounded border border-border text-xs font-semibold text-foreground"
                             style={{

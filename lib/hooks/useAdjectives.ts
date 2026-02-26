@@ -4,18 +4,22 @@ import { Vocabulary } from './useVerbs';
 interface AdjectiveSearchParams {
   query?: string;
   jlptLevel?: string;
+  genkiChapter?: string;
   limit?: number;
 }
 
 const PAGE_SIZE = 50;
 
 // Fetch adjective count
-export function useAdjectivesCount(jlptLevel?: string) {
+export function useAdjectivesCount(jlptLevel?: string, genkiChapter?: string) {
   return useQuery({
-    queryKey: ['adjectives', 'count', jlptLevel],
+    queryKey: ['adjectives', 'count', jlptLevel, genkiChapter],
     queryFn: async () => {
-      const params = jlptLevel && jlptLevel !== 'All' ? `?jlptLevel=${jlptLevel}` : '';
-      const response = await fetch(`/api/adjectives/count${params}`);
+      const params = new URLSearchParams();
+      if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const response = await fetch(`/api/adjectives/count${qs}`);
       if (!response.ok) throw new Error('Failed to fetch adjectives count');
       const data = await response.json();
       return data.count as number;
@@ -25,14 +29,15 @@ export function useAdjectivesCount(jlptLevel?: string) {
 }
 
 // Infinite scroll adjectives list with search
-export function useAdjectivesInfinite({ query, jlptLevel }: AdjectiveSearchParams) {
+export function useAdjectivesInfinite({ query, jlptLevel, genkiChapter }: AdjectiveSearchParams) {
   return useInfiniteQuery({
-    queryKey: ['adjectives', 'list', query, jlptLevel],
+    queryKey: ['adjectives', 'list', query, jlptLevel, genkiChapter],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
 
       if (query) params.set('q', query);
       if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
       params.set('limit', PAGE_SIZE.toString());
       params.set('offset', pageParam.toString());
 

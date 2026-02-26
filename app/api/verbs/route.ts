@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const jlptLevel = searchParams.get('jlptLevel');
+    const genkiChapter = searchParams.get('genkiChapter');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
@@ -17,6 +18,11 @@ export async function GET(request: NextRequest) {
     // Add JLPT level filter if specified
     if (jlptLevel && jlptLevel !== 'All') {
       query = query.eq('jlpt_level', jlptLevel);
+    }
+
+    // Add Genki chapter filter if specified
+    if (genkiChapter && genkiChapter !== 'All') {
+      query = query.eq('genki_chapter', parseInt(genkiChapter));
     }
 
     // Add pagination and ordering

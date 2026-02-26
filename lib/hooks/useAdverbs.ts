@@ -4,18 +4,22 @@ import { Vocabulary } from './useVerbs';
 interface AdverbSearchParams {
   query?: string;
   jlptLevel?: string;
+  genkiChapter?: string;
   limit?: number;
 }
 
 const PAGE_SIZE = 50;
 
 // Fetch adverb count
-export function useAdverbsCount(jlptLevel?: string) {
+export function useAdverbsCount(jlptLevel?: string, genkiChapter?: string) {
   return useQuery({
-    queryKey: ['adverbs', 'count', jlptLevel],
+    queryKey: ['adverbs', 'count', jlptLevel, genkiChapter],
     queryFn: async () => {
-      const params = jlptLevel && jlptLevel !== 'All' ? `?jlptLevel=${jlptLevel}` : '';
-      const response = await fetch(`/api/adverbs/count${params}`);
+      const params = new URLSearchParams();
+      if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const response = await fetch(`/api/adverbs/count${qs}`);
       if (!response.ok) throw new Error('Failed to fetch adverbs count');
       const data = await response.json();
       return data.count as number;
@@ -25,14 +29,15 @@ export function useAdverbsCount(jlptLevel?: string) {
 }
 
 // Infinite scroll adverbs list with search
-export function useAdverbsInfinite({ query, jlptLevel }: AdverbSearchParams) {
+export function useAdverbsInfinite({ query, jlptLevel, genkiChapter }: AdverbSearchParams) {
   return useInfiniteQuery({
-    queryKey: ['adverbs', 'list', query, jlptLevel],
+    queryKey: ['adverbs', 'list', query, jlptLevel, genkiChapter],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams();
 
       if (query) params.set('q', query);
       if (jlptLevel && jlptLevel !== 'All') params.set('jlptLevel', jlptLevel);
+      if (genkiChapter && genkiChapter !== 'All') params.set('genkiChapter', genkiChapter);
       params.set('limit', PAGE_SIZE.toString());
       params.set('offset', pageParam.toString());
 
