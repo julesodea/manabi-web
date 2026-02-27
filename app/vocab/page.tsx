@@ -27,6 +27,7 @@ const GENKI_CHAPTERS = [
   { label: "Ch. 2", value: "2" },
   { label: "Ch. 3", value: "3" },
   { label: "Ch. 4", value: "4" },
+  { label: "Ch. 5", value: "5" },
 ];
 
 const VOCAB_TYPES = [
