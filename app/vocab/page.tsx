@@ -23,6 +23,7 @@ const JLPT_LEVELS = [
 ];
 
 const GENKI_CHAPTERS = [
+  // Genki I
   { label: "Lesson 1", value: "1" },
   { label: "Lesson 2", value: "2" },
   { label: "Lesson 3", value: "3" },
@@ -35,6 +36,18 @@ const GENKI_CHAPTERS = [
   { label: "Lesson 10", value: "10" },
   { label: "Lesson 11", value: "11" },
   { label: "Lesson 12", value: "12" },
+  // Genki II
+  { label: "Lesson 13", value: "13" },
+  { label: "Lesson 14", value: "14" },
+  { label: "Lesson 15", value: "15" },
+  { label: "Lesson 16", value: "16" },
+  { label: "Lesson 17", value: "17" },
+  { label: "Lesson 18", value: "18" },
+  { label: "Lesson 19", value: "19" },
+  { label: "Lesson 20", value: "20" },
+  { label: "Lesson 21", value: "21" },
+  { label: "Lesson 22", value: "22" },
+  { label: "Lesson 23", value: "23" },
 ];
 
 const VOCAB_TYPES = [
