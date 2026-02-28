@@ -220,6 +220,48 @@ export class DatabaseService {
       });
     }
 
+    // If some IDs weren't found in the characters table, try the vocabulary table
+    const foundIds = new Set(charactersData.map((c: any) => c.id));
+    const missingIds = collection.characterIds.filter(id => !foundIds.has(id));
+
+    if (missingIds.length > 0) {
+      const { data: vocabData } = await supabase
+        .from('vocabulary')
+        .select('*')
+        .in('id', missingIds);
+
+      if (vocabData) {
+        vocabData.forEach((v: any) => {
+          characters.push({
+            id: v.id,
+            character: v.word,
+            type: 'kanji',
+            strokeCount: 0,
+            strokeOrder: [],
+            frequency: 0,
+            tags: [],
+            createdAt: v.created_at,
+            updatedAt: v.updated_at,
+          });
+          kanjiData[v.id] = {
+            characterId: v.id,
+            meanings: [v.meaning],
+            grade: 0,
+            jlptLevel: v.jlpt_level,
+            readings: {
+              onyomi: v.reading ? [v.reading] : [],
+              kunyomi: v.romaji ? [v.romaji] : [],
+              nanori: [],
+            },
+            radicals: [],
+            components: [],
+            exampleWords: [],
+            exampleSentences: [],
+          };
+        });
+      }
+    }
+
     return { characters, kanjiData, collectionId };
   }
 

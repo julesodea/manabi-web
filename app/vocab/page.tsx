@@ -183,6 +183,26 @@ function VocabGridContent() {
     });
   };
 
+  const allDisplayedSelected =
+    displayedVocab.length > 0 &&
+    displayedVocab.every((v) => selectedVocab.has(v.id));
+
+  const toggleSelectAll = () => {
+    if (allDisplayedSelected) {
+      setSelectedVocab((prev) => {
+        const newSet = new Set(prev);
+        displayedVocab.forEach((v) => newSet.delete(v.id));
+        return newSet;
+      });
+    } else {
+      setSelectedVocab((prev) => {
+        const newSet = new Set(prev);
+        displayedVocab.forEach((v) => newSet.add(v.id));
+        return newSet;
+      });
+    }
+  };
+
   // Create collection with selected vocab
   const createCollection = () => {
     const ids = Array.from(selectedVocab).join(",");
@@ -380,6 +400,12 @@ function VocabGridContent() {
                       Create ({selectedVocab.size})
                     </button>
                   )}
+                  <button
+                    onClick={toggleSelectAll}
+                    className="px-4 py-2 text-foreground border border-border rounded-full text-sm font-medium hover:bg-card-bg transition"
+                  >
+                    {allDisplayedSelected ? "Deselect All" : "Select All"}
+                  </button>
                   <button
                     onClick={() => setSelectionMode(false)}
                     className="px-4 py-2 text-foreground border border-border rounded-full text-sm font-medium hover:bg-card-bg transition"

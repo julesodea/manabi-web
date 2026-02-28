@@ -458,7 +458,7 @@ export default function StudyPage() {
           <p className="text-gray-600 mb-4">Collection not found or empty</p>
           <Link
             href="/"
-            className="px-6 py-3 text-white rounded-full font-semibold shadow-lg inline-block"
+            className="px-6 py-3 text-accent-text rounded-full font-semibold shadow-lg inline-block"
             style={{
               backgroundColor: colors.primary,
             }}
@@ -528,7 +528,7 @@ export default function StudyPage() {
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-24 pb-12">
-          <div className="bg-white rounded-3xl p-8 text-center shadow-2xl">
+          <div className="bg-white rounded-3xl p-8 text-center">
             <h2 className="text-2xl font-bold mb-6 text-gray-900">
               Great job studying {collection.name}!
             </h2>
@@ -622,7 +622,7 @@ export default function StudyPage() {
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
                 href="/"
-                className="px-6 py-3 border-2 border-gray-300 rounded-full font-semibold text-gray-700"
+                className="px-6 py-3 border-2 border-gray-300 rounded-full font-semibold text-gray-900"
               >
                 Go Home
               </Link>
@@ -647,7 +647,7 @@ export default function StudyPage() {
                     startSession(collectionId, chars, characterData.kanjiData);
                   }
                 }}
-                className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+                className="px-6 py-3 text-accent-text rounded-full font-semibold"
                 style={{
                   backgroundColor: colors.primary,
                 }}
@@ -891,7 +891,7 @@ export default function StudyPage() {
                       handleInputSubmit();
                     }}
                     disabled={!userInput.trim()}
-                    className="w-full py-4 md:py-6 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-4 md:py-6 bg-[var(--accent)] text-accent-text rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Check Answer
                   </button>
