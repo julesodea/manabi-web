@@ -435,7 +435,7 @@ export default function StudyPage() {
   if (loading) {
     return (
       <div
-        className="font-medium min-h-screen flex items-center justify-center bg-background"
+        className="font-medium min-h-screen flex items-center justify-center bg-background pb-safe"
         
       >
         <div className="text-center">
@@ -449,7 +449,7 @@ export default function StudyPage() {
   if (!collection || characters.length === 0) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center pb-safe"
         style={{
           backgroundColor: colors.primary,
         }}
@@ -504,8 +504,8 @@ export default function StudyPage() {
       <div
                  
                  
-        className="min-h-screen bg-background"
-       
+        className="min-h-screen bg-background pb-safe"
+
       >
         <header
           className={`bg-background fixed top-0 left-0 right-0 z-50 duration-300 ${
@@ -662,7 +662,7 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-safe">
       {/* Menu Drawer */}
       <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 

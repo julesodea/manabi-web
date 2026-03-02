@@ -18,7 +18,7 @@ export default function KanjiDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background pb-safe flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse text-[var(--accent)]">学</div>
           <p className="text-muted">Loading...</p>
@@ -29,7 +29,7 @@ export default function KanjiDetailPage() {
 
   if (error || !kanji) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background pb-safe flex items-center justify-center">
         <div className="text-center bg-card-bg rounded-3xl p-8 shadow-xl max-w-md mx-4 border border-border">
           <p className="text-muted mb-4">Kanji not found</p>
           <button
@@ -44,7 +44,7 @@ export default function KanjiDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-safe">
       {/* Menu Drawer */}
       <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
