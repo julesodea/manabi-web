@@ -61,7 +61,7 @@ export default function StudyPage() {
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
     null
   );
-  const [shuffleMode, setShuffleMode] = useState(false);
+  const [shuffleMode, setShuffleMode] = useState(() => collectionId.startsWith("custom_"));
   const [scrolled, setScrolled] = useState(false);
   const [sessionKey, setSessionKey] = useState(0);
   const [userInput, setUserInput] = useState("");

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
-import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 
@@ -16,10 +15,7 @@ interface UserStats {
 }
 
 export default function Home() {
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { colors } = useTheme();
-  const [scrolled, setScrolled] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user, loading: authLoading } = useAuth();
   const [shouldLoadCollections, setShouldLoadCollections] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -74,15 +70,6 @@ export default function Home() {
 
     fetchStats();
   }, [user]);
-
-  // Handle scroll for sticky header shadow
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-24 sm:pb-0" style={{ opacity: authLoading ? 0 : 1, transition: 'opacity 0.3s' }}>
