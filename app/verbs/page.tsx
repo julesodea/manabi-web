@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useMemo } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useVerbsInfinite, useVerbsCount } from "@/lib/hooks/useVerbs";
-import { useTheme } from "@/lib/providers/ThemeProvider";
+import { useDebouncedSearch } from "@/lib/hooks/useDebouncedSearch";
+import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 import { saveNavigationList } from "@/lib/navigationList";
@@ -22,54 +23,11 @@ function VerbsGridContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectionModeParam = searchParams.get("select") === "true";
-  const { colors } = useTheme();
-
-  // Get search and level from URL params
-  const urlSearchQuery = searchParams.get("q") || "";
-  const urlLevel = searchParams.get("level") || "All";
+  const { searchQuery, setSearchQuery, debouncedSearchQuery, urlLevel } = useDebouncedSearch("/verbs");
 
   const [selectedVerbs, setSelectedVerbs] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
-  const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] =
-    useState(urlSearchQuery);
   const [menuOpen, setMenuOpen] = useState(false);
-  const observerTarget = useRef<HTMLDivElement>(null);
-
-  // Update URL when search query changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Require minimum 2 chars for Latin input to avoid wasteful searches
-      // Single Japanese characters (kanji/kana) are allowed
-      const isJapanese = /[\u3000-\u9FFF\uF900-\uFAFF]/.test(searchQuery);
-      const shouldSearch = searchQuery.length === 0 || isJapanese || searchQuery.length >= 2;
-
-      if (!shouldSearch) return;
-
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (searchQuery) {
-        params.set("q", searchQuery);
-      } else {
-        params.delete("q");
-      }
-
-      const newUrl = params.toString()
-        ? `?${params.toString()}`
-        : "/verbs";
-      const currentUrl = searchParams.toString()
-        ? `?${searchParams.toString()}`
-        : "/verbs";
-
-      // Only update URL if it's actually different
-      if (newUrl !== currentUrl) {
-        router.replace(newUrl, { scroll: false });
-      }
-
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchParams, router]);
 
   // TanStack Query hooks
   const { data: totalCount } = useVerbsCount(urlLevel);
@@ -78,6 +36,8 @@ function VerbsGridContent() {
       query: debouncedSearchQuery || undefined,
       jlptLevel: urlLevel,
     });
+
+  const observerTarget = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
   // Flatten paginated data
   const displayedVerbs = useMemo(() => {
@@ -109,29 +69,6 @@ function VerbsGridContent() {
     const ids = Array.from(selectedVerbs).join(",");
     router.push(`/collections/create?characterIds=${encodeURIComponent(ids)}`);
   };
-
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useMemo } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useVerbsInfinite, useVerbsCount } from "@/lib/hooks/useVerbs";
@@ -8,7 +8,7 @@ import { useNounsInfinite, useNounsCount } from "@/lib/hooks/useNouns";
 import { useAdjectivesInfinite, useAdjectivesCount } from "@/lib/hooks/useAdjectives";
 import { useAdverbsInfinite, useAdverbsCount } from "@/lib/hooks/useAdverbs";
 import { useVocabInfinite, useVocabCount } from "@/lib/hooks/useVocab";
-import { useTheme } from "@/lib/providers/ThemeProvider";
+import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 import { saveNavigationList } from "@/lib/navigationList";
@@ -70,7 +70,6 @@ function VocabGridContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectionModeParam = searchParams.get("select") === "true";
-  const { colors } = useTheme();
 
   // Get search, level, type, and genki chapter from URL params
   const urlSearchQuery = searchParams.get("q") || "";
@@ -86,7 +85,6 @@ function VocabGridContent() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] =
     useState(urlSearchQuery);
   const [menuOpen, setMenuOpen] = useState(false);
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   // Update URL when search query changes
   useEffect(() => {
@@ -151,6 +149,8 @@ function VocabGridContent() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = activeHook;
   const { data: totalCount } = activeCount;
+
+  const observerTarget = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
   // Flatten paginated data
   const displayedVocab = useMemo(() => {
@@ -218,29 +218,6 @@ function VocabGridContent() {
     const ids = Array.from(selectedVocab).join(",");
     router.push(`/collections/create?characterIds=${encodeURIComponent(ids)}`);
   };
-
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   // Get detail page path based on part of speech
   const getDetailPath = (partOfSpeech: string, id: string) => {
@@ -504,23 +481,13 @@ function VocabGridContent() {
                         </div>
 
                         {/* Level Badge */}
-                        <div
-                          className="absolute top-3 left-3 px-2.5 py-1 rounded-lg border border-border text-xs font-bold text-accent"
-                          style={{
-                            backgroundColor: colors.isDark ? colors.cardBg : 'white'
-                          }}
-                        >
+                        <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
                           {v.jlpt_level || 'N5'}
                         </div>
 
                         {/* Type Badge (show in All and Genki tabs since both mix types) */}
                         {(urlType === "all" || urlType === "genki") && (
-                          <div
-                            className="absolute bottom-3 right-3 px-2 py-0.5 rounded border border-border text-xs font-semibold text-foreground"
-                            style={{
-                              backgroundColor: colors.isDark ? colors.cardBg : 'white'
-                            }}
-                          >
+                          <div className="absolute bottom-3 right-3 bg-card-bg px-2 py-0.5 rounded border border-border text-xs font-semibold text-foreground">
                             {TYPE_LABELS[v.part_of_speech] || v.part_of_speech}
                           </div>
                         )}

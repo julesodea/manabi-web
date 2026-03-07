@@ -8,7 +8,6 @@ import {
   useCollections,
   useDeleteCollection,
 } from "@/lib/hooks/useCollections";
-import { useTheme } from "@/lib/providers/ThemeProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 
@@ -16,7 +15,6 @@ export default function ManageCollectionsPage() {
   const router = useRouter();
   const { data: collections = [], isLoading } = useCollections();
   const deleteCollection = useDeleteCollection();
-  const { colors } = useTheme();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
