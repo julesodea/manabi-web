@@ -133,13 +133,6 @@ function AdjectivesGridContent() {
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  // Let browser handle scroll restoration
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.history.scrollRestoration = "auto";
-    }
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Menu Drawer */}
