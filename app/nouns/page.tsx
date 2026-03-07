@@ -33,7 +33,6 @@ function NounsGridContent() {
   const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
   const [debouncedSearchQuery, setDebouncedSearchQuery] =
     useState(urlSearchQuery);
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -71,15 +70,6 @@ function NounsGridContent() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, searchParams, router]);
-
-  // Handle scroll for sticky header shadow
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // TanStack Query hooks
   const { data: totalCount } = useNounsCount(urlLevel);
@@ -142,13 +132,6 @@ function NounsGridContent() {
       }
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  // Let browser handle scroll restoration
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.history.scrollRestoration = "auto";
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">

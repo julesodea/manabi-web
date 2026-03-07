@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getAdjacentIds } from "@/lib/navigationList";
 
@@ -18,15 +18,10 @@ export function useNavigationList(
   currentId: string
 ): UseNavigationListResult {
   const router = useRouter();
-  const [adjacent, setAdjacent] = useState<{
-    prevId: string | null;
-    nextId: string | null;
-    basePath: string | null;
-  }>({ prevId: null, nextId: null, basePath: null });
-
-  useEffect(() => {
-    setAdjacent(getAdjacentIds(resourceKey, currentId));
-  }, [resourceKey, currentId]);
+  const adjacent = useMemo(
+    () => getAdjacentIds(resourceKey, currentId),
+    [resourceKey, currentId]
+  );
 
   const goToPrev = useCallback(() => {
     if (adjacent.prevId && adjacent.basePath) {

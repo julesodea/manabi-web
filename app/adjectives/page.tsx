@@ -33,7 +33,6 @@ function AdjectivesGridContent() {
   const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
   const [debouncedSearchQuery, setDebouncedSearchQuery] =
     useState(urlSearchQuery);
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -71,15 +70,6 @@ function AdjectivesGridContent() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, searchParams, router]);
-
-  // Handle scroll for sticky header shadow
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // TanStack Query hooks
   const { data: totalCount } = useAdjectivesCount(urlLevel);
@@ -222,8 +212,8 @@ function AdjectivesGridContent() {
                     router.replace(newUrl, { scroll: false });
                   }}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${urlLevel === level.value
-                      ? "bg-[var(--accent)] text-[var(--accent-text)]"
-                      : "bg-card-bg text-foreground border border-border hover:bg-[var(--accent)]/10"
+                    ? "bg-[var(--accent)] text-[var(--accent-text)]"
+                    : "bg-card-bg text-foreground border border-border hover:bg-[var(--accent)]/10"
                     }`}
                 >
                   {level.label}

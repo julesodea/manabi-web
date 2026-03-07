@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
@@ -18,7 +18,6 @@ export default function ManageCollectionsPage() {
   const deleteCollection = useDeleteCollection();
   const { colors } = useTheme();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -31,15 +30,6 @@ export default function ManageCollectionsPage() {
   });
 
   const userCollections = collections.filter((c) => c.type === "user");
-
-  // Handle scroll for sticky header shadow
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleDeleteClick = (id: string, name: string) => {
     setDeleteModal({

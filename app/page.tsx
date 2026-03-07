@@ -16,35 +16,15 @@ interface UserStats {
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
-  const [shouldLoadCollections, setShouldLoadCollections] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Defer loading collections until needed
-  const { data: collections = [], isLoading: loading } = useCollections(
-    shouldLoadCollections
-  );
+  const { data: collections = [], isLoading: loading } = useCollections(true);
 
   // Separate system and user collections
   const systemCollections = collections.filter((c) => c.type === "system");
   const userCollections = collections.filter((c) => c.type === "user");
-
-  // Start loading collections after a short delay or when user is logged in
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShouldLoadCollections(true);
-    }, 100); // Small delay to prioritize initial render
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Load immediately if user is logged in (they'll see the dashboard)
-  useEffect(() => {
-    if (user) {
-      setShouldLoadCollections(true);
-    }
-  }, [user]);
 
   // Fetch user stats when logged in
   useEffect(() => {
@@ -141,7 +121,7 @@ export default function Home() {
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                  {loading || !shouldLoadCollections ? (
+                  {loading ? (
                     <div className="h-10 w-16 bg-border animate-pulse rounded mx-auto"></div>
                   ) : (
                     collections.length
@@ -200,7 +180,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div className="text-3xl font-bold text-foreground mb-1">
-                  {loading || !shouldLoadCollections ? (
+                  {loading ? (
                     <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
                   ) : (
                     userCollections.length
@@ -334,7 +314,7 @@ export default function Home() {
             )}
           </div>
 
-          {loading || !shouldLoadCollections ? (
+          {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse bg-card-bg rounded-xl border border-border p-5">
