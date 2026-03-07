@@ -7,6 +7,7 @@ import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 import { useNavigationList } from "@/lib/hooks/useNavigationList";
 import DetailNavigationArrows from "@/components/DetailNavigationArrows";
+import FitText from "@/components/FitText";
 
 export default function KanjiDetailPage() {
   const params = useParams();
@@ -59,9 +60,9 @@ export default function KanjiDetailPage() {
         <div className="bg-card-bg rounded-3xl p-6 lg:p-8 shadow-xl border border-border max-w-4xl w-full max-h-full overflow-y-auto flex flex-col">
           {/* Large Kanji Character */}
           <div className="text-center mb-3 lg:mb-6">
-            <div className="text-[8rem] lg:text-[12rem] leading-none font-medium text-foreground mb-2">
+            <FitText className="font-medium text-foreground mb-2" maxFontSize={192}>
               {kanji.character}
-            </div>
+            </FitText>
           </div>
 
           {/* Main Meaning and Info */}

@@ -474,8 +474,13 @@ function VocabGridContent() {
                         )}
 
                         {/* Vocab Word */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-2xl text-foreground font-medium px-4">
+                        <div className="absolute inset-0 flex items-center justify-center px-3">
+                          <span
+                            className="text-foreground font-medium text-center break-keep"
+                            style={{
+                              fontSize: `clamp(0.875rem, ${Math.max(1, 4 - (v.word.length - 2) * 0.5)}rem, 1.75rem)`,
+                            }}
+                          >
                             {v.word}
                           </span>
                         </div>
