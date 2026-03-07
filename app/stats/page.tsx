@@ -42,6 +42,8 @@ export default function StatsPage() {
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
   const [selectedKanjiId, setSelectedKanjiId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sessionsPage, setSessionsPage] = useState(1);
+  const SESSIONS_PER_PAGE = 10;
 
   const toggleSession = (sessionId: string) => {
     setExpandedSessions((prev) => {
@@ -263,7 +265,7 @@ export default function StatsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {sessions.slice(0, 20).map((session) => {
+                  {sessions.slice(0, sessionsPage * SESSIONS_PER_PAGE).map((session) => {
                     const accuracy =
                       session.reviewedCount > 0
                         ? Math.round(
@@ -385,6 +387,14 @@ export default function StatsPage() {
                     );
                   })}
                 </div>
+              )}
+              {sessions.length > sessionsPage * SESSIONS_PER_PAGE && (
+                <button
+                  onClick={() => setSessionsPage((p) => p + 1)}
+                  className="w-full mt-4 py-3 text-sm font-medium text-muted hover:text-foreground border border-border rounded-xl hover:bg-background transition-colors"
+                >
+                  Show More ({sessions.length - sessionsPage * SESSIONS_PER_PAGE} remaining)
+                </button>
               )}
             </div>
 
