@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useCallback } from "react";
+
 interface DetailNavigationArrowsProps {
   hasPrev: boolean;
   hasNext: boolean;
@@ -13,6 +15,46 @@ export default function DetailNavigationArrows({
   onPrev,
   onNext,
 }: DetailNavigationArrowsProps) {
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+      const SWIPE_THRESHOLD = 50;
+
+      // Only trigger if horizontal swipe is dominant
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        if (deltaX > 0 && hasPrev) {
+          onPrev();
+        } else if (deltaX < 0 && hasNext) {
+          onNext();
+        }
+      }
+
+      touchStartX.current = null;
+      touchStartY.current = null;
+    },
+    [hasPrev, hasNext, onPrev, onNext]
+  );
+
+  useEffect(() => {
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchEnd]);
+
   if (!hasPrev && !hasNext) return null;
 
   return (
