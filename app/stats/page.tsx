@@ -394,35 +394,46 @@ export default function StatsPage() {
                 Activity
               </h2>
               <div className="flex gap-1">
-                {Array.from({ length: 13 }, (_, weekIdx) => (
-                  <div key={weekIdx} className="flex flex-col gap-1 flex-1">
-                    {[0, 1, 2, 3, 4, 5, 6].map((dayOfWeek) => {
-                      const dayIdx = weekIdx * 7 + dayOfWeek;
-                      const day = calendarData[dayIdx];
-                      if (!day) return <div key={dayOfWeek} className="aspect-square rounded-sm bg-transparent" />;
+                {Array.from({ length: 13 }, (_, weekIdx) => {
+                  const firstDayIdx = weekIdx * 7;
+                  const firstDay = calendarData[firstDayIdx];
+                  const dateLabel = firstDay
+                    ? `${firstDay.date.getMonth() + 1}/${firstDay.date.getDate()}`
+                    : "";
 
-                      const intensity =
-                        day.count === 0
-                          ? 0
-                          : Math.min(4, Math.ceil((day.count / maxCount) * 4));
-                      const bgColors = [
-                        "bg-border",
-                        "bg-green-200",
-                        "bg-green-300",
-                        "bg-green-400",
-                        "bg-green-500",
-                      ];
+                  return (
+                    <div key={weekIdx} className="flex flex-col gap-1 flex-1">
+                      <div className="text-[10px] text-muted text-center truncate h-4 leading-4">
+                        {dateLabel}
+                      </div>
+                      {[0, 1, 2, 3, 4, 5, 6].map((dayOfWeek) => {
+                        const dayIdx = weekIdx * 7 + dayOfWeek;
+                        const day = calendarData[dayIdx];
+                        if (!day) return <div key={dayOfWeek} className="aspect-square rounded-sm bg-transparent" />;
 
-                      return (
-                        <div
-                          key={dayOfWeek}
-                          className={`aspect-square rounded-sm ${bgColors[intensity]}`}
-                          title={`${day.date.toLocaleDateString()}: ${day.count} session${day.count !== 1 ? "s" : ""}`}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
+                        const intensity =
+                          day.count === 0
+                            ? 0
+                            : Math.min(4, Math.ceil((day.count / maxCount) * 4));
+                        const bgColors = [
+                          "bg-border",
+                          "bg-green-200",
+                          "bg-green-300",
+                          "bg-green-400",
+                          "bg-green-500",
+                        ];
+
+                        return (
+                          <div
+                            key={dayOfWeek}
+                            className={`aspect-square rounded-sm ${bgColors[intensity]}`}
+                            title={`${day.date.toLocaleDateString()}: ${day.count} session${day.count !== 1 ? "s" : ""}`}
+                          />
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted">
                 <span>Less</span>
