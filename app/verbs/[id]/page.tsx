@@ -12,9 +12,9 @@ import FitText from "@/components/FitText";
 export default function VerbDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = typeof params.id === "string" ? params.id : "";
-  const { data: verb, isLoading, error } = useVerb(id);
-  const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("verbs", id);
+  const initialId = typeof params.id === "string" ? params.id : "";
+  const { currentId, hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("verbs", initialId);
+  const { data: verb, isLoading, error } = useVerb(currentId);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (isLoading) {

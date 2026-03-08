@@ -12,9 +12,9 @@ import FitText from "@/components/FitText";
 export default function AdjectiveDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = typeof params.id === "string" ? params.id : "";
-  const { data: adjective, isLoading, error } = useAdjective(id);
-  const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("adjectives", id);
+  const initialId = typeof params.id === "string" ? params.id : "";
+  const { currentId, hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("adjectives", initialId);
+  const { data: adjective, isLoading, error } = useAdjective(currentId);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (isLoading) {

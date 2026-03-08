@@ -1,4 +1,4 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 import { Vocabulary } from './useVerbs';
 
 interface AdjectiveSearchParams {
@@ -73,5 +73,6 @@ export function useAdjective(id: string) {
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes (adjective data rarely changes)
+    placeholderData: keepPreviousData,
   });
 }

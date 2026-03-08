@@ -1,4 +1,4 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 
 interface ExampleWord {
   word: string;
@@ -99,5 +99,6 @@ export function useKanji(id: string) {
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes (kanji data rarely changes)
+    placeholderData: keepPreviousData,
   });
 }

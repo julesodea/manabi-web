@@ -1,4 +1,4 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 
 export interface ExampleSentence {
   japanese?: string;
@@ -93,5 +93,6 @@ export function useVerb(id: string) {
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes (verb data rarely changes)
+    placeholderData: keepPreviousData,
   });
 }

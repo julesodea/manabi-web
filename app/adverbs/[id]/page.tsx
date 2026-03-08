@@ -12,9 +12,9 @@ import FitText from "@/components/FitText";
 export default function AdverbDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = typeof params.id === "string" ? params.id : "";
-  const { data: adverb, isLoading, error } = useAdverb(id);
-  const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("adverbs", id);
+  const initialId = typeof params.id === "string" ? params.id : "";
+  const { currentId, hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("adverbs", initialId);
+  const { data: adverb, isLoading, error } = useAdverb(currentId);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (isLoading) {

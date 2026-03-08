@@ -12,9 +12,9 @@ import FitText from "@/components/FitText";
 export default function KanjiDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = typeof params.id === "string" ? params.id : "";
-  const { data: kanji, isLoading, error } = useKanji(id);
-  const { hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("kanji", id);
+  const initialId = typeof params.id === "string" ? params.id : "";
+  const { currentId, hasPrev, hasNext, goToPrev, goToNext } = useNavigationList("kanji", initialId);
+  const { data: kanji, isLoading, error } = useKanji(currentId);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (isLoading) {

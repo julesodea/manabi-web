@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { getAdjacentIds } from "@/lib/navigationList";
 
 interface UseNavigationListResult {
+  currentId: string;
   prevId: string | null;
   nextId: string | null;
   goToPrev: () => void;
@@ -15,26 +15,38 @@ interface UseNavigationListResult {
 
 export function useNavigationList(
   resourceKey: string,
-  currentId: string
+  initialId: string
 ): UseNavigationListResult {
-  const router = useRouter();
+  const [currentId, setCurrentId] = useState(initialId);
+
+  // Sync if the route-level id changes (e.g. direct URL navigation)
+  useEffect(() => {
+    setCurrentId(initialId);
+  }, [initialId]);
+
   const adjacent = useMemo(
     () => getAdjacentIds(resourceKey, currentId),
     [resourceKey, currentId]
   );
 
+  const navigateTo = useCallback(
+    (id: string) => {
+      if (!adjacent.basePath) return;
+      setCurrentId(id);
+      window.history.pushState(null, "", `${adjacent.basePath}/${id}`);
+    },
+    [adjacent.basePath]
+  );
+
   const goToPrev = useCallback(() => {
-    if (adjacent.prevId && adjacent.basePath) {
-      router.push(`${adjacent.basePath}/${adjacent.prevId}`);
-    }
-  }, [adjacent.prevId, adjacent.basePath, router]);
+    if (adjacent.prevId) navigateTo(adjacent.prevId);
+  }, [adjacent.prevId, navigateTo]);
 
   const goToNext = useCallback(() => {
-    if (adjacent.nextId && adjacent.basePath) {
-      router.push(`${adjacent.basePath}/${adjacent.nextId}`);
-    }
-  }, [adjacent.nextId, adjacent.basePath, router]);
+    if (adjacent.nextId) navigateTo(adjacent.nextId);
+  }, [adjacent.nextId, navigateTo]);
 
+  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
@@ -42,22 +54,33 @@ export function useNavigationList(
 
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        if (adjacent.prevId && adjacent.basePath) {
-          router.push(`${adjacent.basePath}/${adjacent.prevId}`);
-        }
+        if (adjacent.prevId) navigateTo(adjacent.prevId);
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        if (adjacent.nextId && adjacent.basePath) {
-          router.push(`${adjacent.basePath}/${adjacent.nextId}`);
-        }
+        if (adjacent.nextId) navigateTo(adjacent.nextId);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [adjacent, router]);
+  }, [adjacent, navigateTo]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const pathParts = window.location.pathname.split("/");
+      const urlId = pathParts[pathParts.length - 1];
+      if (urlId && urlId !== currentId) {
+        setCurrentId(urlId);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentId]);
 
   return {
+    currentId,
     prevId: adjacent.prevId,
     nextId: adjacent.nextId,
     goToPrev,
