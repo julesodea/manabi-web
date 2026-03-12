@@ -64,6 +64,27 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* iOS PWA splash screens */}
+        {/* iPhone 16 Pro Max */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1320&h=2868" />
+        {/* iPhone 16 Pro */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1206&h=2622" />
+        {/* iPhone 16 Plus / 15 Plus / 15 Pro Max / 14 Pro Max */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1290&h=2796" />
+        {/* iPhone 16 / 15 / 15 Pro / 14 Pro */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1179&h=2556" />
+        {/* iPhone 14 Plus / 13 Pro Max / 12 Pro Max */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1284&h=2778" />
+        {/* iPhone 14 / 13 / 13 Pro / 12 / 12 Pro */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1170&h=2532" />
+        {/* iPhone 13 mini / 12 mini */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1125&h=2436" />
+        {/* iPhone 11 Pro Max / XS Max */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/api/splash?w=1242&h=2688" />
+        {/* iPhone 11 / XR */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/api/splash?w=828&h=1792" />
+        {/* iPhone SE 3rd/2nd gen / 8 / 7 */}
+        <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/api/splash?w=750&h=1334" />
       </head>
       <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f8f9fc" }} suppressHydrationWarning>
         {/* PWA Splash Screen */}
