@@ -83,6 +83,7 @@ export interface Collection {
     jlptLevel?: string;
     category?: string;
   };
+  previewCharacters?: string[];
 }
 
 // Study session types

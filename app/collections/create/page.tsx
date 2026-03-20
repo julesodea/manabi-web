@@ -2,19 +2,42 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useCreateCollection } from "@/lib/hooks/useCollections";
 import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
 import { StudyMode } from "@/types";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 const JLPT_LEVELS = ["All", "N5", "N4", "N3", "N2", "N1"];
+
+const JLPT_BADGE: Record<string, { light: string; dark: string }> = {
+  N5: {
+    light: "bg-emerald-100 text-emerald-700",
+    dark: "bg-emerald-900/60 text-emerald-400",
+  },
+  N4: {
+    light: "bg-amber-100 text-amber-700",
+    dark: "bg-amber-900/60 text-yellow-300",
+  },
+  N3: {
+    light: "bg-violet-100 text-violet-700",
+    dark: "bg-violet-900/60 text-violet-400",
+  },
+  N2: { light: "bg-sky-100 text-sky-700", dark: "bg-sky-900/60 text-sky-400" },
+  N1: {
+    light: "bg-rose-100 text-rose-700",
+    dark: "bg-rose-900/60 text-rose-400",
+  },
+};
 
 function CreateCollectionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const createCollection = useCreateCollection();
+  const {
+    colors: { isDark },
+  } = useTheme();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -29,7 +52,7 @@ function CreateCollectionForm() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Debounce search query (same as kanji grid)
+  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -37,7 +60,6 @@ function CreateCollectionForm() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Use the same hooks as kanji grid
   const { data: totalCount } = useKanjiCount(selectedLevel);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useKanjiInfinite({
@@ -45,7 +67,6 @@ function CreateCollectionForm() {
       jlptLevel: selectedLevel,
     });
 
-  // Flatten paginated data
   const displayedKanji = data?.pages.flatMap((page) => page.items) ?? [];
 
   // Pre-fill from URL params
@@ -57,7 +78,6 @@ function CreateCollectionForm() {
     }
   }, [searchParams]);
 
-  // Toggle kanji selection
   const toggleKanji = (id: string) => {
     setSelectedKanji((prev) => {
       const newSet = new Set(prev);
@@ -78,7 +98,7 @@ function CreateCollectionForm() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentTarget = observerTarget.current;
@@ -92,6 +112,8 @@ function CreateCollectionForm() {
       }
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const canCreate = name.trim().length > 0 && selectedKanji.size > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,102 +138,91 @@ function CreateCollectionForm() {
       });
 
       router.push("/");
-    } catch (err) {
+    } catch {
       setError("Failed to create collection. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Menu Drawer */}
       <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      {/* Minimal Header */}
-      <MinimalHeader
-        showMenu
-        onMenuClick={() => setMenuOpen(true)}
-        title="Create Collection"
-        rightContent={
-          <div className="text-right">
-            <div className="text-sm text-muted">Selected</div>
-            <div className="text-xl font-bold text-foreground">
-              {selectedKanji.size}
-            </div>
-          </div>
-        }
-      />
+      <MinimalHeader showMenu onMenuClick={() => setMenuOpen(true)} />
 
       {/* Form Section */}
-      <div className="pt-20 border-b border-border bg-card-bg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-2xl font-bold text-foreground mb-6">
+            Create collection
+          </h1>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:border-transparent text-foreground placeholder:text-muted bg-background"
-                placeholder="Collection Name *"
-                required
-              />
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:border-transparent text-foreground placeholder:text-muted bg-background"
-                placeholder="Description (optional)"
-              />
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-5 py-4 border border-border rounded-2xl focus:ring-2 focus:border-transparent text-foreground placeholder:text-muted/60 bg-card-bg text-base"
+              placeholder="Collection name"
+              required
+            />
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-5 py-4 border border-border rounded-2xl focus:ring-2 focus:border-transparent text-foreground placeholder:text-muted/60 bg-card-bg text-base"
+              placeholder="Description (optional)"
+            />
+
+            <div>
+              <p className="text-sm font-medium text-muted mb-3">Study mode</p>
+              <div className="inline-flex bg-card-bg rounded-xl border border-border p-1">
+                <button
+                  type="button"
+                  onClick={() => setStudyMode("flashcard")}
+                  className={`px-6 py-2.5 text-sm font-medium transition-colors rounded-lg ${
+                    studyMode === "flashcard"
+                      ? "bg-[var(--accent)] text-[var(--accent-text)]"
+                      : "text-muted"
+                  }`}
+                >
+                  Flashcard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudyMode("multiple_choice")}
+                  className={`px-6 py-2.5 text-sm font-medium transition-colors rounded-lg ${
+                    studyMode === "multiple_choice"
+                      ? "bg-[var(--accent)] text-[var(--accent-text)]"
+                      : "text-muted"
+                  }`}
+                >
+                  Multiple choice
+                </button>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setStudyMode("flashcard")}
-                className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
-                  studyMode === "flashcard"
-                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-foreground"
-                    : "border-border text-foreground hover:bg-background"
-                }`}
-              >
-                Flashcard
-              </button>
-              <button
-                type="button"
-                onClick={() => setStudyMode("multiple_choice")}
-                className={`flex-1 px-4 py-3 border-2 rounded-xl transition-colors font-medium ${
-                  studyMode === "multiple_choice"
-                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-foreground"
-                    : "border-border text-foreground hover:bg-background"
-                }`}
-              >
-                Multiple Choice
-              </button>
-            </div>
-
-            <div className="flex gap-3">
+            <div className="flex gap-4 pt-2">
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="flex-1 px-4 py-3 border border-border text-foreground rounded-full font-medium hover:bg-background transition"
+                className="flex-1 px-4 py-4 border border-border text-foreground rounded-xl font-medium hover:bg-card-bg transition text-base"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={
-                  createCollection.isPending || selectedKanji.size === 0
-                }
-                className="flex-1 px-4 py-3 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-shadow"
+                disabled={createCollection.isPending || !canCreate}
+                className="flex-1 px-4 py-4 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-medium disabled:opacity-40 disabled:cursor-not-allowed text-base transition"
               >
                 {createCollection.isPending
                   ? "Creating..."
-                  : `Create (${selectedKanji.size})`}
+                  : `Create (${selectedKanji.size} selected)`}
               </button>
             </div>
           </form>
@@ -220,15 +231,15 @@ function CreateCollectionForm() {
 
       {/* Filters & Search */}
       <div className="sticky top-[72px] z-40 bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex items-center bg-card-bg border border-border rounded-xl shadow-sm flex-1">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search meanings, readings..."
-                className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-3 text-sm font-medium placeholder:text-muted text-foreground"
+                className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-4 py-2.5 text-sm font-medium placeholder:text-muted text-foreground"
               />
               <div className="pr-3 text-muted">
                 <svg
@@ -246,7 +257,7 @@ function CreateCollectionForm() {
                 </svg>
               </div>
             </div>
-            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {JLPT_LEVELS.map((level) => (
                 <button
                   key={level}
@@ -267,10 +278,12 @@ function CreateCollectionForm() {
       </div>
 
       {/* Kanji Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4 animate-pulse text-foreground">学</div>
+            <div className="text-6xl mb-4 animate-pulse text-foreground">
+              学
+            </div>
             <p className="text-muted">Loading Kanji...</p>
           </div>
         ) : displayedKanji.length === 0 ? (
@@ -282,73 +295,80 @@ function CreateCollectionForm() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-muted">
-              Showing {displayedKanji.length} of {totalCount ?? 0} Kanji
+            <div className="mb-3 text-sm text-muted">
+              Showing {displayedKanji.length} of {totalCount ?? 0} kanji
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {displayedKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
+                const level = k.kanjiData.jlptLevel || "N5";
+                const badgeColors = JLPT_BADGE[level] || JLPT_BADGE.N5;
+                const badgeClass = isDark
+                  ? badgeColors.dark
+                  : badgeColors.light;
+
                 return (
                   <button
                     key={k.id}
                     type="button"
                     onClick={() => toggleKanji(k.id)}
-                    className="group cursor-pointer"
+                    className={`relative rounded-xl border text-left transition-all duration-150 ${
+                      isSelected
+                        ? "border-[var(--accent)] ring-2 ring-[var(--accent)] bg-card-bg"
+                        : "border-border bg-card-bg hover:shadow-md"
+                    }`}
                   >
-                    <div className="bg-card-bg rounded-2xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all duration-200">
-                      {/* Card Image Area */}
-                      <div className="relative aspect-square duration-300 bg-card-bg border-b border-border">
-                        {/* Selection Indicator */}
-                        {isSelected && (
-                          <div className="absolute top-3 right-3 z-10 bg-[var(--accent)] rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-[var(--accent-text)]">
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </div>
-                        )}
+                    {/* JLPT pill */}
+                    <div
+                      className={`absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeClass}`}
+                    >
+                      {level}
+                    </div>
 
-                        {/* Kanji Character */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-7xl sm:text-8xl text-foreground">
-                            {k.character}
+                    {/* Checkmark */}
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 bg-[var(--accent)] rounded-full w-5 h-5 flex items-center justify-center text-[var(--accent-text)]">
+                        <svg
+                          className="w-3 h-3"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Kanji character */}
+                    <div className="pt-8 pb-2 flex items-center justify-center">
+                      <span className="text-5xl sm:text-6xl text-foreground">
+                        {k.character}
+                      </span>
+                    </div>
+
+                    {/* Meaning + readings */}
+                    <div className="px-2.5 pb-2.5">
+                      <p className="font-semibold text-foreground text-xs truncate">
+                        {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
+                          <span key={i}>
+                            {i > 0 && ", "}
+                            {m.charAt(0).toUpperCase() + m.slice(1)}
                           </span>
-                        </div>
-
-                        {/* Level Badge */}
-                        <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
-                          {k.kanjiData.jlptLevel}
-                        </div>
-                      </div>
-
-                      {/* Card Details */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-foreground truncate text-base">
-                          {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
-                            <span key={i}>
-                              {i > 0 && ", "}
-                              {m.charAt(0).toUpperCase() + m.slice(1)}
-                            </span>
-                          ))}
-                        </h3>
-                        <p className="text-muted text-sm mt-1 truncate">
-                          {[
-                            k.kanjiData.readings.onyomi[0],
-                            k.kanjiData.readings.kunyomi[0],
-                          ]
-                            .filter(Boolean)
-                            .join("、")}
-                        </p>
-                      </div>
+                        ))}
+                      </p>
+                      <p className="text-muted text-[10px] truncate mt-0.5">
+                        {[
+                          k.kanjiData.readings.onyomi[0],
+                          k.kanjiData.readings.kunyomi[0],
+                        ]
+                          .filter(Boolean)
+                          .join("、")}
+                      </p>
                     </div>
                   </button>
                 );

@@ -23,9 +23,9 @@ html.theme-loaded body {
 
 :root {
   /* Light mode defaults (white theme) */
-  --background: #FFFFFF;
+  --background: #F8F8F8;
   --foreground: #1a1a1a;
-  --card-bg: #F5F5F5;
+  --card-bg: #FFFFFF;
   --muted: #6B7280;
   --border: #E5E7EB;
   --accent: #1a1a1a;
@@ -39,18 +39,18 @@ html.theme-loaded body {
 [data-theme="green"],
 [data-theme="orange"],
 [data-theme="black"] {
-  --background: #1a1a1a;
+  --background: #2a2a2a;
   --foreground: #FFFFFF;
-  --card-bg: #2a2a2a;
+  --card-bg: #2e2e2e;
   --muted: #9CA3AF;
   --border: #374151;
   --color-white: #FFFFFF; /* White text on dark themes */
 }
 
 [data-theme="black"] {
-  --background: #0a0a0a;
-  --card-bg: #1a1a1a;
-  --border: #2a2a2a;
+  --background: #222222;
+  --card-bg: #2a2a2a;
+  --border: #383838;
 }
 
 /* Accent colors per theme */

@@ -48,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ backgroundColor: "#f8f9fc" }} suppressHydrationWarning>
+    <html lang="en" style={{ backgroundColor: "#F8F8F8" }} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -86,7 +86,7 @@ export default function RootLayout({
         {/* iPhone SE 3rd/2nd gen / 8 / 7 */}
         <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/api/splash?w=750&h=1334" />
       </head>
-      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#f8f9fc" }} suppressHydrationWarning>
+      <body className={`${notoSansJP.variable} antialiased font-sans`} style={{ backgroundColor: "#F8F8F8" }} suppressHydrationWarning>
         {/* PWA Splash Screen */}
         <div id="splash-screen" style={{
           position: 'fixed',

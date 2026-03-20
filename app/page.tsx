@@ -6,6 +6,7 @@ import { useCollections } from "@/lib/hooks/useCollections";
 import { useAuth } from "@/lib/providers/AuthProvider";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
+import { useTheme } from "@/lib/providers/ThemeProvider";
 
 interface UserStats {
   study_streak: number;
@@ -14,12 +15,89 @@ interface UserStats {
   total_study_time: number;
 }
 
+const JLPT_COLORS: Record<
+  string,
+  {
+    light: { badge: string; badgeText: string };
+    dark: { badge: string; badgeText: string };
+  }
+> = {
+  N5: {
+    light: { badge: "bg-emerald-100", badgeText: "text-emerald-700" },
+    dark: { badge: "bg-emerald-900/50", badgeText: "text-emerald-400" },
+  },
+  N4: {
+    light: { badge: "bg-amber-100", badgeText: "text-amber-700" },
+    dark: { badge: "bg-amber-900/50", badgeText: "text-yellow-300" },
+  },
+  N3: {
+    light: { badge: "bg-violet-100", badgeText: "text-violet-700" },
+    dark: { badge: "bg-violet-900/50", badgeText: "text-violet-400" },
+  },
+  N2: {
+    light: { badge: "bg-sky-100", badgeText: "text-sky-700" },
+    dark: { badge: "bg-sky-900/50", badgeText: "text-sky-400" },
+  },
+  N1: {
+    light: { badge: "bg-rose-100", badgeText: "text-rose-700" },
+    dark: { badge: "bg-rose-900/50", badgeText: "text-rose-400" },
+  },
+};
+
+const AVATAR_COLORS = [
+  {
+    light: { bg: "bg-emerald-100", text: "text-emerald-700" },
+    dark: { bg: "bg-emerald-900/50", text: "text-emerald-400" },
+    bar: "bg-emerald-500",
+  },
+  {
+    light: { bg: "bg-sky-100", text: "text-sky-700" },
+    dark: { bg: "bg-sky-900/50", text: "text-sky-400" },
+    bar: "bg-sky-500",
+  },
+  {
+    light: { bg: "bg-amber-100", text: "text-amber-700" },
+    dark: { bg: "bg-amber-900/50", text: "text-yellow-300" },
+    bar: "bg-amber-500",
+  },
+  {
+    light: { bg: "bg-rose-100", text: "text-rose-700" },
+    dark: { bg: "bg-rose-900/50", text: "text-rose-400" },
+    bar: "bg-rose-400",
+  },
+  {
+    light: { bg: "bg-violet-100", text: "text-violet-700" },
+    dark: { bg: "bg-violet-900/50", text: "text-violet-400" },
+    bar: "bg-violet-500",
+  },
+  {
+    light: { bg: "bg-teal-100", text: "text-teal-700" },
+    dark: { bg: "bg-teal-900/50", text: "text-teal-400" },
+    bar: "bg-teal-500",
+  },
+  {
+    light: { bg: "bg-orange-100", text: "text-orange-700" },
+    dark: { bg: "bg-orange-900/50", text: "text-orange-400" },
+    bar: "bg-orange-500",
+  },
+];
+
+function getAvatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++)
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const {
+    colors: { isDark },
+  } = useTheme();
   const { data: collections = [], isLoading: loading } = useCollections(true);
 
   // Separate system and user collections
@@ -36,7 +114,7 @@ export default function Home() {
 
       setStatsLoading(true);
       try {
-        const response = await fetch('/api/learning/stats');
+        const response = await fetch("/api/learning/stats");
         if (response.ok) {
           const data = await response.json();
           setUserStats(data);
@@ -52,15 +130,15 @@ export default function Home() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-background pb-24 sm:pb-0" style={{ opacity: authLoading ? 0 : 1, transition: 'opacity 0.3s' }}>
+    <div
+      className="min-h-screen bg-background pb-24 sm:pb-0"
+      style={{ opacity: authLoading ? 0 : 1, transition: "opacity 0.3s" }}
+    >
       {/* Menu Drawer */}
       <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Minimal Header */}
-      <MinimalHeader
-        showMenu
-        onMenuClick={() => setMenuOpen(true)}
-      />
+      <MinimalHeader showMenu onMenuClick={() => setMenuOpen(true)} />
 
       {/* Hero Section - only for non-logged-in users */}
       {!user && (
@@ -69,9 +147,7 @@ export default function Home() {
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-5xl sm:text-5xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
                 Learn Kanji,{" "}
-                <span className="text-[var(--accent)]">
-                  your way
-                </span>
+                <span className="text-[var(--accent)]">your way</span>
               </h1>
               <p className="mt-6 text-xl sm:text-2xl text-muted leading-relaxed">
                 Browse, search, and create custom collections to master Japanese
@@ -80,19 +156,19 @@ export default function Home() {
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/kanji-grid"
-                  className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-semibold text-base shadow-md hover:shadow-lg transition-shadow"
+                  className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold text-base shadow-md hover:shadow-lg transition-shadow"
                 >
                   Browse Kanji
                 </Link>
                 <Link
                   href="/vocab"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
+                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-xl font-semibold text-base hover:bg-card-bg transition"
                 >
                   Browse Vocab
                 </Link>
                 <Link
                   href="/collections/create"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-full font-semibold text-base hover:bg-card-bg transition"
+                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-xl font-semibold text-base hover:bg-card-bg transition"
                 >
                   Create Collection
                 </Link>
@@ -209,7 +285,7 @@ export default function Home() {
                   {statsLoading ? (
                     <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
                   ) : (
-                    userStats?.study_streak ?? 0
+                    (userStats?.study_streak ?? 0)
                   )}
                 </div>
                 <div className="text-sm text-muted">Sessions</div>
@@ -235,7 +311,7 @@ export default function Home() {
                   {statsLoading ? (
                     <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
                   ) : (
-                    userStats?.characters_learned ?? 0
+                    (userStats?.characters_learned ?? 0)
                   )}
                 </div>
                 <div className="text-sm text-muted">Kanji Learned</div>
@@ -261,7 +337,7 @@ export default function Home() {
                   {statsLoading ? (
                     <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
                   ) : (
-                    userStats?.total_reviews ?? 0
+                    (userStats?.total_reviews ?? 0)
                   )}
                 </div>
                 <div className="text-sm text-muted">Total Reviews</div>
@@ -272,25 +348,25 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/kanji-grid"
-                className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-full font-semibold shadow-md hover:shadow-lg transition-shadow"
+                className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold shadow-md hover:shadow-lg transition-shadow"
               >
                 Browse Kanji
               </Link>
               <Link
                 href="/vocab"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg/80 transition"
               >
                 Browse Vocab
               </Link>
               <Link
                 href="/collections/create"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg/80 transition"
               >
                 Create Collection
               </Link>
               <Link
                 href="/stats"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-full font-semibold hover:bg-card-bg/80 transition"
+                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg/80 transition"
               >
                 View Stats
               </Link>
@@ -303,7 +379,9 @@ export default function Home() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-foreground">My Collections</h2>
+            <h2 className="text-2xl font-bold text-foreground">
+              My Collections
+            </h2>
             {userCollections.length > 0 && (
               <Link
                 href="/collections/manage"
@@ -315,66 +393,59 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse bg-card-bg rounded-xl border border-border p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-border rounded-lg flex-shrink-0"></div>
+                <div
+                  key={i}
+                  className="animate-pulse bg-card-bg rounded-2xl border border-border p-5"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-border rounded-xl flex-shrink-0"></div>
                     <div className="flex-1">
-                      <div className="h-4 bg-border rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-border rounded w-1/2 mb-2"></div>
-                      <div className="h-3 bg-border rounded w-1/3"></div>
+                      <div className="h-4 bg-border rounded w-1/3 mb-2"></div>
+                      <div className="h-3 bg-border rounded w-1/4"></div>
                     </div>
                   </div>
+                  <div className="mt-4 h-2 bg-border rounded-full"></div>
                 </div>
               ))}
             </div>
           ) : userCollections.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {userCollections.map((collection) => (
-                <Link
-                  key={collection.id}
-                  href={`/study/${collection.id}`}
-                  className="group cursor-pointer block bg-card-bg rounded-xl border border-border p-5 hover:shadow-md transition-all shadow-sm"
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-[var(--accent-text)] font-bold text-lg bg-[var(--accent)]"
-                    >
-                      {collection.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-foreground text-base mb-1">
-                        {collection.name}
-                      </h3>
-                      <p className="text-muted text-sm line-clamp-2 mb-2 leading-relaxed">
-                        {collection.description || "Custom collection"}
-                      </p>
-                      <div className="flex items-center gap-1.5 text-xs text-muted">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                          />
-                        </svg>
-                        <span>{collection.characterIds.length} Kanji</span>
+            <div className="space-y-4">
+              {userCollections.map((collection) => {
+                const color = getAvatarColor(collection.name);
+                const mode = isDark ? color.dark : color.light;
+                return (
+                  <Link
+                    key={collection.id}
+                    href={`/study/${collection.id}`}
+                    className="group block bg-card-bg rounded-2xl border border-border p-5 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 font-bold text-lg ${mode.bg} ${mode.text}`}
+                      >
+                        {collection.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-foreground text-base">
+                          {collection.name}
+                        </h3>
+                        <p className="text-muted text-sm">
+                          {collection.characterIds.length} Kanji
+                          <span className="mx-2">·</span>
+                          Custom
+                        </p>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <Link
               href="/collections/create"
-              className="block border-2 border-dashed border-border bg-card-bg rounded-xl p-8 hover:shadow-md transition-all"
+              className="block border-2 border-dashed border-border bg-card-bg rounded-2xl p-8 hover:shadow-md transition-all"
             >
               <div className="text-center">
                 <div className="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-4 bg-[var(--accent)]/10">
@@ -404,9 +475,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* System Collections Section */}
+      {/* JLPT Collections Section */}
       {systemCollections.length > 0 && (
-        <section className="py-12 bg-card-bg">
+        <section className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold text-foreground">
@@ -417,43 +488,65 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {systemCollections.map((collection) => (
-                <Link
-                  key={collection.id}
-                  href={`/study/${collection.id}`}
-                  className="group cursor-pointer block bg-card-bg rounded-xl border border-border p-5 hover:shadow-md transition-all shadow-sm"
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-[var(--accent-text)] font-bold text-lg bg-[var(--accent)]"
-                    >
-                      {collection.metadata?.jlptLevel || "漢"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-foreground text-base mb-2">
-                        {collection.name}
-                      </h3>
-                      <div className="flex items-center gap-1.5 text-xs text-muted">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                          />
-                        </svg>
-                        <span>{collection.characterIds.length} Kanji</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {systemCollections.map((collection) => {
+                const level = collection.metadata?.jlptLevel || "N5";
+                const colors = JLPT_COLORS[level] || JLPT_COLORS.N5;
+                const mode = isDark ? colors.dark : colors.light;
+                const preview = collection.previewCharacters || [];
+
+                return (
+                  <Link
+                    key={collection.id}
+                    href={`/study/${collection.id}`}
+                    className="group block rounded-2xl border border-border bg-card-bg p-5 hover:shadow-lg transition-all"
+                  >
+                    {/* Header row */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <div
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm ${mode.badge} ${mode.badgeText}`}
+                      >
+                        {level}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-foreground text-base leading-tight">
+                          {collection.name}
+                        </h3>
+                        <div className="flex items-center gap-1.5 text-xs text-muted mt-1">
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                            />
+                          </svg>
+                          <span>{collection.characterIds.length} Kanji</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+
+                    {/* Kanji preview */}
+                    {preview.length > 0 && (
+                      <div className="flex gap-2 mt-4">
+                        {preview.map((char, i) => (
+                          <div
+                            key={i}
+                            className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-medium text-foreground bg-background"
+                          >
+                            {char}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

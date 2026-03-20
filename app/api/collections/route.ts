@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DatabaseService } from '@/lib/services/database';
 import { Collection } from '@/types';
 import { getServerUser } from '@/lib/supabase/server-client';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
@@ -9,6 +10,34 @@ export async function GET() {
 
     // Get all collections (system + user's own if authenticated)
     const collections = await DatabaseService.getAllCollections(user?.id);
+
+    // Gather all character IDs (first 5 per collection) for preview
+    const previewMap = new Map<string, string[]>();
+    const allPreviewIds: string[] = [];
+
+    for (const c of collections) {
+      const previewIds = c.characterIds.slice(0, 5);
+      previewMap.set(c.id, previewIds);
+      allPreviewIds.push(...previewIds);
+    }
+
+    // Batch fetch character data for previews
+    if (allPreviewIds.length > 0) {
+      const uniqueIds = [...new Set(allPreviewIds)];
+      const { data: chars } = await supabaseAdmin
+        .from('characters')
+        .select('id, character')
+        .in('id', uniqueIds);
+
+      if (chars) {
+        const charMap = new Map(chars.map((c: { id: string; character: string }) => [c.id, c.character]));
+        for (const c of collections) {
+          const ids = previewMap.get(c.id) || [];
+          c.previewCharacters = ids.map(id => charMap.get(id)).filter(Boolean) as string[];
+        }
+      }
+    }
+
     return NextResponse.json(collections);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch collections' }, { status: 500 });
