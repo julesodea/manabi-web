@@ -63,7 +63,7 @@ export default function ManageCollectionsPage() {
       {/* Minimal Header */}
       <MinimalHeader
         showMenu
-        onMenuClick={() => setMenuOpen(true)}
+        menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)}
       />
 
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-12">

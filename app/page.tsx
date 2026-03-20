@@ -138,7 +138,7 @@ export default function Home() {
       <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Minimal Header */}
-      <MinimalHeader showMenu onMenuClick={() => setMenuOpen(true)} />
+      <MinimalHeader showMenu menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)} />
 
       {/* Hero Section - only for non-logged-in users */}
       {!user && (

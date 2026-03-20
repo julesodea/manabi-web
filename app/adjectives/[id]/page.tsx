@@ -52,7 +52,7 @@ export default function AdjectiveDetailPage() {
       {/* Minimal Header */}
       <MinimalHeader
         showMenu
-        onMenuClick={() => setMenuOpen(true)}
+        menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)}
       />
 
       {/* Main Content - Single Card */}

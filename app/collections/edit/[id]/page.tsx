@@ -234,7 +234,7 @@ function EditCollectionForm() {
       {/* Minimal Header */}
       <MinimalHeader
         showMenu
-        onMenuClick={() => setMenuOpen(true)}
+        menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)}
         title="Edit Collection"
         rightContent={
           <div className="text-right">

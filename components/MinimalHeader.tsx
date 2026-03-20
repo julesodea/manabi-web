@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/providers/AuthProvider";
 
 interface MinimalHeaderProps {
   onMenuClick?: () => void;
   showMenu?: boolean;
+  menuOpen?: boolean;
   showBack?: boolean;
   onBackClick?: () => void;
   title?: string;
@@ -19,6 +21,7 @@ interface MinimalHeaderProps {
 export default function MinimalHeader({
   onMenuClick,
   showMenu = false,
+  menuOpen = false,
   showBack = false,
   onBackClick,
   title,
@@ -26,10 +29,30 @@ export default function MinimalHeader({
   rightContent,
 }: MinimalHeaderProps) {
   const { user } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)] border-b border-[var(--border)]">
-      <div className="flex items-center justify-between px-4 py-4">
+    <header
+      className="fixed z-50 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(80rem-4rem)] transition-all duration-300"
+      style={{ top: scrolled ? "1rem" : "0", opacity: menuOpen ? 0 : 1, pointerEvents: menuOpen ? "none" : "auto" }}
+    >
+      <div
+        className="flex items-center justify-between px-5 py-3 rounded-2xl border transition-all duration-300"
+        style={{
+          background: scrolled ? "color-mix(in srgb, var(--background) 80%, transparent)" : "transparent",
+          backdropFilter: scrolled ? "blur(24px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(24px)" : "none",
+          borderColor: scrolled ? "var(--border)" : "transparent",
+          boxShadow: scrolled ? "0 10px 15px -3px rgb(0 0 0 / 0.05)" : "none",
+        }}
+      >
         {/* Left side - Menu or Back button */}
         <div className="flex items-center gap-3">
           {showMenu && (

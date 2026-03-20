@@ -669,7 +669,7 @@ export default function StudyPage() {
       {/* Minimal Header */}
       <MinimalHeader
         showMenu
-        onMenuClick={() => setMenuOpen(true)}
+        menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)}
         progress={{
           current: currentIndex + 1,
           total: characters.length,

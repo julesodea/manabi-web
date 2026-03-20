@@ -147,7 +147,7 @@ function CreateCollectionForm() {
     <div className="min-h-screen bg-background">
       <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      <MinimalHeader showMenu onMenuClick={() => setMenuOpen(true)} />
+      <MinimalHeader showMenu menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)} />
 
       {/* Form Section */}
       <div className="pt-20">

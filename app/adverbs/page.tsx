@@ -78,7 +78,7 @@ function AdverbsGridContent() {
       {/* Minimal Header */}
       <MinimalHeader
         showMenu
-        onMenuClick={() => setMenuOpen(true)}
+        menuOpen={menuOpen} onMenuClick={() => setMenuOpen(true)}
       />
 
       {/* Main Content */}
