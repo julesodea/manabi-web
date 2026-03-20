@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useCollection, useUpdateCollection } from "@/lib/hooks/useCollections";
+import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import { StudyMode } from "@/types";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
@@ -48,7 +49,6 @@ function EditCollectionForm() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   // Pre-fill form with existing collection data
   useEffect(() => {
@@ -136,28 +136,7 @@ function EditCollectionForm() {
     }
   }, [selectedLevel, displayedKanji.length, loadingMore, hasMore]);
 
-  // Intersection Observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [loadMore, loading]);
+  const observerTarget = useInfiniteScroll(loadMore, hasMore && !loading, loadingMore);
 
   // Filter kanji by search
   const filteredKanji = displayedKanji.filter((k) => {

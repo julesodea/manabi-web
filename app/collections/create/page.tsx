@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCreateCollection } from "@/lib/hooks/useCollections";
 import { useKanjiInfinite, useKanjiCount } from "@/lib/hooks/useKanji";
+import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import { StudyMode } from "@/types";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
@@ -50,8 +51,6 @@ function CreateCollectionForm() {
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const observerTarget = useRef<HTMLDivElement>(null);
-
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,6 +67,7 @@ function CreateCollectionForm() {
     });
 
   const displayedKanji = data?.pages.flatMap((page) => page.items) ?? [];
+  const observerTarget = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
   // Pre-fill from URL params
   useEffect(() => {
@@ -89,29 +89,6 @@ function CreateCollectionForm() {
       return newSet;
     });
   };
-
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const canCreate = name.trim().length > 0 && selectedKanji.size > 0;
 
