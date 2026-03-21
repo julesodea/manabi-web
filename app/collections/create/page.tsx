@@ -207,9 +207,9 @@ function CreateCollectionForm() {
       </div>
 
       {/* Filters & Search */}
-      <div className="sticky top-[72px] z-40 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex flex-col sm:flex-row gap-3">
+      <div className="sticky top-[72px] z-40 w-[calc(100%-1rem)] max-w-[calc(80rem-2rem)] mx-auto inset-x-0">
+        <div className="py-3">
+          <div className="flex flex-col sm:flex-row gap-3 bg-background/80 backdrop-blur-xl rounded-2xl p-3 border border-border/50">
             <div className="flex items-center bg-card-bg border border-border rounded-xl shadow-sm flex-1">
               <input
                 type="text"

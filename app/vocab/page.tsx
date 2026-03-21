@@ -455,7 +455,7 @@ function VocabGridContent() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {displayedVocab.map((v) => {
                 const isSelected = selectedVocab.has(v.id);
                 const level = v.jlpt_level || "N5";
@@ -463,63 +463,54 @@ function VocabGridContent() {
                 const badgeClass = isDark ? badgeColors.dark : badgeColors.light;
 
                 const cardContent = (
-                  <div className="group cursor-pointer h-full">
-                    <div className="h-full flex flex-col bg-card-bg rounded-2xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all duration-200">
-                      {/* Card Image Area */}
-                      <div className="relative aspect-square duration-300 bg-card-bg border-b border-border">
-                        {/* Selection Indicator */}
-                        {selectionMode && isSelected && (
-                          <div className="absolute top-3 right-3 z-10 bg-[var(--accent)] rounded-full w-7 h-7 flex items-center justify-center shadow-lg text-[var(--accent-text)]">
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </div>
-                        )}
+                  <div
+                    className={`relative rounded-xl border text-left transition-all duration-150 cursor-pointer ${
+                      selectionMode && isSelected
+                        ? "border-[var(--accent)] ring-2 ring-[var(--accent)] bg-card-bg"
+                        : "border-border bg-card-bg hover:shadow-md"
+                    }`}
+                  >
+                    {/* JLPT pill */}
+                    <div className={`absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeClass}`}>
+                      {level}
+                    </div>
 
-                        {/* Vocab Word */}
-                        <div className="absolute inset-0 flex items-center justify-center px-3">
-                          <span
-                            className="text-foreground font-medium text-center break-keep"
-                            style={{
-                              fontSize: `clamp(0.875rem, ${Math.max(1, 4 - (v.word.length - 2) * 0.5)}rem, 1.75rem)`,
-                            }}
-                          >
-                            {v.word}
-                          </span>
-                        </div>
-
-                        {/* Level Badge */}
-                        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-lg text-xs font-bold ${badgeClass}`}>
-                          {level}
-                        </div>
-
-                        {/* Type Badge (show in All and Genki tabs since both mix types) */}
-                        {(urlType === "all" || urlType === "genki") && (
-                          <div className="absolute bottom-3 right-3 bg-card-bg px-2 py-0.5 rounded border border-border text-xs font-semibold text-foreground">
-                            {TYPE_LABELS[v.part_of_speech] || v.part_of_speech}
-                          </div>
-                        )}
+                    {/* Type Badge */}
+                    {(urlType === "all" || urlType === "genki") && (
+                      <div className="absolute top-2 right-2 bg-card-bg px-1.5 py-0.5 rounded border border-border text-[10px] font-semibold text-foreground">
+                        {TYPE_LABELS[v.part_of_speech] || v.part_of_speech}
                       </div>
+                    )}
 
-                      {/* Card Details */}
-                      <div className="p-4 flex-1 flex flex-col justify-center items-center min-h-[88px]">
-                        <h3 className="font-semibold text-foreground line-clamp-2 text-base text-center">
-                          {v.meaning.charAt(0).toUpperCase() + v.meaning.slice(1)}
-                        </h3>
-                        <p className="text-muted text-base mt-1 text-center wrap-break-word w-full">
-                          {v.romaji ? v.romaji.charAt(0).toUpperCase() + v.romaji.slice(1) : v.reading}
-                        </p>
+                    {/* Checkmark */}
+                    {selectionMode && isSelected && (
+                      <div className="absolute top-2 right-2 bg-[var(--accent)] rounded-full w-5 h-5 flex items-center justify-center text-[var(--accent-text)]">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
                       </div>
+                    )}
+
+                    {/* Vocab word */}
+                    <div className="pt-8 pb-2 flex items-center justify-center px-2">
+                      <span
+                        className="text-foreground font-medium text-center break-keep"
+                        style={{
+                          fontSize: `clamp(0.875rem, ${Math.max(1, 3.5 - (v.word.length - 2) * 0.5)}rem, 1.5rem)`,
+                        }}
+                      >
+                        {v.word}
+                      </span>
+                    </div>
+
+                    {/* Meaning + reading */}
+                    <div className="px-2.5 pb-2.5">
+                      <p className="font-semibold text-foreground text-xs truncate">
+                        {v.meaning.charAt(0).toUpperCase() + v.meaning.slice(1)}
+                      </p>
+                      <p className="text-muted text-[11px] truncate mt-0.5">
+                        {v.romaji ? v.romaji.charAt(0).toUpperCase() + v.romaji.slice(1) : v.reading}
+                      </p>
                     </div>
                   </div>
                 );
