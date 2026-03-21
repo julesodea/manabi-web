@@ -9,6 +9,15 @@ import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import MinimalHeader from "@/components/MinimalHeader";
 import MenuDrawer from "@/components/MenuDrawer";
 import { saveNavigationList } from "@/lib/navigationList";
+import { useTheme } from "@/lib/providers/ThemeProvider";
+
+const JLPT_BADGE: Record<string, { light: string; dark: string }> = {
+  N5: { light: "bg-emerald-100 text-emerald-700", dark: "bg-emerald-900/60 text-emerald-400" },
+  N4: { light: "bg-amber-100 text-amber-700", dark: "bg-amber-900/60 text-yellow-300" },
+  N3: { light: "bg-violet-100 text-violet-700", dark: "bg-violet-900/60 text-violet-400" },
+  N2: { light: "bg-sky-100 text-sky-700", dark: "bg-sky-900/60 text-sky-400" },
+  N1: { light: "bg-rose-100 text-rose-700", dark: "bg-rose-900/60 text-rose-400" },
+};
 
 const JLPT_LEVELS = [
   { label: "All", value: "All" },
@@ -28,6 +37,7 @@ function KanjiGridContent() {
   const [selectedKanji, setSelectedKanji] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(selectionModeParam);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { colors: { isDark } } = useTheme();
 
   // TanStack Query hooks
   const { data: totalCount } = useKanjiCount(urlLevel);
@@ -215,6 +225,9 @@ function KanjiGridContent() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {displayedKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
+                const level = k.kanjiData.jlptLevel || "N5";
+                const badgeColors = JLPT_BADGE[level] || JLPT_BADGE.N5;
+                const badgeClass = isDark ? badgeColors.dark : badgeColors.light;
 
                 const cardContent = (
                   <div className="group cursor-pointer">
@@ -248,8 +261,8 @@ function KanjiGridContent() {
                         </div>
 
                         {/* Level Badge */}
-                        <div className="absolute top-3 left-3 bg-[var(--accent)]/10 px-2.5 py-1 rounded-lg shadow-sm text-xs font-bold text-[var(--accent)]">
-                          {k.kanjiData.jlptLevel}
+                        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-lg text-xs font-bold ${badgeClass}`}>
+                          {level}
                         </div>
                       </div>
 
