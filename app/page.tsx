@@ -162,13 +162,13 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/kanji-grid"
-                  className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold text-base hover:opacity-90 transition"
+                  className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold text-base hover:opacity-80 transition"
                 >
                   Browse Kanji
                 </Link>
                 <Link
                   href="/vocab"
-                  className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold text-base hover:opacity-90 transition"
+                  className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold text-base hover:opacity-80 transition"
                 >
                   Browse Vocab
                 </Link>
@@ -354,19 +354,19 @@ export default function Home() {
               </Link>
               <Link
                 href="/kanji-grid"
-                className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold hover:opacity-90 transition"
+                className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold hover:opacity-80 transition"
               >
                 Browse Kanji
               </Link>
               <Link
                 href="/vocab"
-                className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold hover:opacity-90 transition"
+                className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold hover:opacity-80 transition"
               >
                 Browse Vocab
               </Link>
               <Link
                 href="/stats"
-                className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold hover:opacity-90 transition"
+                className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold hover:opacity-80 transition"
               >
                 View Stats
               </Link>
