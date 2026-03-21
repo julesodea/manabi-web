@@ -155,22 +155,22 @@ export default function Home() {
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/kanji-grid"
+                  href="/collections/create"
                   className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold text-base shadow-md hover:shadow-lg transition-shadow"
+                >
+                  Create Collection
+                </Link>
+                <Link
+                  href="/kanji-grid"
+                  className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold text-base hover:opacity-90 transition"
                 >
                   Browse Kanji
                 </Link>
                 <Link
                   href="/vocab"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-xl font-semibold text-base hover:bg-card-bg transition"
+                  className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold text-base hover:opacity-90 transition"
                 >
                   Browse Vocab
-                </Link>
-                <Link
-                  href="/collections/create"
-                  className="px-5 py-2 bg-background border-2 border-border text-foreground rounded-xl font-semibold text-base hover:bg-card-bg transition"
-                >
-                  Create Collection
                 </Link>
               </div>
             </div>
@@ -347,26 +347,26 @@ export default function Home() {
             {/* Quick Actions */}
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/kanji-grid"
+                href="/collections/create"
                 className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold shadow-md hover:shadow-lg transition-shadow"
+              >
+                Create Collection
+              </Link>
+              <Link
+                href="/kanji-grid"
+                className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold hover:opacity-90 transition"
               >
                 Browse Kanji
               </Link>
               <Link
                 href="/vocab"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg/80 transition"
+                className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold hover:opacity-90 transition"
               >
                 Browse Vocab
               </Link>
               <Link
-                href="/collections/create"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg/80 transition"
-              >
-                Create Collection
-              </Link>
-              <Link
                 href="/stats"
-                className="px-5 py-2 bg-card-bg border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg/80 transition"
+                className="px-5 py-2 bg-foreground text-background rounded-xl font-semibold hover:opacity-90 transition"
               >
                 View Stats
               </Link>
