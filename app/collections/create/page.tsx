@@ -184,18 +184,18 @@ function CreateCollectionForm() {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-2">
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="flex-1 px-4 py-4 border border-border text-foreground rounded-xl font-medium hover:bg-card-bg transition text-base"
+                className="px-5 py-2 border-2 border-border text-foreground rounded-xl font-semibold hover:bg-card-bg transition text-base"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={createCollection.isPending || !canCreate}
-                className="flex-1 px-4 py-4 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-medium disabled:opacity-40 disabled:cursor-not-allowed text-base transition"
+                className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed text-base shadow-md hover:shadow-lg transition"
               >
                 {createCollection.isPending
                   ? "Creating..."
@@ -207,7 +207,7 @@ function CreateCollectionForm() {
       </div>
 
       {/* Filters & Search */}
-      <div className="sticky top-[72px] z-40 bg-background border-b border-border">
+      <div className="sticky top-[72px] z-40 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex items-center bg-card-bg border border-border rounded-xl shadow-sm flex-1">

@@ -40,8 +40,8 @@ export default function MinimalHeader({
 
   return (
     <header
-      className="fixed z-50 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(80rem-4rem)] transition-all duration-300"
-      style={{ top: scrolled ? "1rem" : "0", opacity: menuOpen ? 0 : 1, pointerEvents: menuOpen ? "none" : "auto" }}
+      className="fixed z-50 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] max-w-[calc(80rem-2rem)] transition-all duration-300"
+      style={{ top: scrolled ? "1rem" : "0.5rem", opacity: menuOpen ? 0 : 1, pointerEvents: menuOpen ? "none" : "auto" }}
     >
       <div
         className="flex items-center justify-between px-5 py-3 rounded-2xl border transition-all duration-300"
