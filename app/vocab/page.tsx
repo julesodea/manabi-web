@@ -427,7 +427,7 @@ function VocabGridContent() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
             {[...Array(15)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-square bg-card-bg border border-border rounded-xl mb-3"></div>
@@ -455,7 +455,7 @@ function VocabGridContent() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {displayedVocab.map((v) => {
                 const isSelected = selectedVocab.has(v.id);
                 const level = v.jlpt_level || "N5";
@@ -506,7 +506,7 @@ function VocabGridContent() {
                     {/* Meaning + reading */}
                     <div className="px-2.5 pb-2.5">
                       <p className="font-semibold text-foreground text-xs truncate">
-                        {v.meaning.charAt(0).toUpperCase() + v.meaning.slice(1)}
+                        {(v.meaning.charAt(0).toUpperCase() + v.meaning.slice(1)).replace(/;\s*/g, ", ")}
                       </p>
                       <p className="text-muted text-[11px] truncate mt-0.5">
                         {v.romaji ? v.romaji.charAt(0).toUpperCase() + v.romaji.slice(1) : v.reading}

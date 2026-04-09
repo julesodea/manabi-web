@@ -194,7 +194,7 @@ function KanjiGridContent() {
           </div>
         </div>
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
             {[...Array(15)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-square bg-card-bg border border-border rounded-xl mb-3"></div>
@@ -222,7 +222,7 @@ function KanjiGridContent() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {displayedKanji.map((k) => {
                 const isSelected = selectedKanji.has(k.id);
                 const level = k.kanjiData.jlptLevel || "N5";
@@ -264,7 +264,7 @@ function KanjiGridContent() {
                         {k.kanjiData.meanings.slice(0, 2).map((m, i) => (
                           <span key={i}>
                             {i > 0 && ", "}
-                            {m.charAt(0).toUpperCase() + m.slice(1)}
+                            {(m.charAt(0).toUpperCase() + m.slice(1)).replace(/;\s*/g, ", ")}
                           </span>
                         ))}
                       </p>

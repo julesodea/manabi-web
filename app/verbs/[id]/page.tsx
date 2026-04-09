@@ -69,7 +69,7 @@ export default function VerbDetailPage() {
           <div className="mb-4 lg:mb-8 flex flex-col justify-between gap-3">
             <div>
               <h1 className="text-2xl lg:text-4xl font-bold text-foreground mb-2 lg:mb-4">
-                {verb.meaning.charAt(0).toUpperCase() + verb.meaning.slice(1)}
+                {(verb.meaning.charAt(0).toUpperCase() + verb.meaning.slice(1)).replace(/;\s*/g, ", ")}
               </h1>
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[var(--accent)] text-[var(--accent-text)] rounded-full text-xs lg:text-sm font-bold">
