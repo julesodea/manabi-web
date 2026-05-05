@@ -7,6 +7,7 @@ export type ThemeMode = "light" | "dark";
 
 interface ThemeColors {
   primary: string;      // Accent color
+  primaryText: string;  // Text color on accent surfaces
   background: string;   // Page background
   foreground: string;   // Main text
   cardBg: string;       // Card/content areas
@@ -27,6 +28,7 @@ const getThemeColors = (color: ThemeColor, mode: ThemeMode): ThemeColors => {
   if (mode === "light") {
     return {
       primary: accentColors[color],
+      primaryText: "#FFFFFF",
       background: "#FFFFFF",
       foreground: "#1a1a1a",
       cardBg: "#F5F5F5",
@@ -39,6 +41,7 @@ const getThemeColors = (color: ThemeColor, mode: ThemeMode): ThemeColors => {
     const isDeeperDark = color === "neutral";
     return {
       primary: accentColors[color],
+      primaryText: color === "neutral" ? "#000000" : "#FFFFFF",
       background: isDeeperDark ? "#0a0a0a" : "#1a1a1a",
       foreground: "#FFFFFF",
       cardBg: isDeeperDark ? "#1a1a1a" : "#2a2a2a",
@@ -60,46 +63,58 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const validThemeColors: ThemeColor[] = ["neutral", "blue", "red", "green", "orange"];
+const validThemeModes: ThemeMode[] = ["light", "dark"];
+
+const getStoredThemePreference = (): { color: ThemeColor; mode: ThemeMode } => {
+  const preference: { color: ThemeColor; mode: ThemeMode } = {
+    color: "neutral",
+    mode: "light",
+  };
+
+  if (typeof window === "undefined") {
+    return preference;
+  }
+
+  const savedColor = localStorage.getItem("theme-color");
+  const savedMode = localStorage.getItem("theme-mode");
+  const colorMap: Record<string, { color: ThemeColor; mode: ThemeMode }> = {
+    white: { color: "neutral", mode: "light" },
+    black: { color: "neutral", mode: "dark" },
+    "blue-light": { color: "blue", mode: "light" },
+    blue: { color: "blue", mode: "dark" },
+    "red-light": { color: "red", mode: "light" },
+    red: { color: "red", mode: "dark" },
+    "green-light": { color: "green", mode: "light" },
+    green: { color: "green", mode: "dark" },
+    "orange-light": { color: "orange", mode: "light" },
+    orange: { color: "orange", mode: "dark" },
+  };
+
+  if (savedColor) {
+    const mapped = colorMap[savedColor];
+    if (mapped) {
+      preference.color = mapped.color;
+      preference.mode = mapped.mode;
+    } else if (validThemeColors.includes(savedColor as ThemeColor)) {
+      preference.color = savedColor as ThemeColor;
+    }
+  }
+
+  if (savedMode && validThemeModes.includes(savedMode as ThemeMode)) {
+    preference.mode = savedMode as ThemeMode;
+  }
+
+  return preference;
+};
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [themeColor, setThemeColorState] = useState<ThemeColor>("neutral");
-  const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
-  const [mounted, setMounted] = useState(false);
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const savedColor = localStorage.getItem("theme-color") as ThemeColor;
-    const savedMode = localStorage.getItem("theme-mode") as ThemeMode;
-
-    // Migration logic: map old theme names to new system
-    if (savedColor) {
-      const colorMap: Record<string, { color: ThemeColor; mode: ThemeMode }> = {
-        white: { color: "neutral", mode: "light" },
-        black: { color: "neutral", mode: "dark" },
-        "blue-light": { color: "blue", mode: "light" },
-        blue: { color: "blue", mode: "dark" },
-        "red-light": { color: "red", mode: "light" },
-        red: { color: "red", mode: "dark" },
-        "green-light": { color: "green", mode: "light" },
-        green: { color: "green", mode: "dark" },
-        "orange-light": { color: "orange", mode: "light" },
-        orange: { color: "orange", mode: "dark" },
-      };
-
-      const mapped = colorMap[savedColor];
-      if (mapped) {
-        setThemeColorState(mapped.color);
-        setThemeModeState(mapped.mode);
-      } else if (["neutral", "blue", "red", "green", "orange"].includes(savedColor)) {
-        setThemeColorState(savedColor as ThemeColor);
-      }
-    }
-
-    if (savedMode && ["light", "dark"].includes(savedMode)) {
-      setThemeModeState(savedMode);
-    }
-
-    setMounted(true);
-  }, []);
+  const [themeColor, setThemeColorState] = useState<ThemeColor>(
+    () => getStoredThemePreference().color
+  );
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(
+    () => getStoredThemePreference().mode
+  );
 
   const setThemeColor = (color: ThemeColor) => {
     setThemeColorState(color);
@@ -126,19 +141,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Update data-theme attribute when theme changes
   useEffect(() => {
-    if (mounted) {
-      updateDataTheme(themeColor, themeMode);
-    }
-  }, [themeColor, themeMode, mounted]);
-
-  // Add theme-loaded class when React has hydrated
-  useEffect(() => {
-    if (mounted) {
-      requestAnimationFrame(() => {
-        document.documentElement.classList.add('theme-loaded');
-      });
-    }
-  }, [mounted]);
+    updateDataTheme(themeColor, themeMode);
+    requestAnimationFrame(() => {
+      document.documentElement.classList.add("theme-loaded");
+    });
+  }, [themeColor, themeMode]);
 
   return (
     <ThemeContext.Provider

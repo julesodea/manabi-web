@@ -131,7 +131,7 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen bg-background pb-24 sm:pb-0"
+      className="min-h-dvh bg-background pb-24 sm:pb-0"
       style={{ opacity: authLoading ? 0 : 1, transition: "opacity 0.3s" }}
     >
       {/* Menu Drawer */}
@@ -142,75 +142,152 @@ export default function Home() {
 
       {/* Hero Section - only for non-logged-in users */}
       {!user && (
-        <section className="pt-24 pb-12 sm:pt-32 sm:pb-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-5xl sm:text-5xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
-                Learn Kanji,{" "}
-                <span className="text-[var(--accent)]">your way</span>
-              </h1>
-              <p className="mt-6 text-xl sm:text-2xl text-muted leading-relaxed">
-                Browse, search, and create custom collections to master Japanese
-                characters at your own pace.
-              </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/collections/create"
-                  className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold text-base shadow-md hover:shadow-lg transition-shadow"
-                >
-                  Create Collection
-                </Link>
-                <Link
-                  href="/kanji-grid"
-                  className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold text-base hover:opacity-80 transition"
-                >
-                  Browse Kanji
-                </Link>
-                <Link
-                  href="/vocab"
-                  className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold text-base hover:opacity-80 transition"
-                >
-                  Browse Vocab
-                </Link>
+        <section className="relative overflow-hidden pt-24 sm:pt-32 pb-12 sm:pb-16">
+          {/* Ambient drifting kanji */}
+          <div className="absolute inset-0 pointer-events-none select-none">
+            {[
+              { ch: "漢", top: "12%", left: "78%", size: 140, delay: 0, dur: 18, op: 0.04 },
+              { ch: "道", top: "62%", left: "4%",  size: 180, delay: 2, dur: 22, op: 0.05 },
+              { ch: "心", top: "82%", left: "84%", size: 100, delay: 4, dur: 16, op: 0.04 },
+            ].map((k, i) => (
+              <span
+                key={i}
+                className="absolute font-bold leading-none text-foreground"
+                style={{
+                  top: k.top,
+                  left: k.left,
+                  fontSize: `${k.size}px`,
+                  opacity: k.op,
+                  animation: `drift ${k.dur}s ease-in-out ${k.delay}s infinite`,
+                  willChange: "transform",
+                }}
+              >
+                {k.ch}
+              </span>
+            ))}
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Eyebrow */}
+            <div className="flex items-center gap-3 mb-8">
+              <span className="text-[11px] uppercase tracking-[0.22em] text-muted">
+                学習 · the practice
+              </span>
+              <span className="flex-1 h-px bg-border max-w-32" />
+            </div>
+
+            <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10 lg:gap-14 items-end">
+              {/* Headline + CTAs */}
+              <div>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground tracking-tighter leading-[0.95]">
+                  Learn kanji,
+                  <br />
+                  <span className="text-[var(--accent)]">deliberately</span>
+                  <span className="text-foreground">.</span>
+                </h1>
+                <p className="mt-6 text-lg sm:text-xl text-muted leading-relaxed max-w-[52ch]">
+                  Browse every jōyō character, build custom collections, study at
+                  your own rhythm. No streaks, no guilt — steady practice.
+                </p>
+                <div className="mt-10 flex flex-wrap gap-3 items-center">
+                  <Link
+                    href="/collections/create"
+                    className="group inline-flex items-center gap-3 px-6 h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-text)] font-semibold text-[15px] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  >
+                    Create collection
+                    <span className="font-mono text-sm opacity-70 group-hover:translate-x-0.5 transition-transform">
+                      →
+                    </span>
+                  </Link>
+                  <Link
+                    href="/kanji-grid"
+                    className="inline-flex items-center gap-2 px-6 h-12 rounded-2xl border border-border bg-card-bg text-foreground font-semibold text-[15px] hover:border-foreground/30 hover:-translate-y-px transition-all duration-200"
+                  >
+                    Browse kanji
+                  </Link>
+                  <Link
+                    href="/vocab"
+                    className="group inline-flex items-center gap-1 px-2 h-12 text-foreground font-medium text-[15px] hover:opacity-70 transition-opacity"
+                  >
+                    Browse vocab
+                    <span className="font-mono text-sm opacity-60 group-hover:translate-x-0.5 transition-transform">
+                      →
+                    </span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Feature tile - kanji card */}
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-foreground text-background hidden lg:block">
+                <div
+                  className="absolute -right-20 -top-20 w-72 h-72 rounded-full border border-background/10 pointer-events-none"
+                  style={{ animation: "ensoSpin 80s linear infinite" }}
+                />
+                <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full border border-background/15 pointer-events-none" />
+                <div className="relative h-full p-8 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.22em] opacity-60">
+                    <span>kanji · 一</span>
+                    <span className="font-mono">0001 / 2136</span>
+                  </div>
+                  <div className="text-center">
+                    <div
+                      className="text-[200px] leading-none font-black tracking-tighter"
+                      style={{ animation: "breathe 5s ease-in-out infinite" }}
+                    >
+                      学
+                    </div>
+                    <div className="mt-5 text-sm font-mono opacity-70">
+                      manabu · まなぶ
+                    </div>
+                    <div className="mt-1 text-base font-medium">
+                      to learn, to study
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-[11px] uppercase tracking-[0.22em] opacity-60">
+                    <span>strokes · 8</span>
+                    <span>jlpt · n5</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Stats Section - for non-logged-in users */}
+      {/* Stats ledger - flat, no cards */}
       {!user && (
-        <section className="py-12 bg-card-bg border-y border-border">
+        <section className="border-y border-border bg-card-bg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                  2,136
+            <div className="grid grid-cols-2 lg:grid-cols-4 lg:divide-x divide-border">
+              {[
+                { value: "2,136", label: "Jōyō kanji", sub: "all characters" },
+                { value: "N5–N1", label: "JLPT levels", sub: "complete coverage" },
+                {
+                  value: loading ? null : String(collections.length),
+                  label: "Collections",
+                  sub: "system + custom",
+                },
+                { value: "Free", label: "Always", sub: "no paywall" },
+              ].map((s, i) => (
+                <div
+                  key={i}
+                  className="px-2 py-8 lg:px-8 lg:py-10 lg:first:pl-0 lg:last:pr-0"
+                >
+                  <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+                    {s.value === null ? (
+                      <span className="inline-block h-9 w-16 bg-border animate-pulse rounded" />
+                    ) : (
+                      s.value
+                    )}
+                  </div>
+                  <div className="mt-2 text-sm font-medium text-foreground">
+                    {s.label}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted font-mono uppercase tracking-[0.18em]">
+                    {s.sub}
+                  </div>
                 </div>
-                <div className="text-sm text-muted mt-1">Jōyō Kanji</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                  N5-N1
-                </div>
-                <div className="text-sm text-muted mt-1">JLPT Levels</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                  {loading ? (
-                    <div className="h-10 w-16 bg-border animate-pulse rounded mx-auto"></div>
-                  ) : (
-                    collections.length
-                  )}
-                </div>
-                <div className="text-sm text-muted mt-1">Collections</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                  Free
-                </div>
-                <div className="text-sm text-muted mt-1">Browse forever</div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -218,157 +295,118 @@ export default function Home() {
 
       {/* Welcome Back Dashboard - for logged-in users */}
       {user && (
-        <section className="pt-24 pb-8 sm:pt-28">
+        <section className="relative pt-24 sm:pt-28 pb-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Eyebrow row */}
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-[11px] uppercase tracking-[0.22em] text-muted">
+                session · 学習
+              </span>
+              <span className="flex-1 h-px bg-border max-w-24" />
+              <span className="font-mono text-[11px] text-muted uppercase tracking-[0.18em]">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                })}
+              </span>
+            </div>
+
             {/* Welcome Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-                Welcome back,{" "}
+            <div className="mb-10">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tighter leading-[1.02]">
+                Welcome back,
+                <br />
                 <span className="text-[var(--accent)]">
                   {user.user_metadata?.name ||
                     user.user_metadata?.full_name ||
                     user.user_metadata?.preferred_username ||
                     user.email?.split("@")[0] ||
-                    "there"}
+                    "friend"}
                 </span>
+                <span className="text-foreground">.</span>
               </h1>
-              <p className="mt-2 text-muted">
-                Continue your Japanese learning journey
+              <p className="mt-4 text-base sm:text-lg text-muted leading-relaxed max-w-[52ch]">
+                Pick up a collection where you left off, or open something new.
               </p>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-card-bg rounded-xl p-5 border border-border shadow-sm">
-                <div className="text-2xl mb-2 text-[var(--accent)]">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
+            {/* Flat ledger stats - no cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 border-y border-border lg:divide-x divide-border">
+              {[
+                {
+                  label: "Collections",
+                  value: loading ? null : String(userCollections.length),
+                  sub: "yours",
+                },
+                {
+                  label: "Sessions",
+                  value: statsLoading ? null : String(userStats?.study_streak ?? 0),
+                  sub: "completed",
+                },
+                {
+                  label: "Kanji learned",
+                  value: statsLoading
+                    ? null
+                    : String(userStats?.characters_learned ?? 0),
+                  sub: "of 2,136",
+                },
+                {
+                  label: "Reviews",
+                  value: statsLoading ? null : String(userStats?.total_reviews ?? 0),
+                  sub: "lifetime",
+                },
+              ].map((s, i) => (
+                <div
+                  key={i}
+                  className="px-2 py-6 lg:px-8 lg:py-8 lg:first:pl-0 lg:last:pr-0"
+                >
+                  <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted mb-3">
+                    {s.label}
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight tabular-nums">
+                    {s.value === null ? (
+                      <span className="inline-block h-9 w-14 bg-border animate-pulse rounded" />
+                    ) : (
+                      s.value
+                    )}
+                  </div>
+                  <div className="mt-1 text-xs text-muted">{s.sub}</div>
                 </div>
-                <div className="text-3xl font-bold text-foreground mb-1">
-                  {loading ? (
-                    <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
-                  ) : (
-                    userCollections.length
-                  )}
-                </div>
-                <div className="text-sm text-muted">Collections</div>
-              </div>
-
-              <div className="bg-card-bg rounded-xl p-5 border border-border shadow-sm">
-                <div className="text-2xl mb-2 text-[var(--accent)]">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <div className="text-3xl font-bold text-foreground mb-1">
-                  {statsLoading ? (
-                    <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
-                  ) : (
-                    (userStats?.study_streak ?? 0)
-                  )}
-                </div>
-                <div className="text-sm text-muted">Sessions</div>
-              </div>
-
-              <div className="bg-card-bg rounded-xl p-5 border border-border shadow-sm">
-                <div className="text-2xl mb-2 text-[var(--accent)]">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="text-3xl font-bold text-foreground mb-1">
-                  {statsLoading ? (
-                    <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
-                  ) : (
-                    (userStats?.characters_learned ?? 0)
-                  )}
-                </div>
-                <div className="text-sm text-muted">Kanji Learned</div>
-              </div>
-
-              <div className="bg-card-bg rounded-xl p-5 border border-border shadow-sm">
-                <div className="text-2xl mb-2 text-[var(--accent)]">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="text-3xl font-bold text-foreground mb-1">
-                  {statsLoading ? (
-                    <div className="h-8 w-12 bg-border animate-pulse rounded"></div>
-                  ) : (
-                    (userStats?.total_reviews ?? 0)
-                  )}
-                </div>
-                <div className="text-sm text-muted">Total Reviews</div>
-              </div>
+              ))}
             </div>
 
             {/* Quick Actions */}
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-10 flex flex-wrap gap-3 items-center">
               <Link
                 href="/collections/create"
-                className="px-5 py-2 bg-[var(--accent)] text-[var(--accent-text)] rounded-xl font-semibold shadow-md hover:shadow-lg transition-shadow"
+                className="group inline-flex items-center gap-3 px-6 h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-text)] font-semibold text-[15px] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
-                Create Collection
+                Create collection
+                <span className="font-mono text-sm opacity-70 group-hover:translate-x-0.5 transition-transform">
+                  →
+                </span>
               </Link>
               <Link
                 href="/kanji-grid"
-                className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold hover:opacity-80 transition"
+                className="inline-flex items-center px-5 h-12 rounded-2xl border border-border bg-card-bg text-foreground font-semibold text-[15px] hover:border-foreground/30 hover:-translate-y-px transition-all duration-200"
               >
-                Browse Kanji
+                Browse kanji
               </Link>
               <Link
                 href="/vocab"
-                className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold hover:opacity-80 transition"
+                className="inline-flex items-center px-5 h-12 rounded-2xl border border-border bg-card-bg text-foreground font-semibold text-[15px] hover:border-foreground/30 hover:-translate-y-px transition-all duration-200"
               >
-                Browse Vocab
+                Browse vocab
               </Link>
               <Link
                 href="/stats"
-                className="px-5 py-2 bg-card-bg text-foreground rounded-xl font-semibold hover:opacity-80 transition"
+                className="group inline-flex items-center gap-1 px-2 h-12 text-foreground font-medium text-[15px] hover:opacity-70 transition-opacity"
               >
-                View Stats
+                View stats
+                <span className="font-mono text-sm opacity-60 group-hover:translate-x-0.5 transition-transform">
+                  →
+                </span>
               </Link>
             </div>
           </div>

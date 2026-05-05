@@ -55,10 +55,39 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var savedTheme = localStorage.getItem('theme-color') || 'blue';
-                  document.documentElement.setAttribute('data-theme', savedTheme);
+                  var savedColor = localStorage.getItem('theme-color');
+                  var savedMode = localStorage.getItem('theme-mode');
+                  var color = 'neutral';
+                  var mode = 'light';
+                  var legacyThemes = {
+                    white: { color: 'neutral', mode: 'light' },
+                    black: { color: 'neutral', mode: 'dark' },
+                    'blue-light': { color: 'blue', mode: 'light' },
+                    blue: { color: 'blue', mode: 'dark' },
+                    'red-light': { color: 'red', mode: 'light' },
+                    red: { color: 'red', mode: 'dark' },
+                    'green-light': { color: 'green', mode: 'light' },
+                    green: { color: 'green', mode: 'dark' },
+                    'orange-light': { color: 'orange', mode: 'light' },
+                    orange: { color: 'orange', mode: 'dark' }
+                  };
+                  var validColors = ['neutral', 'blue', 'red', 'green', 'orange'];
+                  var mapped = savedColor && legacyThemes[savedColor];
+                  if (mapped) {
+                    color = mapped.color;
+                    mode = mapped.mode;
+                  } else if (validColors.indexOf(savedColor) !== -1) {
+                    color = savedColor;
+                  }
+                  if (savedMode === 'light' || savedMode === 'dark') {
+                    mode = savedMode;
+                  }
+                  var theme = color === 'neutral'
+                    ? (mode === 'dark' ? 'black' : 'white')
+                    : color + (mode === 'light' ? '-light' : '');
+                  document.documentElement.setAttribute('data-theme', theme);
                 } catch (e) {
-                  document.documentElement.setAttribute('data-theme', 'blue');
+                  document.documentElement.setAttribute('data-theme', 'white');
                 }
               })();
             `,

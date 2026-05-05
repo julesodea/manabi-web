@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useTheme, ThemeColor } from "@/lib/providers/ThemeProvider";
 import { useAuth } from "@/lib/providers/AuthProvider";
+import MinimalHeader from "@/components/MinimalHeader";
+import MenuDrawer from "@/components/MenuDrawer";
 
 const colorOptions: { color: ThemeColor; name: string; description: string; colorValue: string }[] =
   [
@@ -42,16 +44,8 @@ const colorOptions: { color: ThemeColor; name: string; description: string; colo
 export default function SettingsPage() {
   const { themeColor, themeMode, setThemeColor, setThemeMode, colors } = useTheme();
   const { user } = useAuth();
-  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleColorChange = (color: ThemeColor) => {
     setThemeColor(color);
@@ -66,40 +60,14 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 duration-300 border-b border-border ${scrolled ? "py-3" : "py-4"}`}
-        style={{
-          backgroundColor: colors.background,
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-card-bg rounded-lg flex items-center justify-center text-foreground font-bold">
-                  学
-                </div>
-                <span className="text-foreground text-xl font-bold tracking-tight hidden sm:block">
-                  Manabi
-                </span>
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-border" />
-              <h1 className="text-lg font-semibold text-foreground hidden sm:block">
-                Settings
-              </h1>
-            </div>
+    <div className="min-h-screen bg-background pb-24 sm:pb-0">
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-            <Link
-              href="/"
-              className="px-4 py-2 text-foreground border border-border rounded-full text-sm font-medium hover:bg-card-bg transition"
-            >
-              Back
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MinimalHeader
+        showMenu
+        menuOpen={menuOpen}
+        onMenuClick={() => setMenuOpen(true)}
+      />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-20">
@@ -255,16 +223,17 @@ export default function SettingsPage() {
         </div>
 
         {/* Preview Section */}
-        <div className="mt-8 bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Preview</h2>
+        <div className="mt-8 bg-card-bg rounded-xl p-6 border border-border">
+          <h2 className="text-xl font-bold text-foreground mb-4">Preview</h2>
           <div className="space-y-4">
             {/* Preview Button */}
             <div>
-              <p className="text-sm text-gray-600 mb-2">Primary Button</p>
+              <p className="text-sm text-muted mb-2">Primary Button</p>
               <button
-                className="px-6 py-3 text-white rounded-full font-semibold shadow-lg"
+                className="px-6 py-3 rounded-full font-semibold"
                 style={{
                   backgroundColor: colors.primary,
+                  color: colors.primaryText,
                 }}
               >
                 Start Learning
@@ -273,23 +242,26 @@ export default function SettingsPage() {
 
             {/* Preview Card */}
             <div>
-              <p className="text-sm text-gray-600 mb-2">Collection Card</p>
-              <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 max-w-xs">
+              <p className="text-sm text-muted mb-2">Collection Card</p>
+              <div className="bg-background rounded-xl overflow-hidden border border-border max-w-xs">
                 <div
                   className="aspect-[4/3] flex items-center justify-center p-6"
                   style={{
                     backgroundColor: colors.primary,
                   }}
                 >
-                  <span className="text-6xl font-bold text-white/90 drop-shadow-lg">
+                  <span
+                    className="text-6xl font-bold drop-shadow-lg"
+                    style={{ color: colors.primaryText }}
+                  >
                     漢
                   </span>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-gray-900 text-lg mb-1">
+                  <h3 className="font-bold text-foreground text-lg mb-1">
                     JLPT N5
                   </h3>
-                  <p className="text-gray-600 text-sm">80 Kanji characters</p>
+                  <p className="text-muted text-sm">80 Kanji characters</p>
                 </div>
               </div>
             </div>
@@ -298,7 +270,7 @@ export default function SettingsPage() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-card-bg border-t border-gray-200 z-50 pb-safe">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-card-bg border-t border-border z-50 pb-safe">
         <div className="grid grid-cols-5 h-20 px-2">
           <Link
             href="/"
