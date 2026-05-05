@@ -142,7 +142,7 @@ export default function Home() {
 
       {/* Hero Section - only for non-logged-in users */}
       {!user && (
-        <section className="relative overflow-hidden pt-24 sm:pt-32 pb-12 sm:pb-16">
+        <section className="relative overflow-hidden pt-24 sm:pt-32 pb-24 sm:pb-32">
           {/* Ambient drifting kanji */}
           <div className="absolute inset-0 pointer-events-none select-none">
             {[
