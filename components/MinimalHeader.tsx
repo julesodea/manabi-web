@@ -30,6 +30,7 @@ export default function MinimalHeader({
 }: MinimalHeaderProps) {
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -139,7 +140,28 @@ export default function MinimalHeader({
             Sign in
           </Link>
         ) : (
-          <div className="w-10" />
+          <Link
+            href="/settings"
+            className="flex items-center justify-end hover:opacity-80 transition-opacity"
+            aria-label="Account settings"
+          >
+            {avatarUrl ? (
+              <div
+                role="img"
+                aria-label="User avatar"
+                className="w-9 h-9 rounded-full object-cover border border-[var(--border)]"
+                style={{
+                  backgroundImage: `url(${avatarUrl})`,
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
+                }}
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-[var(--accent)] text-[var(--accent-text)] flex items-center justify-center text-sm font-bold border border-[var(--border)]">
+                J
+              </div>
+            )}
+          </Link>
         )}
       </div>
     </header>
