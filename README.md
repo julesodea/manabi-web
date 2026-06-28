@@ -67,8 +67,6 @@ Get these from: Supabase Dashboard → Project Settings → API
 
 The kanji data is in `lib/data/initialKanji.ts`. You need to create a script to load this into your Supabase database.
 
-See `MIGRATION_STATUS.md` for the current implementation status and next steps.
-
 ### 5. Run the Development Server
 
 ```bash
