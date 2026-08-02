@@ -1,4 +1,4 @@
-# Manabi Learning
+# Manabi Web
 
 [Link](https://manabi-web.vercel.app)
 
